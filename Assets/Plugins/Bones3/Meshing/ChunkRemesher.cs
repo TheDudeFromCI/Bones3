@@ -25,7 +25,7 @@ namespace WraithavenGames.Bones3.Meshing
 
         void FixedUpdate()
         {
-            // TODO Check if chunk requests are ready for use.
+            requests.RemoveAll(r => r.Complete());
         }
     }
 
@@ -53,6 +53,17 @@ namespace WraithavenGames.Bones3.Meshing
         List<RemeshStub> stubs = new List<RemeshStub>();
 
         private NativeArray<BlockID> blockProperties;
+
+        public bool IsDone
+        {
+            get
+            {
+                foreach (var s in stubs)
+                    if (!s.IsDone)
+                        return false;
+                return true;
+            }
+        }
 
         public RemeshRequest(Chunk chunk)
         {
@@ -92,6 +103,9 @@ namespace WraithavenGames.Bones3.Meshing
         private void Dispose()
         {
             blockProperties.Dispose();
+
+            foreach (var stub in stubs)
+                stub.Dispose();
         }
 
         private void CreateCollisionRemeshStub(ushort[] blocks)
@@ -99,11 +113,12 @@ namespace WraithavenGames.Bones3.Meshing
             var vertices = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
             var normals = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
             var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
+            var count = new NativeArray<int>(2, Allocator.TempJob);
 
-            RemeshCollisionJob remeshCollision = new RemeshCollisionJob(blocks, blockProperties, vertices, normals, triangles);
+            RemeshCollisionJob remeshCollision = new RemeshCollisionJob(blocks, blockProperties, vertices, normals, triangles, count);
             JobHandle job = remeshCollision.Schedule();
 
-            stubs.Add(new RemeshStub(vertices, normals, triangles, job));
+            stubs.Add(new RemeshStub(count, vertices, normals, triangles, job));
         }
 
         private void CreateMaterialRemeshStubs(ushort[] blocks, BlockID[] blockIDs)
@@ -116,14 +131,108 @@ namespace WraithavenGames.Bones3.Meshing
                 var normals = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
                 var uvs = new NativeArray<Vector2>(MAX_QUADS * 4, Allocator.TempJob);
                 var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
+                var count = new NativeArray<int>(2, Allocator.TempJob);
 
-                RemeshMaterialJob remeshMaterial = new RemeshMaterialJob(blocks, blockProperties, id, vertices, normals, uvs, triangles);
+                RemeshMaterialJob remeshMaterial = new RemeshMaterialJob(blocks, blockProperties, id, vertices, normals, uvs, triangles, count);
                 JobHandle job = remeshMaterial.Schedule();
 
                 Material material = chunk.BlockTypes.GetMaterialProperties(id).Material;
-                stubs.Add(new RemeshStubMaterial(vertices, normals, uvs, triangles, material, job));
+                stubs.Add(new RemeshStubMaterial(count, vertices, normals, uvs, triangles, material, job));
             }
         }
+
+        public bool Complete()
+        {
+            if (!IsDone)
+                return false;
+
+            UpdateCollision();
+            UpdateVisuals();
+            Dispose();
+            return true;
+        }
+
+        private void UpdateCollision()
+        {
+            MeshCollider meshCollider = chunk.GetComponent<MeshCollider>();
+            Mesh colMesh = meshCollider.sharedMesh;
+            colMesh.Clear();
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+            List<int> triangles = new List<int>();
+
+            RemeshStub stub = stubs.Find(s => !(s is RemeshStubMaterial));
+            stub.GetVertices(vertices);
+            stub.GetNormals(normals);
+            stub.GetTriangles(triangles);
+
+            colMesh.SetVertices(vertices);
+            colMesh.SetNormals(normals);
+            colMesh.SetTriangles(triangles, 0);
+
+            meshCollider.sharedMesh = null;
+            meshCollider.sharedMesh = colMesh;
+        }
+
+        private void UpdateVisuals()
+        {
+            MeshFilter meshFilter = chunk.GetComponent<MeshFilter>();
+            Mesh mesh = meshFilter.sharedMesh;
+            mesh.Clear();
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+            List<Vector2> uvs = new List<Vector2>();
+
+            List<SubMesh> submeshes = new List<SubMesh>();
+
+            foreach (var stub in stubs.FindAll(s => s is RemeshStubMaterial))
+            {
+                RemeshStubMaterial s = stub as RemeshStubMaterial;
+
+                List<int> triangles = new List<int>();
+                
+                submeshes.Add(new SubMesh(){
+                    triangles = triangles,
+                    vertexOffset = vertices.Count,
+                    material = s.Material
+                });
+
+                s.GetVertices(vertices);
+                s.GetNormals(normals);
+                s.GetUVs(uvs);
+                s.GetTriangles(triangles);
+            }
+
+            mesh.SetVertices(vertices);
+            mesh.SetNormals(normals);
+            mesh.SetUVs(0, uvs);
+
+            Material[] materials = new Material[submeshes.Count];
+
+            for (int i = 0; i < submeshes.Count; i++)
+            {
+                mesh.SetTriangles(submeshes[i].triangles, i, true, submeshes[i].vertexOffset);
+                materials[i] = submeshes[i].material;
+            }
+
+            meshFilter.sharedMesh = null;
+            meshFilter.sharedMesh = mesh;
+
+            MeshRenderer renderer = chunk.GetComponent<MeshRenderer>();
+            renderer.sharedMaterials = materials;
+        }
+    }
+
+    /// <summary>
+    /// A temporary data holder for storing information used to create a submesh.
+    /// </summary>
+    struct SubMesh
+    {
+        public List<int> triangles;
+        public Material material;
+        public int vertexOffset;
     }
 
     /// <summary>
@@ -154,17 +263,101 @@ namespace WraithavenGames.Bones3.Meshing
         protected NativeArray<ushort> triangles;
 
         /// <summary>
+        /// An array containing exactly values. The first value is the number of vertices which were
+        /// generated by the remesher and the second value is the number of triangles which were
+        /// generated by the remesher.
+        /// </summary>
+        protected NativeArray<int> count;
+
+        /// <summary>
         /// The job handle which this stub is waiting on.
         /// </summary>
         protected JobHandle job;
 
-        public RemeshStub(NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<ushort> triangles,
-            JobHandle job)
+        /// <summary>
+        /// Checks if this job has finished or not.
+        /// </summary>
+        /// <value>True if the job has finished. False otherwise.</value>
+        public bool IsDone { get { return job.IsCompleted; } }
+
+        /// <summary>
+        /// Gets the number of vertices that were generated in this mesh.
+        /// </summary>
+        /// <value>The number of vertices.</value>
+        protected int VertexCount { get{ return count[0]; } }
+
+        /// <summary>
+        /// Gets the number of triangles that were generated in this mesh.
+        /// </summary>
+        /// <value>The number of triangles.</value>
+        protected int TriangleCount { get{ return count[1]; } }
+
+        /// <summary>
+        /// Creates a new <c>RemeshStub</c> object.
+        /// </summary>
+        /// <param name="count">A returned list of values containing the size of the mesh.</param>
+        /// <param name="vertices">A list of vertices which will be generated.</param>
+        /// <param name="normals">A list of normals which will be generated.</param>
+        /// <param name="triangles">A list of triangles which will be generated.</param>
+        /// <param name="job">The job this stub is wrapping.</param>
+        public RemeshStub(NativeArray<int> count, NativeArray<Vector3> vertices, NativeArray<Vector3> normals,
+            NativeArray<ushort> triangles, JobHandle job)
         {
+            this.count = count;
             this.vertices = vertices;
             this.normals = normals;
             this.triangles = triangles;
             this.job = job;
+        }
+
+        /// <summary>
+        /// Disposes all native resources associated with this stub.
+        /// </summary>
+        public virtual void Dispose()
+        {
+            count.Dispose();
+            vertices.Dispose();
+            normals.Dispose();
+            triangles.Dispose();
+        }
+
+        /// <summary>
+        /// Gets all the vertices in this stub and appends them to the end of the given vertex list.
+        /// </summary>
+        /// <param name="vertices">The list of vertices to add to.</param>
+        public void GetVertices(List<Vector3> vertices)
+        {
+            int c = VertexCount;
+            vertices.Capacity = Mathf.Max(vertices.Capacity, vertices.Count + c);
+
+            for (int i = 0; i < c; i++)
+                vertices.Add(this.vertices[i]);
+        }
+
+        /// <summary>
+        /// Gets all the normals in this stub and appends them to the end of the given normal list.
+        /// </summary>
+        /// <param name="normals">The list of normals to add to.</param>
+        public void GetNormals(List<Vector3> normals)
+        {
+            int c = VertexCount;
+            normals.Capacity = Mathf.Max(normals.Capacity, normals.Count + c);
+
+            for (int i = 0; i < c; i++)
+                normals.Add(this.normals[i]);
+        }
+
+        /// <summary>
+        /// Gets all the triangles in this stub and appends them to the end of the given triangle list.
+        /// </summary>
+        /// <param name="triangles">The list of triangles to add to.</param>
+        public void GetTriangles(List<int> triangles)
+        {
+            int c = TriangleCount * 3;
+            triangles.Capacity = Mathf.Max(triangles.Capacity, triangles.Count + c);
+
+            for (int i = 0; i < c; i++)
+                triangles.Add((int) this.triangles[i]);
         }
     }
 
@@ -184,11 +377,50 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         protected Material material;
 
-        public RemeshStubMaterial(NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<Vector2> uvs,
-            NativeArray<ushort> triangles, Material material, JobHandle job) : base(vertices, normals, triangles, job)
+        /// <summary>
+        /// Gets the material associated with the remesh stub.
+        /// </summary>
+        /// <value>The material.</value>
+        public Material Material { get{ return material; } }
+
+        /// <summary>
+        /// Creates a new <c>RemeshStubMaterial</c> object.
+        /// </summary>
+        /// <param name="count">A returned list of values containing the size of the mesh.</param>
+        /// <param name="vertices">A list of vertices which will be generated.</param>
+        /// <param name="normals">A list of normals which will be generated.</param>
+        /// <param name="uvs">A list of uvs which will be generated.</param>
+        /// <param name="triangles">A list of triangles which will be generated.</param>
+        /// <param name="material">The material of the submesh this stub is generating.</param>
+        /// <param name="job">The job this stub is wrapping.</param>
+        public RemeshStubMaterial(NativeArray<int> count, NativeArray<Vector3> vertices, NativeArray<Vector3> normals,
+            NativeArray<Vector2> uvs, NativeArray<ushort> triangles, Material material,
+            JobHandle job) : base(count, vertices, normals, triangles, job)
         {
             this.uvs = uvs;
             this.material = material;
+        }
+
+        /// <summary>
+        /// Disposes all native resources associated with this stub.
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            uvs.Dispose();
+        }
+
+        /// <summary>
+        /// Gets all the uvs in this stub and appends them to the end of the given uv list.
+        /// </summary>
+        /// <param name="uvs">The list of uvs to add to.</param>
+        public void GetUVs(List<Vector2> uvs)
+        {
+            int c = VertexCount;
+            uvs.Capacity = Mathf.Max(uvs.Capacity, uvs.Count + c);
+
+            for (int i = 0; i < c; i++)
+                uvs.Add(this.uvs[i]);
         }
     }
 }
