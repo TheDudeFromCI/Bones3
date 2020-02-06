@@ -18,7 +18,7 @@ namespace WraithavenGames.Bones3.Meshing
         /// each position, the value provided is the id value of the block, with 0 being air.
         /// </summary>
         [ReadOnly]
-        ushort[] blocks;
+        NativeArray<ushort> blocks;
 
         /// <summary>
         /// A list of block properties for how blocks should be handled in the mesher. All blocks
@@ -73,8 +73,9 @@ namespace WraithavenGames.Bones3.Meshing
         /// <param name="uvs">The array to write the generated uvs to.</param>
         /// <param name="triangles">The array to write the generated triangles to.</param>
         /// <param name="count">A returned list of values containing the size of the mesh.</param>
-        public RemeshMaterialJob(ushort[] blocks, NativeArray<BlockID> blockProperties, ushort targetBlock, NativeArray<Vector3> vertices,
-            NativeArray<Vector3> normals, NativeArray<Vector2> uvs, NativeArray<ushort> triangles, NativeArray<int> count)
+        public RemeshMaterialJob(NativeArray<ushort> blocks, NativeArray<BlockID> blockProperties, ushort targetBlock,
+            NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<Vector2> uvs, NativeArray<ushort> triangles,
+            NativeArray<int> count)
         {
             this.blocks = blocks;
             this.blockProperties = blockProperties;
@@ -88,7 +89,30 @@ namespace WraithavenGames.Bones3.Meshing
 
         public void Execute()
         {
-            // TODO
+            count[0] = 4;
+            count[1] = 2;
+
+            vertices[0] = new Vector3(0, 0, 0);
+            vertices[1] = new Vector3(0, 0, 1);
+            vertices[2] = new Vector3(1, 0, 1);
+            vertices[3] = new Vector3(1, 0, 0);
+
+            normals[0] = new Vector3(0, 1, 0);
+            normals[1] = new Vector3(0, 1, 0);
+            normals[2] = new Vector3(0, 1, 0);
+            normals[3] = new Vector3(0, 1, 0);
+
+            uvs[0] = new Vector2(0, 0);
+            uvs[1] = new Vector2(0, 1);
+            uvs[2] = new Vector2(1, 1);
+            uvs[3] = new Vector2(1, 0);
+
+            triangles[0] = 0;
+            triangles[1] = 1;
+            triangles[2] = 2;
+            triangles[3] = 0;
+            triangles[4] = 2;
+            triangles[5] = 3;
         }
     }
 
@@ -105,7 +129,7 @@ namespace WraithavenGames.Bones3.Meshing
         /// each position, the value provided is the id value of the block, with 0 being air.
         /// </summary>
         [ReadOnly]
-        ushort[] blocks;
+        NativeArray<ushort> blocks;
 
         /// <summary>
         /// A list of block properties for how blocks should be handled in the mesher. All blocks
@@ -143,13 +167,11 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         /// <param name="blocks">The list of block ids within the chunk.</param>
         /// <param name="blockProperties">The list of properties for each block type.</param>
-        /// <param name="targetBlock">The block id this job is generating.</param>
         /// <param name="vertices">The array to write the generated vertices to.</param>
         /// <param name="normals">The array to write the generated normals to.</param>
-        /// <param name="uvs">The array to write the generated uvs to.</param>
         /// <param name="triangles">The array to write the generated triangles to.</param>
         /// <param name="count">A returned list of values containing the size of the mesh.</param>
-        public RemeshCollisionJob(ushort[] blocks, NativeArray<BlockID> blockProperties, NativeArray<Vector3> vertices,
+        public RemeshCollisionJob(NativeArray<ushort> blocks, NativeArray<BlockID> blockProperties, NativeArray<Vector3> vertices,
             NativeArray<Vector3> normals, NativeArray<ushort> triangles, NativeArray<int> count)
         {
             this.blocks = blocks;
@@ -162,7 +184,25 @@ namespace WraithavenGames.Bones3.Meshing
 
         public void Execute()
         {
-            // TODO
+            count[0] = 4;
+            count[1] = 2;
+
+            vertices[0] = new Vector3(0, 0, 0);
+            vertices[1] = new Vector3(0, 0, 1);
+            vertices[2] = new Vector3(1, 0, 1);
+            vertices[3] = new Vector3(1, 0, 0);
+
+            normals[0] = new Vector3(0, 1, 0);
+            normals[1] = new Vector3(0, 1, 0);
+            normals[2] = new Vector3(0, 1, 0);
+            normals[3] = new Vector3(0, 1, 0);
+
+            triangles[0] = 0;
+            triangles[1] = 1;
+            triangles[2] = 2;
+            triangles[3] = 0;
+            triangles[4] = 2;
+            triangles[5] = 3;
         }
     }
 }

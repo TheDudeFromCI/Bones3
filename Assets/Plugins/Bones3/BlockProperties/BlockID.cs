@@ -15,21 +15,27 @@ namespace WraithavenGames.Bones3.BlockProperties
         /// <summary>
         /// A boolean flag for whether or not this block type has collision information
         /// attached to it.
+        /// 
+        /// A value of 0 means false, while all other values are true.
         /// </summary>
-        public bool hasCollision;
+        public byte hasCollision;
 
         /// <summary>
         /// A boolean flag for whether or not this block type has double-sided meshes. If this
         /// is true, additional mesh faces are generated for the inside surfaces of the block
         /// which originally would have been hidden.
+        /// 
+        /// A value of 0 means false, while all other values are true.
         /// </summary>
-        public bool viewInsides;
+        public byte viewInsides;
 
         /// <summary>
         /// A boolean flag for whether or not this block type is transparent. If true, surrounding
         /// blocks will still generate faces that would normally be occluded by this block.
+        /// 
+        /// A value of 0 means false, while all other values are true.
         /// </summary>
-        public bool transparent;
+        public byte transparent;
 
         /// <summary>
         /// A boolean flag for whether or not thiss block type requires faces to be sorted. If
@@ -41,7 +47,9 @@ namespace WraithavenGames.Bones3.BlockProperties
         /// This flag only sorts blocks of this material with itself within a single chunk,
         /// meaning that it has no effort on the depth sorting of other transparent materials
         /// with this flag, or with other blocks of this same type in other chunks.
+        /// 
+        /// A value of 0 means false, while all other values are true.
         /// </summary>
-        public bool depthSort;
+        public byte depthSort;
     }
 }
