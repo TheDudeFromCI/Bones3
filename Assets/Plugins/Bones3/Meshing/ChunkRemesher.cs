@@ -22,6 +22,7 @@ namespace WraithavenGames.Bones3.Meshing
         public void Remesh(Chunk chunk)
         {
             var blocks = new NativeArray<ushort>(4096, Allocator.TempJob);
+            var nearbyBlocks = new NativeArray<ushort>(16 * 16 * 6, Allocator.TempJob);
             var blockRef = new List<ushort>();
 
             for (int i = 0; i < 4096; i++)
@@ -30,6 +31,65 @@ namespace WraithavenGames.Bones3.Meshing
 
                 if (!blockRef.Contains(blocks[i]))
                     blockRef.Add(blocks[i]);
+            }
+
+            for (int j = 0; j < 6; j++)
+            {
+                Chunk near = chunk.GetNearbyChunk(j);
+                int offset = j * 16 * 16;
+
+                for (int a = 0; a < 16; a++)
+                {
+                    for (int b = 0; b < 16; b++)
+                    {
+                        int index = a * 16 + b;
+
+                        int x, y, z;
+                        switch (j)
+                        {
+                            case 0:
+                                x = 0;
+                                y = a;
+                                z = b;
+                                break;
+
+                            case 1:
+                                x = 15;
+                                y = a;
+                                z = b;
+                                break;
+
+                            case 2:
+                                x = a;
+                                y = 0;
+                                z = b;
+                                break;
+
+                            case 3:
+                                x = a;
+                                y = 15;
+                                z = b;
+                                break;
+
+                            case 4:
+                                x = a;
+                                y = b;
+                                z = 0;
+                                break;
+
+                            case 5:
+                                x = a;
+                                y = b;
+                                z = 15;
+                                break;
+
+                            default:
+                                return;
+                        }
+
+                        nearbyBlocks[offset + index] = near.GetBlockId(x, y, z);
+                    }
+                }
             }
 
             BlockID[] blockIDs = new BlockID[blockRef.Count];
@@ -61,8 +121,8 @@ namespace WraithavenGames.Bones3.Meshing
             var blockProperties = new NativeArray<BlockID>(blockIDs, Allocator.TempJob);
 
             List<RemeshStub> stubs = new List<RemeshStub>();
-            CreateCollisionRemeshStub(stubs, blocks, blockProperties);
-            CreateMaterialRemeshStubs(blockIDs, stubs, blocks, blockProperties, chunk);
+            CreateCollisionRemeshStub(stubs, blocks, nearbyBlocks, blockProperties);
+            CreateMaterialRemeshStubs(blockIDs, stubs, blocks, nearbyBlocks, blockProperties, chunk);
 
             JobHandle.ScheduleBatchedJobs();
 
@@ -73,27 +133,34 @@ namespace WraithavenGames.Bones3.Meshing
             UpdateVisuals(chunk, stubs);
 
             blocks.Dispose();
+            nearbyBlocks.Dispose();
             blockProperties.Dispose();
 
             foreach (var stub in stubs)
                 stub.Dispose();
         }
 
-        private void CreateCollisionRemeshStub(List<RemeshStub> stubs, NativeArray<ushort> blocks, NativeArray<BlockID> blockProperties)
+        private void CreateCollisionRemeshStub(List<RemeshStub> stubs, NativeArray<ushort> blocks, NativeArray<ushort> nearbyBlocks,
+            NativeArray<BlockID> blockProperties)
         {
+            ushort id = 0;
+
             var vertices = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
             var normals = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
+            var uvs = new NativeArray<Vector2>(MAX_QUADS * 4, Allocator.TempJob);
             var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
             var count = new NativeArray<int>(2, Allocator.TempJob);
 
-            RemeshCollisionJob remeshCollision = new RemeshCollisionJob(blocks, blockProperties, vertices, normals, triangles, count);
-            JobHandle job = remeshCollision.Schedule();
+            RemeshJob remeshMaterial = new RemeshJob(blocks, nearbyBlocks, blockProperties, id, vertices, normals,
+                uvs, triangles, count);
+
+            JobHandle job = remeshMaterial.Schedule();
 
             stubs.Add(new RemeshStub(count, vertices, normals, triangles, job));
         }
 
         private void CreateMaterialRemeshStubs(BlockID[] blockIDs, List<RemeshStub> stubs, NativeArray<ushort> blocks,
-            NativeArray<BlockID> blockProperties, Chunk chunk)
+            NativeArray<ushort> nearbyBlocks, NativeArray<BlockID> blockProperties, Chunk chunk)
         {
             for (int i = 0; i < blockIDs.Length; i++)
             {
@@ -105,7 +172,9 @@ namespace WraithavenGames.Bones3.Meshing
                 var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
                 var count = new NativeArray<int>(2, Allocator.TempJob);
 
-                RemeshMaterialJob remeshMaterial = new RemeshMaterialJob(blocks, blockProperties, id, vertices, normals, uvs, triangles, count);
+                RemeshJob remeshMaterial = new RemeshJob(blocks, nearbyBlocks, blockProperties, id, vertices, normals,
+                    uvs, triangles, count);
+
                 JobHandle job = remeshMaterial.Schedule();
 
                 Material material = chunk.BlockTypes.GetMaterialProperties(id)?.Material;

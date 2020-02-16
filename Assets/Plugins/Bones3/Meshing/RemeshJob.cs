@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using WraithavenGames.Bones3.BlockProperties;
+using System.Collections.Generic;
 
 namespace WraithavenGames.Bones3.Meshing
 {
@@ -10,7 +11,7 @@ namespace WraithavenGames.Bones3.Meshing
     /// a given target block of a chunk. Multiple remesh jobs are usually run in parallel, one for
     /// each block type within the chunk and one for the collision of the chunk.
     /// </summary>
-    public struct RemeshMaterialJob : IJob
+    public struct RemeshJob : IJob
     {
         /// <summary>
         /// An array of block ids currently in the chunk. The length of the array is exactly 4069,
@@ -19,6 +20,13 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         [ReadOnly]
         NativeArray<ushort> blocks;
+
+        /// <summary>
+        /// An array of blocks which surround the outside of this chunk. Used for the purpose of
+        /// determining how outter faces should be handled.
+        /// </summary>
+        [ReadOnly]
+        NativeArray<ushort> nearbyBlocks;
 
         /// <summary>
         /// A list of block properties for how blocks should be handled in the mesher. All blocks
@@ -62,10 +70,16 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         NativeArray<int> count;
 
+        private bool[,] quads;
+        private int[,] storage;
+        private bool[] references;
+        private List<int> used;
+
         /// <summary>
         /// Creates a new <c>RemeshMaterialJob</c> object.
         /// </summary>
         /// <param name="blocks">The list of block ids within the chunk.</param>
+        /// <param name="nearbyBlocks">A list of blocks which surround this chunk.</param>
         /// <param name="blockProperties">The list of properties for each block type.</param>
         /// <param name="targetBlock">The block id this job is generating.</param>
         /// <param name="vertices">The array to write the generated vertices to.</param>
@@ -73,11 +87,12 @@ namespace WraithavenGames.Bones3.Meshing
         /// <param name="uvs">The array to write the generated uvs to.</param>
         /// <param name="triangles">The array to write the generated triangles to.</param>
         /// <param name="count">A returned list of values containing the size of the mesh.</param>
-        public RemeshMaterialJob(NativeArray<ushort> blocks, NativeArray<BlockID> blockProperties, ushort targetBlock,
-            NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<Vector2> uvs, NativeArray<ushort> triangles,
-            NativeArray<int> count)
+        public RemeshJob(NativeArray<ushort> blocks, NativeArray<ushort> nearbyBlocks, NativeArray<BlockID> blockProperties,
+            ushort targetBlock, NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<Vector2> uvs,
+            NativeArray<ushort> triangles, NativeArray<int> count)
         {
             this.blocks = blocks;
+            this.nearbyBlocks = nearbyBlocks;
             this.blockProperties = blockProperties;
             this.targetBlock = targetBlock;
             this.vertices = vertices;
@@ -85,124 +100,421 @@ namespace WraithavenGames.Bones3.Meshing
             this.uvs = uvs;
             this.triangles = triangles;
             this.count = count;
+
+            quads = new bool[16, 16];
+            storage = new int[16, 16];
+            references = new bool[16 * 16 / 2];
+            used = new List<int>();
         }
 
         public void Execute()
         {
-            count[0] = 4;
-            count[1] = 2;
-
-            vertices[0] = new Vector3(0, 0, 0);
-            vertices[1] = new Vector3(0, 0, 1);
-            vertices[2] = new Vector3(1, 0, 1);
-            vertices[3] = new Vector3(1, 0, 0);
-
-            normals[0] = new Vector3(0, 1, 0);
-            normals[1] = new Vector3(0, 1, 0);
-            normals[2] = new Vector3(0, 1, 0);
-            normals[3] = new Vector3(0, 1, 0);
-
-            uvs[0] = new Vector2(0, 0);
-            uvs[1] = new Vector2(0, 1);
-            uvs[2] = new Vector2(1, 1);
-            uvs[3] = new Vector2(1, 0);
-
-            triangles[0] = 0;
-            triangles[1] = 1;
-            triangles[2] = 2;
-            triangles[3] = 0;
-            triangles[4] = 2;
-            triangles[5] = 3;
-        }
-    }
-
-    /// <summary>
-    /// The <c>RemeshCollisionJob</c> object is a chunk meshing job identical to <c>RemeshMaterialJob</c>,
-    /// with the slight differences that one, it doesn't generate uv data and two, it targets all collidable
-    /// blocks instead of a single target block.
-    /// </summary>
-    public struct RemeshCollisionJob : IJob
-    {
-        /// <summary>
-        /// An array of block ids currently in the chunk. The length of the array is exactly 4069,
-        /// or 16x16x16. The block at (x, y, z) is located at index x * 16 * 16 + y * 16 + z. At
-        /// each position, the value provided is the id value of the block, with 0 being air.
-        /// </summary>
-        [ReadOnly]
-        NativeArray<ushort> blocks;
-
-        /// <summary>
-        /// A list of block properties for how blocks should be handled in the mesher. All blocks
-        /// contained within the block array have a block id object in this list.
-        /// </summary>
-        [ReadOnly]
-        NativeArray<BlockID> blockProperties;
-
-        /// <summary>
-        /// A list of vertex locations for this mesh. If empty, this vertex data object represents an
-        /// empty mesh.
-        /// </summary>
-        NativeArray<Vector3> vertices;
-
-        /// <summary>
-        /// A list of normal values for this mesh.
-        /// </summary>
-        NativeArray<Vector3> normals;
-
-        /// <summary>
-        /// A list of vertex indices, representing the triangles for this mesh. Each triplet of indices
-        /// represents a single triangle.
-        /// </summary>
-        NativeArray<ushort> triangles;
-
-        /// <summary>
-        /// An array containing exactly values. The first value is the number of vertices which were
-        /// generated by the remesher and the second value is the number of triangles which were
-        /// generated by the remesher.
-        /// </summary>
-        NativeArray<int> count;
-
-        /// <summary>
-        /// Creates a new <c>RemeshCollisionJob</c> object.
-        /// </summary>
-        /// <param name="blocks">The list of block ids within the chunk.</param>
-        /// <param name="blockProperties">The list of properties for each block type.</param>
-        /// <param name="vertices">The array to write the generated vertices to.</param>
-        /// <param name="normals">The array to write the generated normals to.</param>
-        /// <param name="triangles">The array to write the generated triangles to.</param>
-        /// <param name="count">A returned list of values containing the size of the mesh.</param>
-        public RemeshCollisionJob(NativeArray<ushort> blocks, NativeArray<BlockID> blockProperties, NativeArray<Vector3> vertices,
-            NativeArray<Vector3> normals, NativeArray<ushort> triangles, NativeArray<int> count)
-        {
-            this.blocks = blocks;
-            this.blockProperties = blockProperties;
-            this.vertices = vertices;
-            this.normals = normals;
-            this.triangles = triangles;
-            this.count = count;
+            BuildFaces(targetBlock);
         }
 
-        public void Execute()
+        private BlockID GetBlockProperties(ushort blockId)
         {
-            count[0] = 4;
-            count[1] = 2;
+            for (int i = 0; i < blockProperties.Length; i++)
+                if (blockProperties[i].id == blockId)
+                    return blockProperties[i];
 
-            vertices[0] = new Vector3(0, 0, 0);
-            vertices[1] = new Vector3(0, 0, 1);
-            vertices[2] = new Vector3(1, 0, 1);
-            vertices[3] = new Vector3(1, 0, 0);
+            return default;
+        }
 
-            normals[0] = new Vector3(0, 1, 0);
-            normals[1] = new Vector3(0, 1, 0);
-            normals[2] = new Vector3(0, 1, 0);
-            normals[3] = new Vector3(0, 1, 0);
+        private void BuildFaces(ushort blockId)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                int nearbyOffset = j * 16 * 16;
+                int end = j % 2 == 0 ? 15 : 0;
 
-            triangles[0] = 0;
-            triangles[1] = 1;
-            triangles[2] = 2;
-            triangles[3] = 0;
-            triangles[4] = 2;
-            triangles[5] = 3;
+                if (j <= 1)
+                {
+                    for (int x = 0; x < 16; x++)
+                    {
+                        for (int y = 0; y < 16; y++)
+                            for (int z = 0; z < 16; z++)
+                            {
+                                int index = x * 16 * 16 + y * 16 + z;
+
+                                int next;
+                                if (j == 0)
+                                    next = (x + 1) * 16 * 16 + y * 16 + z;
+                                else
+                                    next = (x - 1) * 16 * 16 + y * 16 + z;
+
+                                BlockID nextState = GetBlockProperties(blocks[next]);
+                                BlockID indexState = GetBlockProperties(blocks[index]);
+
+                                quads[y, z] = blocks[index] == blockId;
+                                quads[y, z] &= x == end || blocks[next] == 0 || nextState.transparent > 0;
+
+                                if (x != end && blocks[index] == blocks[next])
+                                    quads[y, z] &= indexState.viewInsides > 0;
+
+                                if (x == end)
+                                {
+                                    int nearbyIndex = y * 16 + z;
+
+                                    BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
+                                    quads[y, z] &= nearbyState.transparent > 0;
+
+                                    if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
+                                        quads[y, z] &= indexState.viewInsides > 0;
+                                }
+                            }
+
+                        if (GreedyMesher() == 0)
+                            continue;
+
+                        AddQuads(j, x);
+                    }
+                }
+                else if (j <= 3)
+                {
+                    for (int y = 0; y < 16; y++)
+                    {
+                        for (int x = 0; x < 16; x++)
+                            for (int z = 0; z < 16; z++)
+                            {
+                                int index = x * 16 * 16 + y * 16 + z;
+
+                                int next;
+                                if (j == 2)
+                                    next = x * 16 * 16 + (y + 1) * 16 + z;
+                                else
+                                    next = x * 16 * 16 + (y - 1) * 16 + z;
+
+                                BlockID nextState = GetBlockProperties(blocks[next]);
+                                BlockID indexState = GetBlockProperties(blocks[index]);
+
+                                quads[x, z] = blocks[index] == blockId;
+                                quads[x, z] &= y == end || blocks[next] == 0 || nextState.transparent > 0;
+
+                                if (y != end && blocks[index] == blocks[next])
+                                    quads[x, z] &= indexState.viewInsides > 0;
+
+                                if (y == end)
+                                {
+                                    int nearbyIndex = x * 16 + z;
+
+                                    BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
+                                    quads[x, z] &= nearbyState.transparent > 0;
+
+                                    if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
+                                        quads[x, z] &= indexState.viewInsides > 0;
+                                }
+                            }
+
+                        if (GreedyMesher() == 0)
+                            continue;
+
+                        AddQuads(j, y);
+                    }
+                }
+                else
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+                        for (int x = 0; x < 16; x++)
+                            for (int y = 0; y < 16; y++)
+                            {
+                                int index = x * 16 * 16 + y * 16 + z;
+
+                                int next;
+                                if (j == 4)
+                                    next = x * 16 * 16 + y * 16 + (z + 1);
+                                else
+                                    next = x * 16 * 16 + y * 16 + (z - 1);
+
+                                BlockID nextState = GetBlockProperties(blocks[next]);
+                                BlockID indexState = GetBlockProperties(blocks[index]);
+
+                                quads[x, y] = blocks[index] == blockId;
+                                quads[x, y] &= z == end || blocks[next] == 0 || nextState.transparent > 0;
+
+                                if (z != end && blocks[index] == blocks[next])
+                                    quads[x, y] &= indexState.viewInsides > 0;
+
+                                if (z == end)
+                                {
+                                    int nearbyIndex = x * 16 + y;
+
+                                    BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
+                                    quads[x, y] &= nearbyState.transparent > 0;
+
+                                    if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
+                                        quads[x, y] &= indexState.viewInsides > 0;
+                                }
+                            }
+
+                        if (GreedyMesher() == 0)
+                            continue;
+
+                        AddQuads(j, z);
+                    }
+                }
+            }
+        }
+
+        private int GreedyMesher()
+        {
+            int x, y, t, q;
+            int w = -1;
+            int total = 0;
+
+            for (x = 0; x < 16; x++)
+                for (y = 0; y < 16; y++)
+                    storage[x, y] = -1;
+
+            for (y = 0; y < 16; y++)
+            {
+                w = -1;
+                for (x = 0; x < 16; x++)
+                {
+                    if (!quads[x, y])
+                    {
+                        w = -1;
+                        continue;
+                    }
+
+                    if (w == -1)
+                    {
+                        w = total;
+                        total++;
+                    }
+
+                    storage[x, y] = w;
+                }
+            }
+
+            for (y = 0; y < 15; y++)
+            {
+                w = 0;
+                for (x = 0; x < 16; x++)
+                {
+                    if (!quads[x, y])
+                    {
+                        if (w > 0)
+                        {
+                            q = 0;
+                            if (!quads[x, y + 1] && (x == w || !quads[x - w - 1, y + 1]))
+                            {
+                                for (t = x - w; t < x; t++)
+                                {
+                                    if (!quads[t, y + 1])
+                                        break;
+
+                                    q++;
+                                }
+
+                                if (q == w)
+                                    for (t = x - w; t < x; t++)
+                                        storage[t, y + 1] = storage[t, y];
+                            }
+                            w = 0;
+                        }
+                        continue;
+                    }
+                    w++;
+                }
+
+                if (w > 0)
+                {
+                    q = 0;
+                    if (x == w || !quads[x - w - 1, y + 1])
+                    {
+                        for (t = x - w; t < x; t++)
+                        {
+                            if (!quads[t, y + 1])
+                                break;
+                            q++;
+                        }
+
+                        if (q == w)
+                            for (t = x - w; t < x; t++)
+                                storage[t, y + 1] = storage[t, y];
+                    }
+                }
+            }
+
+            for (x = 0; x < 16; x++)
+                for (y = 0; y < 16; y++)
+                    if (storage[x, y] > -1 && !used.Contains(storage[x, y]))
+                        used.Add(storage[x, y]);
+
+            for (x = 0; x < 16; x++)
+                for (y = 0; y < 16; y++)
+                    if (storage[x, y] > -1)
+                        storage[x, y] = used.IndexOf((int)storage[x, y]);
+
+            return used.Count;
+        }
+
+        private bool AddQuads(int side, int offset)
+        {
+            int x, y, w, h, o;
+
+            for (int i = 0; i < used.Count; i++)
+                references[i] = false;
+
+            bool hasQuads = false;
+
+            for (x = 0; x < 16; x++)
+                for (y = 0; y < 16; y++)
+                {
+                    if (storage[x, y] == -1)
+                        continue;
+
+                    if (references[storage[x, y]])
+                        continue;
+
+                    o = storage[x, y];
+                    references[o] = true;
+
+                    for (w = x; w < 16; w++)
+                        if (storage[w, y] != o)
+                            break;
+
+                    for (h = y; h < 16; h++)
+                        if (storage[x, h] != o)
+                            break;
+
+                    w -= x;
+                    h -= y;
+
+                    AddSingleQuad(side, x, y, w, h, offset);
+                    hasQuads = true;
+                }
+            return hasQuads;
+        }
+
+        private void AddSingleQuad(int j, int x, int y, int w, int h, int o)
+        {
+            int vertexCount = count[0];
+            int triangleCount = count[1] * 3;
+
+            count[0] += 4;
+            count[1] += 2;
+
+            triangles[triangleCount + 0] = (ushort)(vertexCount + 0);
+            triangles[triangleCount + 1] = (ushort)(vertexCount + 1);
+            triangles[triangleCount + 2] = (ushort)(vertexCount + 2);
+            triangles[triangleCount + 3] = (ushort)(vertexCount + 0);
+            triangles[triangleCount + 4] = (ushort)(vertexCount + 2);
+            triangles[triangleCount + 5] = (ushort)(vertexCount + 3);
+
+            if (j == 0)
+            {
+                float sx = o;
+                float sy = x;
+                float sz = y;
+                float bx = sx + 1;
+                float by = sy + w;
+                float bz = sz + h;
+
+                vertices[vertexCount + 0] = new Vector3(bx, by, bz);
+                vertices[vertexCount + 1] = new Vector3(bx, sy, bz);
+                vertices[vertexCount + 2] = new Vector3(bx, sy, sz);
+                vertices[vertexCount + 3] = new Vector3(bx, by, sz);
+
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(0, w);
+                uvs[vertexCount + 0] = new Vector2(h, w);
+                uvs[vertexCount + 0] = new Vector2(h, 0);
+            }
+            else if (j == 1)
+            {
+                float sx = o;
+                float sy = x;
+                float sz = y;
+                float by = sy + w;
+                float bz = sz + h;
+
+                vertices[vertexCount + 0] = new Vector3(sx, sy, sz);
+                vertices[vertexCount + 1] = new Vector3(sx, sy, bz);
+                vertices[vertexCount + 2] = new Vector3(sx, by, bz);
+                vertices[vertexCount + 3] = new Vector3(sx, by, sz);
+
+                uvs[vertexCount + 0] = new Vector2(h, w);
+                uvs[vertexCount + 0] = new Vector2(0, w);
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(h, 0);
+            }
+            else if (j == 2)
+            {
+                float sx = x;
+                float sy = o;
+                float sz = y;
+                float bx = sx + w;
+                float by = sy + 1;
+                float bz = sz + h;
+
+                vertices[vertexCount + 0] = new Vector3(sx, by, sz);
+                vertices[vertexCount + 1] = new Vector3(sx, by, bz);
+                vertices[vertexCount + 2] = new Vector3(bx, by, bz);
+                vertices[vertexCount + 3] = new Vector3(bx, by, sz);
+
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(0, h);
+                uvs[vertexCount + 0] = new Vector2(w, h);
+                uvs[vertexCount + 0] = new Vector2(w, 0);
+            }
+            else if (j == 3)
+            {
+                float sx = x;
+                float sy = o;
+                float sz = y;
+                float bx = sx + w;
+                float bz = sz + h;
+
+                vertices[vertexCount + 0] = new Vector3(bx, sy, bz);
+                vertices[vertexCount + 1] = new Vector3(sx, sy, bz);
+                vertices[vertexCount + 2] = new Vector3(sx, sy, sz);
+                vertices[vertexCount + 3] = new Vector3(bx, sy, sz);
+
+                uvs[vertexCount + 0] = new Vector2(w, h);
+                uvs[vertexCount + 0] = new Vector2(0, h);
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(w, 0);
+            }
+            else if (j == 4)
+            {
+                float sx = x;
+                float sy = y;
+                float sz = o;
+                float bx = sx + w;
+                float by = sy + h;
+                float bz = sz + 1;
+
+                vertices[vertexCount + 0] = new Vector3(bx, by, bz);
+                vertices[vertexCount + 1] = new Vector3(sx, by, bz);
+                vertices[vertexCount + 2] = new Vector3(sx, sy, bz);
+                vertices[vertexCount + 3] = new Vector3(bx, sy, bz);
+
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(0, w);
+                uvs[vertexCount + 0] = new Vector2(h, w);
+                uvs[vertexCount + 0] = new Vector2(h, 0);
+            }
+            else
+            {
+                float sx = x;
+                float sy = y;
+                float sz = o;
+                float bx = sx + w;
+                float by = sy + h;
+
+                vertices[vertexCount + 0] = new Vector3(sx, sy, sz);
+                vertices[vertexCount + 1] = new Vector3(sx, by, sz);
+                vertices[vertexCount + 2] = new Vector3(bx, by, sz);
+                vertices[vertexCount + 3] = new Vector3(bx, sy, sz);
+
+                uvs[vertexCount + 0] = new Vector2(0, 0);
+                uvs[vertexCount + 0] = new Vector2(0, h);
+                uvs[vertexCount + 0] = new Vector2(w, h);
+                uvs[vertexCount + 0] = new Vector2(w, 0);
+            }
         }
     }
 }
