@@ -36,6 +36,9 @@ namespace WraithavenGames.Bones3.Meshing
             for (int j = 0; j < 6; j++)
             {
                 Chunk near = chunk.GetNearbyChunk(j);
+                if (near == null)
+                    continue;
+
                 int offset = j * 16 * 16;
 
                 for (int a = 0; a < 16; a++)
@@ -98,8 +101,7 @@ namespace WraithavenGames.Bones3.Meshing
                 MaterialBlock blockState = chunk.GetBlockState(i);
 
                 BlockID id = new BlockID();
-                blockIDs[i] = id;
-                id.id = blocks[i];
+                id.id = blockRef[i];
 
                 if (blockState == null)
                 {
@@ -110,18 +112,18 @@ namespace WraithavenGames.Bones3.Meshing
                 }
                 else
                 {
-                    id.hasCollision = (byte)(blocks[i] > 0 ? 0 : 1);
+                    id.hasCollision = (byte)(blockRef[i] > 0 ? 1 : 0);
                     id.transparent = (byte)(blockState.Transparent ? 1 : 0);
                     id.viewInsides = (byte)(blockState.ViewInsides ? 1 : 0);
                     id.depthSort = (byte)(blockState.DepthSort ? 1 : 0);
                 }
 
-                blockRef.Add(blocks[i]);
+                blockIDs[i] = id;
             }
             var blockProperties = new NativeArray<BlockID>(blockIDs, Allocator.TempJob);
 
             List<RemeshStub> stubs = new List<RemeshStub>();
-            CreateCollisionRemeshStub(stubs, blocks, nearbyBlocks, blockProperties);
+            // CreateCollisionRemeshStub(stubs, blocks, nearbyBlocks, blockProperties);
             CreateMaterialRemeshStubs(blockIDs, stubs, blocks, nearbyBlocks, blockProperties, chunk);
 
             JobHandle.ScheduleBatchedJobs();
@@ -129,7 +131,7 @@ namespace WraithavenGames.Bones3.Meshing
             foreach (var s in stubs)
                 s.StopJob();
 
-            UpdateCollision(chunk, stubs);
+            // UpdateCollision(chunk, stubs);
             UpdateVisuals(chunk, stubs);
 
             blocks.Dispose();
@@ -140,25 +142,6 @@ namespace WraithavenGames.Bones3.Meshing
                 stub.Dispose();
         }
 
-        private void CreateCollisionRemeshStub(List<RemeshStub> stubs, NativeArray<ushort> blocks, NativeArray<ushort> nearbyBlocks,
-            NativeArray<BlockID> blockProperties)
-        {
-            ushort id = 0;
-
-            var vertices = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
-            var normals = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
-            var uvs = new NativeArray<Vector2>(MAX_QUADS * 4, Allocator.TempJob);
-            var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
-            var count = new NativeArray<int>(2, Allocator.TempJob);
-
-            RemeshJob remeshMaterial = new RemeshJob(blocks, nearbyBlocks, blockProperties, id, vertices, normals,
-                uvs, triangles, count);
-
-            JobHandle job = remeshMaterial.Schedule();
-
-            stubs.Add(new RemeshStub(count, vertices, normals, triangles, job));
-        }
-
         private void CreateMaterialRemeshStubs(BlockID[] blockIDs, List<RemeshStub> stubs, NativeArray<ushort> blocks,
             NativeArray<ushort> nearbyBlocks, NativeArray<BlockID> blockProperties, Chunk chunk)
         {
@@ -166,19 +149,27 @@ namespace WraithavenGames.Bones3.Meshing
             {
                 ushort id = blockIDs[i].id;
 
+                if (id == 0)
+                    continue;
+
                 var vertices = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
                 var normals = new NativeArray<Vector3>(MAX_QUADS * 4, Allocator.TempJob);
                 var uvs = new NativeArray<Vector2>(MAX_QUADS * 4, Allocator.TempJob);
                 var triangles = new NativeArray<ushort>(MAX_QUADS * 6, Allocator.TempJob);
                 var count = new NativeArray<int>(2, Allocator.TempJob);
 
+                var quads = new NativeArray<byte>(16 * 16, Allocator.TempJob);
+                var storage = new NativeArray<int>(16 * 16, Allocator.TempJob);
+                var references = new NativeArray<byte>(16 * 16 / 2, Allocator.TempJob);
+                var used = new NativeArray<int>(16 * 16 / 2, Allocator.TempJob);
+
                 RemeshJob remeshMaterial = new RemeshJob(blocks, nearbyBlocks, blockProperties, id, vertices, normals,
-                    uvs, triangles, count);
+                    uvs, triangles, count, quads, storage, references, used);
 
                 JobHandle job = remeshMaterial.Schedule();
 
                 Material material = chunk.BlockTypes.GetMaterialProperties(id)?.Material;
-                stubs.Add(new RemeshStubMaterial(count, vertices, normals, uvs, triangles, material, job));
+                stubs.Add(new RemeshStubMaterial(count, vertices, normals, uvs, triangles, quads, storage, references, used, material, job));
             }
         }
 
@@ -247,6 +238,7 @@ namespace WraithavenGames.Bones3.Meshing
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);
             mesh.SetUVs(0, uvs);
+            mesh.subMeshCount = submeshes.Count;
 
             Material[] materials = new Material[submeshes.Count];
 
@@ -255,6 +247,10 @@ namespace WraithavenGames.Bones3.Meshing
                 mesh.SetTriangles(submeshes[i].triangles, i, true, submeshes[i].vertexOffset);
                 materials[i] = submeshes[i].material;
             }
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
 
             meshFilter.sharedMesh = null;
             meshFilter.sharedMesh = mesh;
@@ -308,6 +304,11 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         protected NativeArray<int> count;
 
+        protected NativeArray<byte> quads;
+        protected NativeArray<int> storage;
+        protected NativeArray<byte> references;
+        protected NativeArray<int> used;
+
         /// <summary>
         /// The job handle which this stub is waiting on.
         /// </summary>
@@ -340,13 +341,19 @@ namespace WraithavenGames.Bones3.Meshing
         /// <param name="triangles">A list of triangles which will be generated.</param>
         /// <param name="job">The job this stub is wrapping.</param>
         public RemeshStub(NativeArray<int> count, NativeArray<Vector3> vertices, NativeArray<Vector3> normals,
-            NativeArray<ushort> triangles, JobHandle job)
+            NativeArray<ushort> triangles, NativeArray<byte> quads, NativeArray<int> storage, NativeArray<byte> references,
+            NativeArray<int> used, JobHandle job)
         {
             this.count = count;
             this.vertices = vertices;
             this.normals = normals;
             this.triangles = triangles;
             this.job = job;
+
+            this.quads = quads;
+            this.storage = storage;
+            this.references = references;
+            this.used = used;
         }
 
         /// <summary>
@@ -358,6 +365,11 @@ namespace WraithavenGames.Bones3.Meshing
             vertices.Dispose();
             normals.Dispose();
             triangles.Dispose();
+
+            quads.Dispose();
+            storage.Dispose();
+            references.Dispose();
+            used.Dispose();
         }
 
         /// <summary>
@@ -442,8 +454,9 @@ namespace WraithavenGames.Bones3.Meshing
         /// <param name="material">The material of the submesh this stub is generating.</param>
         /// <param name="job">The job this stub is wrapping.</param>
         public RemeshStubMaterial(NativeArray<int> count, NativeArray<Vector3> vertices, NativeArray<Vector3> normals,
-            NativeArray<Vector2> uvs, NativeArray<ushort> triangles, Material material,
-            JobHandle job) : base(count, vertices, normals, triangles, job)
+            NativeArray<Vector2> uvs, NativeArray<ushort> triangles, NativeArray<byte> quads, NativeArray<int> storage,
+            NativeArray<byte> references, NativeArray<int> used, Material material,
+            JobHandle job) : base(count, vertices, normals, triangles, quads, storage, references, used, job)
         {
             this.uvs = uvs;
             this.material = material;

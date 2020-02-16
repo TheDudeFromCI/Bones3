@@ -32,7 +32,7 @@ namespace WraithavenGames.Bones3.ChunkFinding
             this.world = world;
         }
 
-#region OctreeHandle
+        #region OctreeHandle
         public void Clear()
         {
             for (int i = 0; i < 8; i++)
@@ -43,14 +43,14 @@ namespace WraithavenGames.Bones3.ChunkFinding
                 if (size == 1)
                 {
                     Chunk c = children[i] as Chunk;
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                         if (Application.isPlaying)
                             GameObject.Destroy(c.gameObject);
                         else
                             GameObject.DestroyImmediate(c.gameObject);
-                    #else
-                        GameObject.Destroy(c.gameObject);
-                    #endif
+#else
+                    GameObject.Destroy(c.gameObject);
+#endif
                 }
                 else
                     ((BlockGroup)children[i]).Clear();
@@ -92,7 +92,7 @@ namespace WraithavenGames.Bones3.ChunkFinding
                     continue;
 
                 if (size == 1)
-                    world.RemeshChunkHard(children[i] as Chunk);
+                    world.RemeshChunk(children[i] as Chunk);
                 else
                     ((BlockGroup)children[i]).RemeshAllChunks();
             }
@@ -158,14 +158,14 @@ namespace WraithavenGames.Bones3.ChunkFinding
                     // If chunk is completely outside radius, unload it
                     if ((pos - center).sqrMagnitude >= r2 + c2)
                     {
-                        #if UNITY_EDITOR
+#if UNITY_EDITOR
                             if (Application.isPlaying)
                                 GameObject.Destroy(c.gameObject);
                             else
                                 GameObject.DestroyImmediate(c.gameObject);
-                        #else
-                            GameObject.Destroy(c.gameObject);
-                        #endif
+#else
+                        GameObject.Destroy(c.gameObject);
+#endif
 
                         children[i] = null;
                     }
@@ -194,14 +194,14 @@ namespace WraithavenGames.Bones3.ChunkFinding
             if (size == 1)
             {
                 Chunk chunk = children[index] as Chunk;
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                     if (Application.isPlaying)
                         GameObject.Destroy(chunk.gameObject);
                     else
                         GameObject.DestroyImmediate(chunk.gameObject);
-                #else
-                    GameObject.Destroy(chunk.gameObject);
-                #endif
+#else
+                GameObject.Destroy(chunk.gameObject);
+#endif
 
                 children[index] = null;
             }
@@ -265,14 +265,14 @@ namespace WraithavenGames.Bones3.ChunkFinding
                 if (size == 1)
                 {
                     GameObject go = new GameObject();
-                    go.name = "Chunk ("+x+", "+y+", "+z+")";
+                    go.name = "Chunk (" + x + ", " + y + ", " + z + ")";
                     go.isStatic = world.gameObject.isStatic;
                     Chunk ch = go.AddComponent<Chunk>();
                     ch.chunkX = x;
                     ch.chunkY = y;
                     ch.chunkZ = z;
 
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                         if (!Application.isPlaying)
                         {
                             Undo.RegisterCreatedObjectUndo(go, "Created chunk.");
@@ -280,18 +280,18 @@ namespace WraithavenGames.Bones3.ChunkFinding
                         }
                         else
                             go.transform.SetParent(world.transform, false);
-                    #else
-                        go.transform.SetParent(world.transform, false);
-                    #endif
+#else
+                    go.transform.SetParent(world.transform, false);
+#endif
 
                     go.transform.localPosition = new Vector3(x, y, z) * 16;
                     go.transform.localRotation = Quaternion.identity;
                     go.transform.localScale = Vector3.one;
 
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                         Undo.RecordObject(go, "Initialized chunk.");
 						EditorUtility.SetSelectedRenderState(go.GetComponent<Renderer>(), EditorSelectedRenderState.Hidden);
-                    #endif
+#endif
 
                     children[index] = ch;
                 }
@@ -306,9 +306,9 @@ namespace WraithavenGames.Bones3.ChunkFinding
                 return children[index] as Chunk;
             return ((BlockGroup)children[index]).GetChunk(x, y, z, create);
         }
-#endregion
+        #endregion
 
-#region SerializationHandler
+        #region SerializationHandler
         [SerializeField] private Chunk[] chunkArray;
 
         public void Serialize()
@@ -349,6 +349,6 @@ namespace WraithavenGames.Bones3.ChunkFinding
                 chunkArray = null;
             }
         }
-#endregion
+        #endregion
     }
 }

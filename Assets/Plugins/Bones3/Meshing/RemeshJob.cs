@@ -2,7 +2,6 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using WraithavenGames.Bones3.BlockProperties;
-using System.Collections.Generic;
 
 namespace WraithavenGames.Bones3.Meshing
 {
@@ -70,10 +69,11 @@ namespace WraithavenGames.Bones3.Meshing
         /// </summary>
         NativeArray<int> count;
 
-        private bool[,] quads;
-        private int[,] storage;
-        private bool[] references;
-        private List<int> used;
+        private NativeArray<byte> quads;
+        private NativeArray<int> storage;
+        private NativeArray<byte> references;
+        private NativeArray<int> used;
+        private int usedCount;
 
         /// <summary>
         /// Creates a new <c>RemeshMaterialJob</c> object.
@@ -89,7 +89,8 @@ namespace WraithavenGames.Bones3.Meshing
         /// <param name="count">A returned list of values containing the size of the mesh.</param>
         public RemeshJob(NativeArray<ushort> blocks, NativeArray<ushort> nearbyBlocks, NativeArray<BlockID> blockProperties,
             ushort targetBlock, NativeArray<Vector3> vertices, NativeArray<Vector3> normals, NativeArray<Vector2> uvs,
-            NativeArray<ushort> triangles, NativeArray<int> count)
+            NativeArray<ushort> triangles, NativeArray<int> count, NativeArray<byte> quads, NativeArray<int> storage,
+            NativeArray<byte> references, NativeArray<int> used)
         {
             this.blocks = blocks;
             this.nearbyBlocks = nearbyBlocks;
@@ -101,10 +102,11 @@ namespace WraithavenGames.Bones3.Meshing
             this.triangles = triangles;
             this.count = count;
 
-            quads = new bool[16, 16];
-            storage = new int[16, 16];
-            references = new bool[16 * 16 / 2];
-            used = new List<int>();
+            this.quads = quads;
+            this.storage = storage;
+            this.references = references;
+            this.used = used;
+            usedCount = 0;
         }
 
         public void Execute()
@@ -143,24 +145,27 @@ namespace WraithavenGames.Bones3.Meshing
                                 else
                                     next = (x - 1) * 16 * 16 + y * 16 + z;
 
-                                BlockID nextState = GetBlockProperties(blocks[next]);
-                                BlockID indexState = GetBlockProperties(blocks[index]);
 
-                                quads[y, z] = blocks[index] == blockId;
-                                quads[y, z] &= x == end || blocks[next] == 0 || nextState.transparent > 0;
+                                BlockID indexState = GetBlockProperties(blocks[index]);
+                                BlockID nextState = indexState;
+                                if (x != end)
+                                    nextState = GetBlockProperties(blocks[next]);
+
+                                quads[y * 16 + z] = blocks[index] == blockId ? (byte)1 : (byte)0;
+                                quads[y * 16 + z] &= (x == end || blocks[next] == 0 || nextState.transparent > 0) ? (byte)1 : (byte)0;
 
                                 if (x != end && blocks[index] == blocks[next])
-                                    quads[y, z] &= indexState.viewInsides > 0;
+                                    quads[y * 16 + z] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
 
                                 if (x == end)
                                 {
                                     int nearbyIndex = y * 16 + z;
 
                                     BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
-                                    quads[y, z] &= nearbyState.transparent > 0;
+                                    quads[y * 16 + z] &= nearbyState.transparent > 0 ? (byte)1 : (byte)0;
 
                                     if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
-                                        quads[y, z] &= indexState.viewInsides > 0;
+                                        quads[y * 16 + z] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
                                 }
                             }
 
@@ -185,24 +190,26 @@ namespace WraithavenGames.Bones3.Meshing
                                 else
                                     next = x * 16 * 16 + (y - 1) * 16 + z;
 
-                                BlockID nextState = GetBlockProperties(blocks[next]);
                                 BlockID indexState = GetBlockProperties(blocks[index]);
+                                BlockID nextState = indexState;
+                                if (y != end)
+                                    nextState = GetBlockProperties(blocks[next]);
 
-                                quads[x, z] = blocks[index] == blockId;
-                                quads[x, z] &= y == end || blocks[next] == 0 || nextState.transparent > 0;
+                                quads[x * 16 + z] = blocks[index] == blockId ? (byte)1 : (byte)0;
+                                quads[x * 16 + z] &= (y == end || blocks[next] == 0 || nextState.transparent > 0) ? (byte)1 : (byte)0;
 
                                 if (y != end && blocks[index] == blocks[next])
-                                    quads[x, z] &= indexState.viewInsides > 0;
+                                    quads[x * 16 + z] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
 
                                 if (y == end)
                                 {
                                     int nearbyIndex = x * 16 + z;
 
                                     BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
-                                    quads[x, z] &= nearbyState.transparent > 0;
+                                    quads[x * 16 + z] &= nearbyState.transparent > 0 ? (byte)1 : (byte)0;
 
                                     if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
-                                        quads[x, z] &= indexState.viewInsides > 0;
+                                        quads[x * 16 + z] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
                                 }
                             }
 
@@ -227,24 +234,26 @@ namespace WraithavenGames.Bones3.Meshing
                                 else
                                     next = x * 16 * 16 + y * 16 + (z - 1);
 
-                                BlockID nextState = GetBlockProperties(blocks[next]);
                                 BlockID indexState = GetBlockProperties(blocks[index]);
+                                BlockID nextState = indexState;
+                                if (z != end)
+                                    nextState = GetBlockProperties(blocks[next]);
 
-                                quads[x, y] = blocks[index] == blockId;
-                                quads[x, y] &= z == end || blocks[next] == 0 || nextState.transparent > 0;
+                                quads[x * 16 + y] = blocks[index] == blockId ? (byte)1 : (byte)0;
+                                quads[x * 16 + y] &= (z == end || blocks[next] == 0 || nextState.transparent > 0) ? (byte)1 : (byte)0;
 
                                 if (z != end && blocks[index] == blocks[next])
-                                    quads[x, y] &= indexState.viewInsides > 0;
+                                    quads[x * 16 + y] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
 
                                 if (z == end)
                                 {
                                     int nearbyIndex = x * 16 + y;
 
                                     BlockID nearbyState = GetBlockProperties(nearbyBlocks[nearbyIndex + nearbyOffset]);
-                                    quads[x, y] &= nearbyState.transparent > 0;
+                                    quads[x * 16 + y] &= nearbyState.transparent > 0 ? (byte)1 : (byte)0;
 
                                     if (blocks[index] == nearbyBlocks[nearbyIndex + nearbyOffset])
-                                        quads[x, y] &= indexState.viewInsides > 0;
+                                        quads[x * 16 + y] &= indexState.viewInsides > 0 ? (byte)1 : (byte)0;
                                 }
                             }
 
@@ -265,14 +274,14 @@ namespace WraithavenGames.Bones3.Meshing
 
             for (x = 0; x < 16; x++)
                 for (y = 0; y < 16; y++)
-                    storage[x, y] = -1;
+                    storage[x * 16 + y] = -1;
 
             for (y = 0; y < 16; y++)
             {
                 w = -1;
                 for (x = 0; x < 16; x++)
                 {
-                    if (!quads[x, y])
+                    if (quads[x * 16 + y] == 0)
                     {
                         w = -1;
                         continue;
@@ -284,7 +293,7 @@ namespace WraithavenGames.Bones3.Meshing
                         total++;
                     }
 
-                    storage[x, y] = w;
+                    storage[x * 16 + y] = w;
                 }
             }
 
@@ -293,16 +302,16 @@ namespace WraithavenGames.Bones3.Meshing
                 w = 0;
                 for (x = 0; x < 16; x++)
                 {
-                    if (!quads[x, y])
+                    if (quads[x * 16 + y] == 0)
                     {
                         if (w > 0)
                         {
                             q = 0;
-                            if (!quads[x, y + 1] && (x == w || !quads[x - w - 1, y + 1]))
+                            if (quads[x * 16 + (y + 1)] == 0 && (x == w || quads[(x - w - 1) * 16 + (y + 1)] == 0))
                             {
                                 for (t = x - w; t < x; t++)
                                 {
-                                    if (!quads[t, y + 1])
+                                    if (quads[t * 16 + (y + 1)] == 0)
                                         break;
 
                                     q++;
@@ -310,7 +319,7 @@ namespace WraithavenGames.Bones3.Meshing
 
                                 if (q == w)
                                     for (t = x - w; t < x; t++)
-                                        storage[t, y + 1] = storage[t, y];
+                                        storage[t * 16 + (y + 1)] = storage[t * 16 + y];
                             }
                             w = 0;
                         }
@@ -322,62 +331,76 @@ namespace WraithavenGames.Bones3.Meshing
                 if (w > 0)
                 {
                     q = 0;
-                    if (x == w || !quads[x - w - 1, y + 1])
+                    if (x == w || quads[(x - w - 1) * 16 + (y + 1)] == 0)
                     {
                         for (t = x - w; t < x; t++)
                         {
-                            if (!quads[t, y + 1])
+                            if (quads[t * 16 + (y + 1)] == 0)
                                 break;
                             q++;
                         }
 
                         if (q == w)
                             for (t = x - w; t < x; t++)
-                                storage[t, y + 1] = storage[t, y];
+                                storage[t * 16 + (y + 1)] = storage[t * 16 + y];
                     }
                 }
             }
 
-            for (x = 0; x < 16; x++)
-                for (y = 0; y < 16; y++)
-                    if (storage[x, y] > -1 && !used.Contains(storage[x, y]))
-                        used.Add(storage[x, y]);
+            usedCount = 0;
 
             for (x = 0; x < 16; x++)
                 for (y = 0; y < 16; y++)
-                    if (storage[x, y] > -1)
-                        storage[x, y] = used.IndexOf((int)storage[x, y]);
+                    if (storage[x * 16 + y] > -1 && UsedIndex(storage[x * 16 + y]) == -1)
+                    {
+                        used[usedCount] = storage[x * 16 + y];
+                        usedCount++;
+                    }
 
-            return used.Count;
+            for (x = 0; x < 16; x++)
+                for (y = 0; y < 16; y++)
+                    if (storage[x * 16 + y] > -1)
+                        storage[x * 16 + y] = UsedIndex(storage[x * 16 + y]);
+
+            return usedCount;
+        }
+
+        private int UsedIndex(int value)
+        {
+            for (int i = 0; i < usedCount; i++)
+                if (used[i] == value)
+                    return i;
+
+            return -1;
         }
 
         private bool AddQuads(int side, int offset)
         {
             int x, y, w, h, o;
 
-            for (int i = 0; i < used.Count; i++)
-                references[i] = false;
+            for (int i = 0; i < usedCount; i++)
+                references[i] = 0;
 
             bool hasQuads = false;
 
             for (x = 0; x < 16; x++)
                 for (y = 0; y < 16; y++)
                 {
-                    if (storage[x, y] == -1)
+                    if (storage[x * 16 + y] == -1)
                         continue;
 
-                    if (references[storage[x, y]])
+                    if (references[storage[x * 16 + y]] > 0)
                         continue;
 
-                    o = storage[x, y];
-                    references[o] = true;
+                    o = storage[x * 16 + y];
+                    references[o] = 1;
 
                     for (w = x; w < 16; w++)
-                        if (storage[w, y] != o)
+                        if (storage[w * 16 + y] != o)
                             break;
 
                     for (h = y; h < 16; h++)
-                        if (storage[x, h] != o)
+                        if (storage[x * 16 + h] != o)
                             break;
 
                     w -= x;

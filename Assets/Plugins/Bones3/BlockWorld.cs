@@ -22,9 +22,10 @@ namespace WraithavenGames.Bones3
         public int selectedMaterialIndex;
         public SelectedBlock selectedBlock;
         public SelectedBlock dragStart;
-        public RemeshManager remeshManager;
         public BlockTypeList blockTypes;
         public ArrayList blockGroups = new ArrayList();
+
+        private ChunkRemesher remesher = new ChunkRemesher();
 
         public BlockTypeList BlockTypes
         {
@@ -35,8 +36,6 @@ namespace WraithavenGames.Bones3
                 return blockTypes;
             }
         }
-
-        private StandardChunkRemesh temp;
 
         #region SerializationHandling
         [SerializeField] private BlockGroup[] blockGroupArray;
@@ -217,33 +216,7 @@ namespace WraithavenGames.Bones3
 
         public void RemeshChunk(Chunk chunk)
         {
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                RemeshChunkHard(chunk);
-                return;
-            }
-#endif
-
-            if (remeshManager == null)
-            {
-                remeshManager = GameObject.FindObjectOfType<RemeshManager>();
-
-                if (remeshManager == null)
-                    remeshManager = gameObject.AddComponent<RemeshManager>();
-            }
-
-            remeshManager.AddStandardRemeshTask(chunk);
-        }
-
-        public void RemeshChunkHard(Chunk chunk)
-        {
-            if (temp == null)
-                temp = new StandardChunkRemesh();
-            temp.Initalize(transform, chunk);
-            temp.RemeshChunk();
-            temp.FinishTask();
-            temp.CleanupRemesh();
+            remesher.Remesh(chunk);
         }
         #endregion
 
@@ -259,7 +232,7 @@ namespace WraithavenGames.Bones3
             else
                 EditorUtility.UnloadUnusedAssetsImmediate();
 #else
-			Resources.UnloadUnusedAssets();
+            Resources.UnloadUnusedAssets();
 #endif
         }
 
