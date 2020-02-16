@@ -1,4 +1,3 @@
-using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using WraithavenGames.Bones3.BlockProperties;

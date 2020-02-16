@@ -1,4 +1,3 @@
-using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 
@@ -8,7 +7,7 @@ namespace WraithavenGames.Bones3.Meshing
     /// This job takes in a set of quads for a given chunk side and combines them into an array
     /// of larger quads for further processing.
     /// </summary>
-    public struct CombineQuads
+    public struct CombineQuads : IJob
     {
         /// <summary>
         /// An array of each quad face which is present within the chunk. This array consists
