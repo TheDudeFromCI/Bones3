@@ -35,8 +35,8 @@ namespace WraithavenGames.Bones3.Meshing
 
         /// <summary>
         /// The output list of quads which were collected by this job. Each quad a boolean value,
-        /// where quads[x * 16 * 16 * 6 + y * 16 * 6 + z * 6 + j] represents whether the quad is
-        /// active or not.
+        /// where quads[(x * 16 * 16 + y * 16 + z) * 6 + j] represents whether the quad is active
+        /// or not.
         /// </summary>
         public NativeArray<byte> quads;
 

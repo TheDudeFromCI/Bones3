@@ -35,5 +35,10 @@ namespace WraithavenGames.Bones3.Meshing
         /// <para/>5 = z-
         /// </summary>
         public int side;
+
+        /// <summary>
+        /// The offset of this quad from the origin of the chunk, along the given side.
+        /// </summary>
+        public int offset;
     }
 }
