@@ -53,15 +53,20 @@ namespace WraithavenGames.Bones3.Meshing
                 collectQuads.Schedule(collectBlocks, blockId);
                 tasks.Add(collectQuads);
 
-                for (int j = 0; j < 6; j++)
-                {
-                    var combineQuads = pool.Get<CombineQuadsTask>();
-                    combineQuads.Schedule(collectQuads, j, materialIndex);
-                    tasks.Add(combineQuads);
-                }
+                var combineQuads = pool.Get<CombineQuadsTask>();
+                combineQuads.Schedule(collectQuads, materialIndex);
+                tasks.Add(combineQuads);
 
                 materialIndex++;
             }
+
+            var collectColBlocks = pool.Get<CollectColQuadsTask>();
+            collectColBlocks.Schedule(collectBlocks);
+            tasks.Add(collectColBlocks);
+
+            var combineColQuads = pool.Get<CombineQuadsTask>();
+            combineColQuads.Schedule(collectColBlocks, -1);
+            tasks.Add(combineColQuads);
 
             JobHandle.ScheduleBatchedJobs();
         }
@@ -71,13 +76,8 @@ namespace WraithavenGames.Bones3.Meshing
             foreach (var t in tasks)
                 t.Complete();
 
-            List<IRemeshTask> quadTasks = tasks.FindAll(t => t is CombineQuadsTask);
-
-            int[] submeshSizes = GetSubMeshSizes(quadTasks);
-            int vertexCount = Sum(submeshSizes, submeshSizes.Length) * 4;
-
-            Vector3[] vertices = GetVertices(quadTasks, vertexCount);
-            UpdateChunkVisuals(vertices, new Vector3[0], new Vector2[0], submeshSizes);
+            UpdateChunkCollision();
+            UpdateChunkVisuals();
 
             chunk = null;
             foreach (var t in tasks)
@@ -87,18 +87,23 @@ namespace WraithavenGames.Bones3.Meshing
 
         private int[] GetSubMeshSizes(List<IRemeshTask> quadTasks)
         {
-            int[] submeshSizes = new int[quadTasks.Count / 6];
+            int[] submeshSizes = new int[quadTasks.Count];
 
             for (int i = 0; i < quadTasks.Count; i++)
             {
                 var q = quadTasks[i] as CombineQuadsTask;
-                submeshSizes[q.GetMaterialIndex()] += q.GetQuadCount()[0];
+
+                int index = q.GetMaterialIndex();
+                if (index == -1)
+                    index = 0;
+
+                submeshSizes[index] = q.GetQuadCount()[0];
             }
 
             return submeshSizes;
         }
 
-        private void UpdateChunkVisuals(Vector3[] vertices, Vector3[] normals, Vector2[] uvs, int[] submeshSizes)
+        private void UpdateChunkVisuals()
         {
             MeshFilter meshFilter = chunk.GetComponent<MeshFilter>();
             Mesh mesh = meshFilter.sharedMesh;
@@ -108,9 +113,12 @@ namespace WraithavenGames.Bones3.Meshing
             else
                 mesh.Clear();
 
-            mesh.vertices = vertices;
-            mesh.normals = normals;
-            mesh.uv = uvs;
+            List<IRemeshTask> quadMatTasks = tasks.FindAll(t => t is CombineQuadsTask && (t as CombineQuadsTask).GetMaterialIndex() >= 0);
+            int[] submeshSizes = GetSubMeshSizes(quadMatTasks);
+            int vertexCount = Sum(submeshSizes, submeshSizes.Length) * 4;
+
+            mesh.vertices = GetVertices(quadMatTasks, vertexCount);
+            // mesh.uv = new Vector2[0];
             mesh.subMeshCount = submeshSizes.Length;
 
             for (int i = 0; i < submeshSizes.Length; i++)
@@ -124,6 +132,28 @@ namespace WraithavenGames.Bones3.Meshing
 
             MeshRenderer renderer = chunk.GetComponent<MeshRenderer>();
             renderer.sharedMaterials = materials;
+        }
+
+        private void UpdateChunkCollision()
+        {
+            MeshCollider collider = chunk.GetComponent<MeshCollider>();
+            Mesh mesh = collider.sharedMesh;
+
+            if (mesh == null)
+                mesh = new Mesh();
+            else
+                mesh.Clear();
+
+            List<IRemeshTask> quadColTasks = tasks.FindAll(t => t is CombineQuadsTask && (t as CombineQuadsTask).GetMaterialIndex() < 0);
+            int[] submeshSizes = GetSubMeshSizes(quadColTasks);
+
+            mesh.vertices = GetVertices(quadColTasks, submeshSizes[0] * 4);
+            mesh.triangles = GetTriangles(new int[] { submeshSizes[0] }, 0);
+
+            mesh.RecalculateNormals();
+
+            collider.sharedMesh = null;
+            collider.sharedMesh = mesh;
         }
 
         private Vector3[] GetVertices(List<IRemeshTask> quadTasks, int vertexCount)

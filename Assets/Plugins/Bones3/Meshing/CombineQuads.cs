@@ -28,19 +28,15 @@ namespace WraithavenGames.Bones3.Meshing
         public NativeArray<int> quadCount;
 
         /// <summary>
-        /// The side of the chunk this job is handling.
-        /// </summary>
-        public int side;
-
-        /// <summary>
         /// Used for internal storage when processing the quads. 16 * 16 in length.
         /// </summary>
         public NativeArray<byte> storage;
 
         public void Execute()
         {
-            for (int layer = 0; layer < 16; layer++)
-                GreedyMesher(layer);
+            for (int j = 0; j < 6; j++)
+                for (int layer = 0; layer < 16; layer++)
+                    GreedyMesher(layer, j);
         }
 
         private void ResetStorage()
@@ -49,7 +45,7 @@ namespace WraithavenGames.Bones3.Meshing
                 storage[i] = 0;
         }
 
-        private int GetIndex(int layer, int x, int y)
+        private int GetIndex(int layer, int x, int y, int side)
         {
             switch (side)
             {
@@ -69,7 +65,7 @@ namespace WraithavenGames.Bones3.Meshing
             return -1;
         }
 
-        private void BuildColumns(int layer)
+        private void BuildColumns(int layer, int side)
         {
             byte total = 1;
             for (int y = 0; y < 16; y++)
@@ -77,7 +73,7 @@ namespace WraithavenGames.Bones3.Meshing
                 byte w = 0;
                 for (int x = 0; x < 16; x++)
                 {
-                    if (quadsIn[GetIndex(layer, x, y)] == 0)
+                    if (quadsIn[GetIndex(layer, x, y, side)] == 0)
                     {
                         w = 0;
                         continue;
@@ -150,7 +146,7 @@ namespace WraithavenGames.Bones3.Meshing
             }
         }
 
-        private void AddQuads(int offset)
+        private void AddQuads(int offset, int side)
         {
             int lastQuad = 0;
             for (int y = 0; y < 16; y++)
@@ -188,14 +184,14 @@ namespace WraithavenGames.Bones3.Meshing
             }
         }
 
-        private void GreedyMesher(int layer)
+        private void GreedyMesher(int layer, int side)
         {
             ResetStorage();
 
-            BuildColumns(layer);
+            BuildColumns(layer, side);
             CombineColumns();
 
-            AddQuads(layer);
+            AddQuads(layer, side);
         }
     }
 }

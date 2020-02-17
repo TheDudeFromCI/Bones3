@@ -14,6 +14,13 @@ namespace WraithavenGames.Bones3.Meshing
         void Dispose();
     }
 
+    public interface IQuadCollectionTask
+    {
+        NativeArray<byte> GetBlockFaces();
+
+        JobHandle GetJob();
+    }
+
     public class CollectBlocksTask : IRemeshTask
     {
         private NativeArray<ushort> blocks;
@@ -156,7 +163,7 @@ namespace WraithavenGames.Bones3.Meshing
     /// <summary>
     /// This task is used to collect all of the quads within a chunk for a given material type.
     /// </summary>
-    public class CollectQuadsTask : IRemeshTask
+    public class CollectQuadsTask : IRemeshTask, IQuadCollectionTask
     {
         private NativeArray<byte> blockFaces;
         private JobHandle job;
@@ -199,6 +206,50 @@ namespace WraithavenGames.Bones3.Meshing
         }
     }
 
+    /// <summary>
+    /// This task is used to collect all of the collision quads within a chunk.
+    /// </summary>
+    public class CollectColQuadsTask : IRemeshTask, IQuadCollectionTask
+    {
+        private NativeArray<byte> blockFaces;
+        private JobHandle job;
+
+        public CollectColQuadsTask()
+        {
+            blockFaces = new NativeArray<byte>(16 * 16 * 16 * 6, Allocator.Persistent);
+        }
+
+        public void Schedule(CollectBlocksTask task)
+        {
+            job = new CollectColQuads()
+            {
+                blocks = task.GetBlocks(),
+                blockProperties = task.GetBlockProperties(),
+                quads = blockFaces
+            }.Schedule();
+        }
+
+        public JobHandle GetJob()
+        {
+            return job;
+        }
+
+        public void Dispose()
+        {
+            blockFaces.Dispose();
+        }
+
+        public NativeArray<byte> GetBlockFaces()
+        {
+            return blockFaces;
+        }
+
+        public void Complete()
+        {
+            job.Complete();
+        }
+    }
+
     public class CombineQuadsTask : IRemeshTask
     {
         private NativeArray<Quad> quads;
@@ -216,7 +267,7 @@ namespace WraithavenGames.Bones3.Meshing
             storage = new NativeArray<byte>(16 * 16, Allocator.Persistent);
         }
 
-        public void Schedule(CollectQuadsTask task, int side, int materialIndex)
+        public void Schedule(IQuadCollectionTask task, int materialIndex)
         {
             this.materialIndex = materialIndex;
 
@@ -225,8 +276,7 @@ namespace WraithavenGames.Bones3.Meshing
                 quadsIn = task.GetBlockFaces(),
                 quadsOut = quads,
                 quadCount = quadCount,
-                storage = storage,
-                side = side
+                storage = storage
             }.Schedule(task.GetJob());
         }
 
