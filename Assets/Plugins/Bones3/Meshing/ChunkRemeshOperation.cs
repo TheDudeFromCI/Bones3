@@ -47,7 +47,7 @@ namespace WraithavenGames.Bones3.Meshing
                     continue;
 
                 MaterialBlock blockState = chunk.BlockTypes.GetMaterialProperties(blockId);
-                materials[materialIndex++] = blockState.Material;
+                materials[materialIndex] = blockState.Material;
 
                 var collectQuads = pool.Get<CollectQuadsTask>();
                 collectQuads.Schedule(collectBlocks, blockId);
@@ -56,14 +56,15 @@ namespace WraithavenGames.Bones3.Meshing
                 for (int j = 0; j < 6; j++)
                 {
                     var combineQuads = pool.Get<CombineQuadsTask>();
-                    combineQuads.Schedule(collectQuads, j);
+                    combineQuads.Schedule(collectQuads, j, materialIndex);
                     tasks.Add(combineQuads);
                 }
+
+                materialIndex++;
             }
 
             JobHandle.ScheduleBatchedJobs();
         }
-
 
         public void Finish()
         {
@@ -86,10 +87,13 @@ namespace WraithavenGames.Bones3.Meshing
 
         private int[] GetSubMeshSizes(List<IRemeshTask> quadTasks)
         {
-            int[] submeshSizes = new int[quadTasks.Count];
+            int[] submeshSizes = new int[quadTasks.Count / 6];
 
-            for (int i = 0; i < submeshSizes.Length; i++)
-                submeshSizes[i] = (quadTasks[i] as CombineQuadsTask).GetQuadCount()[0];
+            for (int i = 0; i < quadTasks.Count; i++)
+            {
+                var q = quadTasks[i] as CombineQuadsTask;
+                submeshSizes[q.GetMaterialIndex()] += q.GetQuadCount()[0];
+            }
 
             return submeshSizes;
         }
@@ -107,18 +111,13 @@ namespace WraithavenGames.Bones3.Meshing
             mesh.vertices = vertices;
             mesh.normals = normals;
             mesh.uv = uvs;
-
             mesh.subMeshCount = submeshSizes.Length;
 
             for (int i = 0; i < submeshSizes.Length; i++)
-            {
-                List<int> triangles = GetTriangles(submeshSizes, i);
-                mesh.SetTriangles(triangles, i, true, Sum(submeshSizes, i + 1));
-            }
+                mesh.SetTriangles(GetTriangles(submeshSizes, i), i, true, Sum(submeshSizes, i));
 
             mesh.RecalculateNormals();
             mesh.RecalculateTangents();
-            mesh.RecalculateBounds();
 
             meshFilter.sharedMesh = null;
             meshFilter.sharedMesh = mesh;
@@ -241,19 +240,18 @@ namespace WraithavenGames.Bones3.Meshing
             return vertices;
         }
 
-        private List<int> GetTriangles(int[] submeshSizes, int index)
+        private int[] GetTriangles(int[] submeshSizes, int index)
         {
-            List<int> triangles = new List<int>();
-            triangles.Capacity = submeshSizes[index] * 6;
-
-            for (int i = 0; i < submeshSizes[index]; i += 2)
+            int quadCount = submeshSizes[index];
+            int[] triangles = new int[quadCount * 6];
+            for (int i = 0; i < quadCount; i++)
             {
-                triangles.Add(0);
-                triangles.Add(1);
-                triangles.Add(2);
-                triangles.Add(0);
-                triangles.Add(2);
-                triangles.Add(3);
+                triangles[i * 6 + 0] = i * 4 + 0;
+                triangles[i * 6 + 1] = i * 4 + 1;
+                triangles[i * 6 + 2] = i * 4 + 2;
+                triangles[i * 6 + 3] = i * 4 + 0;
+                triangles[i * 6 + 4] = i * 4 + 2;
+                triangles[i * 6 + 5] = i * 4 + 3;
             }
 
             return triangles;

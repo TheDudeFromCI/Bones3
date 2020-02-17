@@ -206,6 +206,9 @@ namespace WraithavenGames.Bones3.Meshing
         private NativeArray<byte> storage;
         private JobHandle job;
 
+        private int materialIndex;
+
+
         public CombineQuadsTask()
         {
             quads = new NativeArray<Quad>(16 * 16 * 8, Allocator.Persistent);
@@ -213,8 +216,10 @@ namespace WraithavenGames.Bones3.Meshing
             storage = new NativeArray<byte>(16 * 16, Allocator.Persistent);
         }
 
-        public void Schedule(CollectQuadsTask task, int side)
+        public void Schedule(CollectQuadsTask task, int side, int materialIndex)
         {
+            this.materialIndex = materialIndex;
+
             job = new CombineQuads()
             {
                 quadsIn = task.GetBlockFaces(),
@@ -250,6 +255,11 @@ namespace WraithavenGames.Bones3.Meshing
         public NativeArray<int> GetQuadCount()
         {
             return quadCount;
+        }
+
+        public int GetMaterialIndex()
+        {
+            return materialIndex;
         }
     }
 }
