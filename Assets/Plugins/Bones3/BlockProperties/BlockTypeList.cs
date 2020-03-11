@@ -7,21 +7,19 @@ namespace WraithavenGames.Bones3.BlockProperties
     {
         private ArrayList materials = new ArrayList();
 
-#region MaterialHandling
+        #region MaterialHandling
         public MaterialBlock GetMaterialProperties(Material material)
         {
             if (material == null)
                 return null;
 
-            lock(materials)
-            {
-                foreach (MaterialBlock type in materials)
-                    if (type.Material == material)
-                        return type;
-                MaterialBlock block = new MaterialBlock(material, (ushort)(materials.Count + 1));
-                materials.Add(block);
-                return block;
-            }
+            foreach (MaterialBlock type in materials)
+                if (type.Material == material)
+                    return type;
+
+            MaterialBlock block = new MaterialBlock(material, (ushort)(materials.Count + 1));
+            materials.Add(block);
+            return block;
         }
 
         public MaterialBlock GetMaterialProperties(ushort id)
@@ -30,12 +28,10 @@ namespace WraithavenGames.Bones3.BlockProperties
                 return null;
 
             id--;
-            lock (materials)
-            {
-                if (id < materials.Count)
-                    return materials[id] as MaterialBlock;
-            }
-            return null;
+            if (id < materials.Count)
+                return materials[id] as MaterialBlock;
+
+            throw new System.Exception($"Unknown Material: {id}. (Actual: {materials.Count})");
         }
 
         public int GetLength()
@@ -49,12 +45,9 @@ namespace WraithavenGames.Bones3.BlockProperties
         public int GetVisibleLength()
         {
             int count = 0;
-            lock (materials)
-            {
-                foreach (MaterialBlock type in materials)
-                    if (!type.HiddenInInspector)
-                        count++;
-            }
+            foreach (MaterialBlock type in materials)
+                if (!type.HiddenInInspector)
+                    count++;
 
             return count;
         }
@@ -64,12 +57,9 @@ namespace WraithavenGames.Bones3.BlockProperties
             if (index < 0)
                 return null;
 
-            lock (materials)
-            {
-                if (index >= materials.Count)
-                    return null;
-                return materials[index] as MaterialBlock;
-            }
+            if (index >= materials.Count)
+                return null;
+            return materials[index] as MaterialBlock;
         }
 
         public MaterialBlock GetVisibleAt(int index)
@@ -78,50 +68,41 @@ namespace WraithavenGames.Bones3.BlockProperties
                 return null;
 
             int i = 0;
-            lock (materials)
-            {
-                foreach (MaterialBlock type in materials)
-                    if (!type.HiddenInInspector)
-                    {
-                        if (i == index)
-                            return type;
-                        i++;
-                    }
-            }
+            foreach (MaterialBlock type in materials)
+                if (!type.HiddenInInspector)
+                {
+                    if (i == index)
+                        return type;
+                    i++;
+                }
 
             return null;
         }
-#endregion
+        #endregion
 
-#region SerializationHandling
+        #region SerializationHandling
         [SerializeField] private MaterialBlock[] tempArray;
 
         public void OnBeforeSerialize()
         {
-            lock(materials)
-            {
-                tempArray = new MaterialBlock[materials.Count];
+            tempArray = new MaterialBlock[materials.Count];
 
-                for (int i = 0; i < materials.Count; i++)
-                    tempArray[i] = materials[i] as MaterialBlock;
-            }
+            for (int i = 0; i < materials.Count; i++)
+                tempArray[i] = materials[i] as MaterialBlock;
         }
 
         public void OnAfterDeserialize()
         {
-            lock(materials)
-            {
-                materials.Clear();
+            materials.Clear();
 
-                if (tempArray == null)
-                    return;
+            if (tempArray == null)
+                return;
 
-                materials.Capacity = tempArray.Length;
-                for (int i = 0; i < tempArray.Length; i++)
-                    materials.Add(tempArray[i]);
+            materials.Capacity = tempArray.Length;
+            for (int i = 0; i < tempArray.Length; i++)
+                materials.Add(tempArray[i]);
 
-                tempArray = null;
-            }
+            tempArray = null;
         }
 
         public BlockTypeList Copy()
@@ -135,6 +116,6 @@ namespace WraithavenGames.Bones3.BlockProperties
 
             return list;
         }
-#endregion
+        #endregion
     }
 }

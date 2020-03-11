@@ -14,6 +14,7 @@ namespace WraithavenGames.Bones3.Meshing
     public class ChunkRemesher
     {
         private ChunkTaskPool pool = new ChunkTaskPool();
+
         public void Remesh(Chunk chunk)
         {
             ChunkRemeshOperation op = new ChunkRemeshOperation(pool);

@@ -7,6 +7,15 @@ namespace WraithavenGames.Bones3.BlockProperties
     /// </summary>
     public struct BlockID
     {
+        public static BlockID AIR = new BlockID()
+        {
+            id = 0,
+            hasCollision = 0,
+            viewInsides = 0,
+            transparent = 1,
+            depthSort = 0
+        };
+
         /// <summary>
         /// This is the ID of the block. Each block has a unquie id value to represent it.
         /// </summary>

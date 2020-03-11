@@ -32,19 +32,29 @@ namespace WraithavenGames.Bones3.Meshing
         {
             blocks = new NativeArray<ushort>(16 * 16 * 16, Allocator.Persistent);
             nearbyBlocks = new NativeArray<ushort>(16 * 16 * 6, Allocator.Persistent);
-            blockProperties = new NativeArray<BlockID>(16 * 16 * 16 * 6, Allocator.Persistent);
+            blockProperties = new NativeArray<BlockID>(16 * 16 * 16 * 6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             blockRef = new List<ushort>();
+
+            for (int i = 0; i < blockProperties.Length; i++)
+                blockProperties[i] = BlockID.AIR;
         }
 
         public void Schedule(Chunk chunk)
         {
-            blockRef.Clear();
-            CollectBlocks(chunk, blockRef);
-            CollectNearbyBlocks(chunk, blockRef);
-            CollectBlockProperties(chunk, blockRef);
+            ClearBlockProperties();
+            CollectBlocks(chunk);
+            CollectNearbyBlocks(chunk);
+            CollectBlockProperties(chunk);
         }
 
-        private void CollectBlocks(Chunk chunk, List<ushort> blockRef)
+        private void ClearBlockProperties()
+        {
+            for (int i = 0; i < blockRef.Count; i++)
+                blockProperties[i] = BlockID.AIR;
+            blockRef.Clear();
+        }
+
+        private void CollectBlocks(Chunk chunk)
         {
             for (int i = 0; i < 4096; i++)
             {
@@ -55,7 +65,7 @@ namespace WraithavenGames.Bones3.Meshing
             }
         }
 
-        private void CollectNearbyBlocks(Chunk chunk, List<ushort> blockRef)
+        private void CollectNearbyBlocks(Chunk chunk)
         {
             for (int j = 0; j < 6; j++)
             {
@@ -99,31 +109,28 @@ namespace WraithavenGames.Bones3.Meshing
             }
         }
 
-        private void CollectBlockProperties(Chunk chunk, List<ushort> blockRef)
+        private void CollectBlockProperties(Chunk chunk)
         {
             for (int i = 0; i < blockRef.Count; i++)
             {
-                MaterialBlock blockState = chunk.GetBlockState(i);
+                MaterialBlock blockState = chunk.GetBlockState(blockRef[i]);
 
-                BlockID block = new BlockID();
-                block.id = blockRef[i];
+                if (blockState != null)
+                {
+                    BlockID block = new BlockID();
+                    block.id = blockRef[i];
 
-                if (blockState == null)
-                {
-                    block.hasCollision = 0;
-                    block.transparent = 1;
-                    block.viewInsides = 0;
-                    block.depthSort = 0;
-                }
-                else
-                {
-                    block.hasCollision = (byte)(blockRef[i] > 0 ? 1 : 0);
+                    block.hasCollision = (byte)(block.id > 0 ? 1 : 0);
                     block.transparent = (byte)(blockState.Transparent ? 1 : 0);
                     block.viewInsides = (byte)(blockState.ViewInsides ? 1 : 0);
                     block.depthSort = (byte)(blockState.DepthSort ? 1 : 0);
-                }
 
-                blockProperties[i] = block;
+                    blockProperties[i] = block;
+
+                    UnityEngine.Debug.Log($"Loaded Block: {block.id}, Col={block.hasCollision}");
+                }
+                else
+                    UnityEngine.Debug.Log($"Failed to Load Block: {blockRef[i]}");
             }
         }
 

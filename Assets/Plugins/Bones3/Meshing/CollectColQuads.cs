@@ -57,9 +57,10 @@ namespace WraithavenGames.Bones3.Meshing
                 case 4:
                 case 5:
                     return a * 16 * 16 + b * 16 + t;
-            }
 
-            return -1;
+                default:
+                    throw new System.Exception();
+            }
         }
 
         private void BuildFaces(int j)
