@@ -7,44 +7,57 @@ namespace Bones3
     /// </summary>
     public class Chunk : MonoBehaviour
     {
-        private Vector3Int pos;
-        private ushort[] blocks = new ushort[16 * 16 * 16];
+        /// <summary>
+        /// The number of blocks within one axis of a chunk.
+        /// </summary>
+        public const int CHUNK_SIZE = 16;
+
+        private ushort[] blocks = new ushort[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+        private Vector3Int position;
+        private int blockCount;
 
         /// <summary>
         /// The X coordinate of this chunk.
         /// </summary>
         /// <value>The X coord.</value>
-        public int X { get => pos.x; }
+        public int X { get => position.x; }
 
         /// <summary>
         /// The Y coordinate of this chunk.
         /// </summary>
         /// <value>The Y coord.</value>
-        public int Y { get => pos.y; }
+        public int Y { get => position.y; }
 
         /// <summary>
         /// The Z coordinate of this chunk.
         /// </summary>
         /// <value>The Z coord.</value>
-        public int Z { get => pos.z; }
+        public int Z { get => position.z; }
 
         /// <summary>
         /// The number of non-air blocks in this chunk.
         /// </summary>
         /// <value>The block count.</value>
-        public int BlockCount { get; private set; } = 0;
+        public int BlockCount { get => blockCount; }
 
         /// <summary>
         /// Sets the coordinates of this chunk.
         /// </summary>
+        /// <remarks>
+        /// This method should only be called when creating the chunk by the
+        /// chunk container object. It is assumed that all chunks within a world
+        /// have a unquie coordinate position along a grid.
+        /// 
+        /// A chunk's coordinate location is equal to `a` >> 4, where `a` is the
+        /// world coordinates of the block in this chunk at relative position
+        /// (0, 0, 0).
+        /// </remarks>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="z">The Z coordinate.</param>
-        void SetCoords(int x, int y, int z)
+        public void SetCoords(int x, int y, int z)
         {
-            pos.x = x;
-            pos.y = y;
-            pos.z = z;
+            position = new Vector3Int(x, y, z);
         }
 
         /// <summary>
@@ -68,6 +81,7 @@ namespace Bones3
         /// <param name="z">The relative Z position.</param>
         /// <param name="block">The Block ID to set.</param>
         /// <returns>True if the block was updated. False if a block with a matching ID was already at the given location.</returns>
+        /// <exception cref="Bones3Exception">If the position is outside of this chunk.</exception>
         public bool SetBlock(int x, int y, int z, ushort block)
         {
             int index = Index(x, y, z);
@@ -76,9 +90,9 @@ namespace Bones3
                 return false;
 
             if (blocks[index] == 0)
-                BlockCount++;
+                blockCount++;
             else if (block == 0)
-                BlockCount--;
+                blockCount--;
 
             blocks[index] = block;
             return true;
@@ -91,12 +105,13 @@ namespace Bones3
         /// <param name="y">The relative Y position.</param>
         /// <param name="z">The relative Z position.</param>
         /// <returns>The block index within the blocks array.</returns>
+        /// <exception cref="Bones3Exception">If the position is outside of this chunk.</exception>
         private int Index(int x, int y, int z)
         {
-            if (x < 0 || y < 0 || z < 0 || x > 15 || y > 15 || z > 15)
+            if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
                 throw new Bones3Exception($"Block index out of range! ({x},{y},{z})");
 
-            return x * 16 * 16 + y * 16 + z;
+            return x * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + z;
         }
     }
 }
