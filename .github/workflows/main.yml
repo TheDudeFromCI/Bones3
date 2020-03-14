@@ -18,9 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         
-      - name: Activate Unity
-        uses: webbertakken/unity-request-manual-activation-file@v1.1
-
       - name: Run Tests
         uses: webbertakken/unity-test-runner@v1.6
         env:
