@@ -17,8 +17,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        
+      - name: Run Tests
+        uses: webbertakken/unity-test-runner@v1.6
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: 2018.4.16f1
+          
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.1
 
-      - name: Prepare Build
+      - name: Prepare Package
         run: |
           mkdir build
           find ./Assets/Plugins/ -name \*.meta > metaList
