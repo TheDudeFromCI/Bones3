@@ -22,12 +22,10 @@ jobs:
     name: Test in ${{ matrix.testMode }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        projectPath:
-          - .
         unityVersion:
-          - 2019.2.11f1
+          - 2018.4.16f1
         testMode:
           - playmode
           - editmode
@@ -44,7 +42,7 @@ jobs:
           restore-keys: |
             Library-
 
-      - uses: webbertakken/unity-test-runner@v1.4
+      - uses: webbertakken/unity-test-runner@v1.6
         id: tests
         with:
           projectPath: ${{ matrix.projectPath }}
