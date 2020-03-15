@@ -1,14 +1,10 @@
 {
-    "name": "Tests",
-    "references": [
-        "Bones3"
-    ],
+    "name": "PlayTests",
+    "references": [],
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

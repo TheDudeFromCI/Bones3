@@ -20,7 +20,10 @@ namespace Tests
         [TearDown]
         public void Teardown()
         {
-            Object.DestroyImmediate(chunk);
+            if (Application.isPlaying)
+                Object.Destroy(chunk);
+            else
+                Object.DestroyImmediate(chunk);
         }
 
         [Test]

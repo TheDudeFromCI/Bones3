@@ -96,7 +96,7 @@ namespace Bones3
 
             chunkCount++;
 
-            chunks[Index(x, y, z)] == chunk;
+            chunks[Index(x, y, z)] = chunk;
             return chunk;
         }
 

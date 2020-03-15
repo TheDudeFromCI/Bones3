@@ -7,7 +7,7 @@ using Bones3;
 
 namespace Tests
 {
-    public class ChunkTest
+    public class RegionTest
     {
         private Region region;
 
@@ -20,7 +20,10 @@ namespace Tests
         [TearDown]
         public void Teardown()
         {
-            Object.DestroyImmediate(region);
+            if (Application.isPlaying)
+                Object.Destroy(region);
+            else
+                Object.DestroyImmediate(region);
         }
 
         [Test]
