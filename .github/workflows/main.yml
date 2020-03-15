@@ -4,21 +4,78 @@ on:
   push:
     paths:
       - "Assets/**"
+      - "Packages/**"
+      - "ProjectSettings/**"
       - ".github/**"
   pull_request:
     paths:
       - "Assets/**"
+      - "Packages/**"
+      - "ProjectSettings/**"
       - ".github/**"
 
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
 jobs:
+  tests:
+    name: Test in ${{ matrix.testMode }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        unityVersion:
+          - 2018.4.16f1
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      - uses: actions/cache@v1.1.0
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
+
+      - uses: webbertakken/unity-test-runner@v1.6
+        id: tests
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: test-results
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Test results for ${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+  
+  code-quality:
+    runs-on: ubuntu-latest
+    needs: [tests]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.1
+ 
   build:
     runs-on: ubuntu-latest
+    needs: [tests]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          lfs: true
 
-      - name: Prepare Build
+      - name: Prepare Package
         run: |
           mkdir build
           find ./Assets/Plugins/ -name \*.meta > metaList
