@@ -26,9 +26,6 @@ jobs:
       matrix:
         unityVersion:
           - 2018.4.16f1
-        testMode:
-          - playmode
-          - editmode
 
     steps:
       - uses: actions/checkout@v2
