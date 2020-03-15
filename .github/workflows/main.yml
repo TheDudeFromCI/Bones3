@@ -45,7 +45,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           testMode: ${{ matrix.testMode }}
-          artifactsPath: $test-results-artifacts
+          artifactsPath: test-results
 
       - uses: actions/upload-artifact@v1
         with:
