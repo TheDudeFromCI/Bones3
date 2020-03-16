@@ -6,5 +6,11 @@
         "**/.project": true,
         "**/.settings": true,
         "**/*.meta": true,
+        "**/*.csproj": true,
+        "**/*.sln": true,
+        "**/Library": true,
+        "**/Logs": true,
+        "**/obj": true,
+        "**/Temp": true,
     }
 }
