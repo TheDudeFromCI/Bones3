@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Bones3
 {
     /// <summary>
-    /// A chunk is a 16x16x16 grid of blocks representing a small piece of a voxel world.
+    /// A chunk is a CHUNK_SIZE^3 grid of blocks representing a small piece of a voxel world.
     /// </summary>
     public class Chunk : MonoBehaviour
     {
@@ -11,6 +11,11 @@ namespace Bones3
         /// The number of blocks within one axis of a chunk.
         /// </summary>
         public const int CHUNK_SIZE = 16;
+
+        /// <summary>
+        /// The number of bits used to transform block coords to chunk coords via x >>= CHUNK_BITS.
+        /// </summary>
+        public const int CHUNK_BITS = 4;
 
         private ushort[] blocks = new ushort[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
         private Vector3Int position;
@@ -48,14 +53,14 @@ namespace Bones3
         /// chunk container object. It is assumed that all chunks within a world
         /// have a unquie coordinate position along a grid.
         /// 
-        /// A chunk's coordinate location is equal to `a` >> 4, where `a` is the
-        /// world coordinates of the block in this chunk at relative position
+        /// A chunk's coordinate location is equal to `a` >> CHUNK_BITS, where `a` is
+        /// the world coordinates of the block in this chunk at relative position
         /// (0, 0, 0).
         /// </remarks>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="z">The Z coordinate.</param>
-        public void SetCoords(int x, int y, int z)
+        internal void SetCoords(int x, int y, int z)
         {
             position = new Vector3Int(x, y, z);
         }
@@ -67,7 +72,6 @@ namespace Bones3
         /// <param name="y">The relative Y position.</param>
         /// <param name="z">The relative Z position.</param>
         /// <returns>The Block ID.</returns>
-        /// <exception cref="Bones3Exception">If the position is outside of this chunk.</exception>
         public ushort GetBlock(int x, int y, int z)
         {
             return blocks[Index(x, y, z)];
@@ -81,7 +85,6 @@ namespace Bones3
         /// <param name="z">The relative Z position.</param>
         /// <param name="block">The Block ID to set.</param>
         /// <returns>True if the block was updated. False if a block with a matching ID was already at the given location.</returns>
-        /// <exception cref="Bones3Exception">If the position is outside of this chunk.</exception>
         public bool SetBlock(int x, int y, int z, ushort block)
         {
             int index = Index(x, y, z);
@@ -105,11 +108,11 @@ namespace Bones3
         /// <param name="y">The relative Y position.</param>
         /// <param name="z">The relative Z position.</param>
         /// <returns>The block index within the blocks array.</returns>
-        /// <exception cref="Bones3Exception">If the position is outside of this chunk.</exception>
         private int Index(int x, int y, int z)
         {
-            if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
-                throw new Bones3Exception($"Block index out of range! ({x},{y},{z})");
+            x &= CHUNK_SIZE - 1;
+            y &= CHUNK_SIZE - 1;
+            z &= CHUNK_SIZE - 1;
 
             return x * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + z;
         }

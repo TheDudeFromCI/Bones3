@@ -20,10 +20,7 @@ namespace Tests
         [TearDown]
         public void Teardown()
         {
-            if (Application.isPlaying)
-                Object.Destroy(region);
-            else
-                Object.DestroyImmediate(region);
+            Object.DestroyImmediate(region);
         }
 
         [Test]
@@ -39,6 +36,7 @@ namespace Tests
             Assert.AreEqual(9, chunk2.Z);
         }
 
+        [Test]
         public void DestroyChunk()
         {
             region.GetChunk(0, 0, 0, true);
@@ -47,6 +45,7 @@ namespace Tests
             Assert.IsNull(region.GetChunk(0, 0, 0, false));
         }
 
+        [Test]
         public void ChunkCount()
         {
             Assert.AreEqual(0, region.ChunkCount);
@@ -62,6 +61,27 @@ namespace Tests
             region.DestroyChunk(2, 1, 2);
 
             Assert.AreEqual(2, region.ChunkCount);
+        }
+
+        [Test]
+        public void ChunkIsChild()
+        {
+            Chunk chunk = region.GetChunk(0, 0, 0, true);
+            Assert.AreEqual(region.transform, chunk.transform.parent);
+        }
+
+        [Test]
+        public void ChunksProperlyNamed()
+        {
+            Chunk chunk = region.GetChunk(2, 4, 6, true);
+            Assert.AreEqual("Chunk (2, 4, 6)", chunk.gameObject.name);
+        }
+
+        [Test]
+        public void ChunksProperlyLocated()
+        {
+            Chunk chunk = region.GetChunk(10, 8, 12, true);
+            Assert.AreEqual(new Vector3(160, 128, 192), chunk.transform.localPosition);
         }
     }
 }

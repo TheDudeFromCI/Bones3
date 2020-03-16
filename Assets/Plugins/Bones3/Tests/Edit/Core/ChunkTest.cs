@@ -20,10 +20,7 @@ namespace Tests
         [TearDown]
         public void Teardown()
         {
-            if (Application.isPlaying)
-                Object.Destroy(chunk);
-            else
-                Object.DestroyImmediate(chunk);
+            Object.DestroyImmediate(chunk);
         }
 
         [Test]
@@ -39,7 +36,11 @@ namespace Tests
         [Test]
         public void SetBlock_OutsideOfRange()
         {
-            Assert.Throws<Bones3Exception>(() => chunk.SetBlock(-1, 2, 2, 17));
+            ushort block = 14;
+
+            chunk.SetBlock(-3, 4, 8, block);
+
+            Assert.AreEqual(block, chunk.GetBlock(16 - 3, 4, 8));
         }
 
         [Test]
