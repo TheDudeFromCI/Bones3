@@ -1,6 +1,5 @@
-# Bones³
-Bones³ is a Unity voxel editor, designed to allow users to manipulate voxel worlds both in-game and in-editor.
-<br>
-<br>
-### ALPHA BUILDS ONLY
-This plugin was only recently revived after years in my old archive storage folders and is far too buggy for use. As time goes on, the project will slowly be refactored and cleaned up, bringing it back to life.
+The open source version of this project is no longer actively being maintained. A commerial version is being prepared for the Unity Asset store and will be released soon.
+
+If you would like to use the code provided in this project, feel free to make a fork and play with it to your heart's content.
+
+For others who wish to see the commnunity version of this project continue, pull requests will still be accepted.
