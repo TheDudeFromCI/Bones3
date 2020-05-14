@@ -22,7 +22,7 @@ namespace Bones3Rebuilt.Demo
         [Header("Reference")]
         public BlockWorld blockWorld;
 
-        void Awake()
+        void Start()
         {
             blockWorld.WorldContainer.BlockList.AddBlockType(new BlockBuilder(2)
                 .Name("Grass")
@@ -43,20 +43,20 @@ namespace Bones3Rebuilt.Demo
                 {
                     float a = x / smoothing;
                     float b = z / smoothing;
-                    int h = (int) (Mathf.PerlinNoise(a, b) * amplitude);
+                    int h = (int)(Mathf.PerlinNoise(a, b) * amplitude);
 
                     for (int y = -5; y <= h; y++)
                     {
                         var place = new BlockPlacement
                         {
                             Position = new BlockPosition(x, y, z),
-                            BlockID = (ushort) (y == h ? 2 : 3),
+                            BlockID = (ushort)(y == h ? 2 : 3),
                         };
 
                         yield return place;
                     }
 
-                    for (int y = h + 1; y <= (int) amplitude + 5; y++)
+                    for (int y = h + 1; y <= (int)amplitude + 5; y++)
                     {
                         var place = new BlockPlacement
                         {

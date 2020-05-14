@@ -1,0 +1,13 @@
+{
+  "files.exclude": {
+    "**/*.meta": true
+  },
+  "cSpell.words": [
+    "Behaviour",
+    "Mathf",
+    "Remesh",
+    "remeshed",
+    "remeshing",
+    "voxel"
+  ]
+}
