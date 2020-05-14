@@ -1,4 +1,4 @@
-![CI](https://github.com/TheDudeFromCI/Bones3-Rebuilt/workflows/CI/badge.svg)
+![CI](https://github.com/Wraithaven-UnityTools/Bones3/workflows/CI/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=alert_status&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=sqale_rating&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=reliability_rating&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
