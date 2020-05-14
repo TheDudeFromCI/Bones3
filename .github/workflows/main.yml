@@ -1,36 +1,31 @@
 name: CI
 
-on:
-  push:
-    paths:
-      - "Assets/**"
-      - ".github/**"
-  pull_request:
-    paths:
-      - "Assets/**"
-      - ".github/**"
+on: push
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    sonar:
+        name: Send project to SonarCloud
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  lfs: true
 
-      - name: Prepare Build
-        run: |
-          mkdir build
-          find ./Assets/Plugins/ -name \*.meta > metaList
+            - run: |
+                  git fetch --prune --unshallow
 
-      - name: create-unitypackage
-        uses: pCYSl5EDgo/create-unitypackage@v1
-        with:
-          package-path: build/bones3.unitypackage
-          include-files: metaList
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: unitypackage
-          path: build/bones3.unitypackage
+            - name: Sonarscanner for dotnet
+              uses: Secbyte/dotnet-sonarscanner@v2.2
+              with:
+                  buildCommand: dotnet build src/Bones3.sln
+                  testCommand: dotnet test src/Bones3.sln
+                  projectKey: TheDudeFromCI_Bones3-Rebuilt
+                  projectName: Bones3-Rebuilt
+                  sonarOrganisation: thedudefromci
+                  beginArguments: >
+                      /d:sonar.verbose="true"
+                      /d:sonar.cs.opencover.reportsPaths='"src/Test/coverage.opencover.xml"'
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

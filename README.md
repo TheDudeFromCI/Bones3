@@ -1,5 +1,13 @@
-The open source version of this project is no longer actively being maintained. A commerial version is being prepared for the Unity Asset store and will be released soon.
+![CI](https://github.com/TheDudeFromCI/Bones3-Rebuilt/workflows/CI/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=alert_status&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=sqale_rating&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=reliability_rating&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=coverage&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=bugs&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=vulnerabilities&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=TheDudeFromCI_Bones3-Rebuilt&metric=sqale_index&token=3e2eaab6c05d5b0ecb3ad879240c116fef9e4b96)](https://sonarcloud.io/dashboard?id=TheDudeFromCI_Bones3-Rebuilt)
+[![BCH compliance](https://bettercodehub.com/edge/badge/TheDudeFromCI/Bones3-Rebuilt?branch=master&token=dbbd7c4aa7a4fd11fc28b25c75f80173af71614e)](https://bettercodehub.com/)
 
-If you would like to use the code provided in this project, feel free to make a fork and play with it to your heart's content.
+# Bones3
 
-For others who wish to see the commnunity version of this project continue, pull requests will still be accepted.
+Bones3 (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.
