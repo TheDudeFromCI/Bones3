@@ -10,21 +10,35 @@
 
 ---
 
+<br><br>
+
 # <div align="center">Bones³</div>
 
 <p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>
 
 ---
 
+<br />
+
 ### Now Fully Open-Source!
 
-Bones3-Rebuilt is now open source! The previouusly in-development commerical version of Bones3, known as Bones3-Rebuilt, has been pushed back into the open-source community version! From now on, Bones3 is free to all users!
+Bones3-Rebuilt is now open source! The previously in-development commercial version of Bones3, known as Bones3-Rebuilt, has been pushed back into the open-source community version! From now on, Bones3 is free to all users!
+
+<br />
 
 ## What is it?
 
 Bones3 is a Unity in-editor/in-engine script which makes it natural for users to create and modify voxel worlds and structures. Design structures in just a few clicks.
 
+<br />
+
+## Developing
+
+This project requires Moq, version 4.2.1510.2205 to run tests, which you can find [here.](https://www.nuget.org/packages/Moq/4.2.1510.2205) Simply download the raw nupkg, extra the net35 dll and drop it anywhere in the Asset folder.
+
+<br />
+
 ## Lets see it in action
 
-Note that the current branch has a few more tweaks to be done before you can use it, however, here is a video of an old prototype version of Bones3 to show what we're aimming for:
+Note that the current branch has a few more tweaks to be done before you can use it, however, here is a video of an old prototype version of Bones3 to show what we're aiming for:
 [![Bones3 Prototype Demo](http://img.youtube.com/vi/GzNd_Lnkytk/0.jpg)](http://www.youtube.com/watch?v=GzNd_Lnkytk "Bones3 Prototype Demo")

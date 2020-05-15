@@ -4,6 +4,7 @@
 #
 /[Ll]ibrary/
 /[Tt]emp/
+/[B]in/
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
@@ -42,6 +43,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+*.dll
 
 # Unity3D generated meta files
 *.pidb.meta
@@ -57,7 +59,3 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
-
-*.code-workspace
-!Bones3.csproj
-*.dll

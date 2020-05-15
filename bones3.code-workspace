@@ -1,0 +1,87 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "."
+    },
+    {
+      "name": "Core",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts/Core"
+    },
+    {
+      "name": "Implementation",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts/Impl"
+    },
+    {
+      "name": "Tests",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts/Tests"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/.git": true,
+      "**/.gitignore": true,
+      "**/.gitmodules": true,
+      "**/*.booproj": true,
+      "**/*.pidb": true,
+      "**/*.suo": true,
+      "**/*.user": true,
+      "**/*.userprefs": true,
+      "**/*.unityproj": true,
+      "**/*.dll": true,
+      "**/*.exe": true,
+      "**/*.pdf": true,
+      "**/*.mid": true,
+      "**/*.midi": true,
+      "**/*.wav": true,
+      "**/*.gif": true,
+      "**/*.ico": true,
+      "**/*.jpg": true,
+      "**/*.jpeg": true,
+      "**/*.png": true,
+      "**/*.psd": true,
+      "**/*.tga": true,
+      "**/*.tif": true,
+      "**/*.tiff": true,
+      "**/*.3ds": true,
+      "**/*.3DS": true,
+      "**/*.fbx": true,
+      "**/*.FBX": true,
+      "**/*.lxo": true,
+      "**/*.LXO": true,
+      "**/*.ma": true,
+      "**/*.MA": true,
+      "**/*.obj": true,
+      "**/*.OBJ": true,
+      "**/*.asset": true,
+      "**/*.cubemap": true,
+      "**/*.flare": true,
+      "**/*.mat": true,
+      "**/*.meta": true,
+      "**/*.prefab": true,
+      "**/*.unity": true,
+      "build/": true,
+      "Build/": true,
+      "Library/": true,
+      "library/": true,
+      "obj/": true,
+      "Obj/": true,
+      "bin/": true,
+      "ProjectSettings/": true,
+      "temp/": true,
+      "Temp/": true,
+      "Assets/AssetStoreTools": true
+    },
+    "cSpell.words": [
+      "Behaviour",
+      "Mathf",
+      "Remesh",
+      "remeshed",
+      "remeshing",
+      "voxel"
+    ],
+    "coverage-gutters.lcovname": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts/Tests/coverage.info",
+    "dotnet-test-explorer.testProjectPath": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts/Tests"
+  }
+}
