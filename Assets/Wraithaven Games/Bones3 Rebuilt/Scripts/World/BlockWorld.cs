@@ -7,24 +7,37 @@ namespace Bones3Rebuilt
     /// <summary>
     /// The main behaviour for containing a voxel block world.
     /// </summary>
-    [SelectionBase]
+    [SelectionBase, ExecuteAlways]
     public class BlockWorld : MonoBehaviour
     {
         private readonly List<BlockChunk> m_Chunks = new List<BlockChunk>();
         private readonly ChunkMeshBuilder m_MeshBuilder = new ChunkMeshBuilder();
         private readonly ChunkCreator m_ChunkCreator = new ChunkCreator();
+        private WorldContainer m_WorldContainer;
 
         /// <summary>
         /// Gets the world container being managed.
         /// </summary>
         /// <value>The world container, for editing the world.</value>
-        public WorldContainer WorldContainer { get; private set; }
+        public WorldContainer WorldContainer
+        {
+            get
+            {
+                if (m_WorldContainer == null)
+                    OnEnable();
+
+                return m_WorldContainer;
+            }
+        }
 
         /// <summary>
         /// Called when the BlockWorld behaviour is enabled.
         /// </summary>
         private void OnEnable()
         {
+            if (m_WorldContainer != null)
+                return; // Already enabled
+
             var chunkSize = new GridSize(4);
 
             var world = new World(chunkSize);
@@ -34,10 +47,19 @@ namespace Bones3Rebuilt
 
             remesh.AddDistributor(new StandardDistributor());
 
-            WorldContainer = new WorldContainer(world, remesh, blockList, database);
-            WorldContainer.BlockContainerProvider.OnBlockContainerCreated += OnChunkCreated;
-            WorldContainer.BlockContainerProvider.OnBlockContainerDestroyed += OnChunkDestroyed;
-            WorldContainer.RemeshHandler.OnRemeshFinish += OnRemeshFinished;
+            m_WorldContainer = new WorldContainer(world, remesh, blockList, database);
+            m_WorldContainer.BlockContainerProvider.OnBlockContainerCreated += OnChunkCreated;
+            m_WorldContainer.BlockContainerProvider.OnBlockContainerDestroyed += OnChunkDestroyed;
+            m_WorldContainer.RemeshHandler.OnRemeshFinish += OnRemeshFinished;
+
+            blockList.AddBlockType(new BlockBuilder(blockList.NextBlockID)
+                .Name("Grass")
+                .Build());
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                UnityEditor.EditorApplication.update += Update;
+#endif
         }
 
         /// <summary>
@@ -45,14 +67,22 @@ namespace Bones3Rebuilt
         /// </summary>
         private void OnDisable()
         {
-            WorldContainer.BlockContainerProvider.OnBlockContainerCreated -= OnChunkCreated;
-            WorldContainer.BlockContainerProvider.OnBlockContainerDestroyed -= OnChunkDestroyed;
-            WorldContainer = null;
+            if (m_WorldContainer == null)
+                return; // Already disabled
+
+            m_WorldContainer.BlockContainerProvider.OnBlockContainerCreated -= OnChunkCreated;
+            m_WorldContainer.BlockContainerProvider.OnBlockContainerDestroyed -= OnChunkDestroyed;
+            m_WorldContainer = null;
 
             foreach (var chunk in m_Chunks)
                 m_ChunkCreator.DestroyChunk(chunk);
 
             m_Chunks.Clear();
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                UnityEditor.EditorApplication.update -= Update;
+#endif
         }
 
         /// <summary>
