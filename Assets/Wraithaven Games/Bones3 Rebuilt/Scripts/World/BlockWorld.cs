@@ -20,6 +20,9 @@ namespace Bones3Rebuilt
         /// <value>The world container, for editing the world.</value>
         public WorldContainer WorldContainer { get; private set; }
 
+        /// <summary>
+        /// Called when the BlockWorld behaviour is enabled.
+        /// </summary>
         private void OnEnable()
         {
             var chunkSize = new GridSize(4);
@@ -37,6 +40,9 @@ namespace Bones3Rebuilt
             WorldContainer.RemeshHandler.OnRemeshFinish += OnRemeshFinished;
         }
 
+        /// <summary>
+        /// Called when the BlockWorld behaviour is disabled.
+        /// </summary>
         private void OnDisable()
         {
             WorldContainer.BlockContainerProvider.OnBlockContainerCreated -= OnChunkCreated;
@@ -49,17 +55,28 @@ namespace Bones3Rebuilt
             m_Chunks.Clear();
         }
 
+        /// <summary>
+        /// Called each frame when enabled.
+        /// </summary>
         private void Update()
         {
             WorldContainer?.RemeshHandler.FinishTasks();
         }
 
+        /// <summary>
+        /// Called when a new chunk is created (or loaded).
+        /// </summary>
+        /// <param name="ev">The event.</param>
         private void OnChunkCreated(BlockContainerCreatedEvent ev)
         {
             var chunk = ev.BlockContainer;
             m_Chunks.Add(m_ChunkCreator.LoadChunk(chunk.Position, chunk.Size.Value, transform));
         }
 
+        /// <summary>
+        /// Called when a chunk is destroyed (or unloaded).
+        /// </summary>
+        /// <param name="ev">The event.</param>
         private void OnChunkDestroyed(BlockContainerDestroyedEvent ev)
         {
             var chunk = GetChunk(ev.BlockContainer.Position);
@@ -71,6 +88,10 @@ namespace Bones3Rebuilt
             m_ChunkCreator.DestroyChunk(chunk);
         }
 
+        /// <summary>
+        /// Called when a chunk finishes a remesh event.
+        /// </summary>
+        /// <param name="ev">The event.</param>
         private void OnRemeshFinished(RemeshFinishEvent ev)
         {
             var chunk = GetChunk(ev.Report.ChunkPosition);
@@ -80,6 +101,11 @@ namespace Bones3Rebuilt
             m_MeshBuilder.RefreshMeshes(chunk, visualMesh, collisionMesh);
         }
 
+        /// <summary>
+        /// Gets the chunk at the given chunk position.
+        /// </summary>
+        /// <param name="chunkPos">The chunk position.</param>
+        /// <returns>The Block Chunk.</returns>
         private BlockChunk GetChunk(ChunkPosition chunkPos)
         {
             foreach (var chunk in m_Chunks)
