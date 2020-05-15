@@ -7,6 +7,14 @@
     {
       "name": "Source",
       "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts"
+    },
+    {
+      "name": "Editor",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Editor/Scripts"
+    },
+    {
+      "name": "Demo",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/DEMO"
     }
   ],
   "settings": {
@@ -61,7 +69,8 @@
       "ProjectSettings/": true,
       "temp/": true,
       "Temp/": true,
-      "Assets/AssetStoreTools": true
+      "Assets": true,
+      "Packages": true
     },
     "cSpell.words": [
       "Behaviour",
