@@ -23,4 +23,5 @@ Bones3 is a Unity in-editor/in-engine script which makes it natural for users to
 ## Lets see it in action
 
 Note that the current branch has a few more tweaks to be done before you can use it, however, here is a video of an old prototype version of Bones3 to show what we're aiming for:
+
 [![Bones3 Prototype Demo](http://img.youtube.com/vi/GzNd_Lnkytk/0.jpg)](http://www.youtube.com/watch?v=GzNd_Lnkytk "Bones3 Prototype Demo")
