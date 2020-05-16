@@ -117,7 +117,7 @@ namespace Bones3Rebuilt
             int width = firstTex.width;
             int height = firstTex.height;
             int depth = textures.arraySize;
-            TextureFormat format = firstTex.format;
+            TextureFormat format = TextureFormat.RGBA32;
             FilterMode filter = firstTex.filterMode;
             int mipmapCount = firstTex.mipmapCount;
             bool linearColor = linearColorSpace.boolValue;
@@ -133,8 +133,21 @@ namespace Bones3Rebuilt
             AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(texture));
 
             for (int i = 0; i < textures.arraySize; i++)
-                for (int m = 0; m < mipmapCount; m++)
-                    Graphics.CopyTexture(textures.GetArrayElementAtIndex(i).objectReferenceValue as Texture2D, 0, m, texture, i, m);
+            {
+                var src = textures.GetArrayElementAtIndex(i).objectReferenceValue as Texture2D;
+                CopyData(src, texture, i);
+            }
+
+            texture.Apply();
+        }
+
+        void CopyData(Texture2D src, Texture2DArray dst, int index)
+        {
+            for (int m = 0; m < src.mipmapCount; m++)
+            {
+                var pixels = src.GetPixels32(m);
+                dst.SetPixels32(pixels, index, m);
+            }
         }
 
         bool ShowWarnings()
@@ -171,6 +184,21 @@ namespace Bones3Rebuilt
             return true;
         }
 
+        private bool IsCompressed(TextureFormat format)
+        {
+            switch (format)
+            {
+                case TextureFormat.RGBA32:
+                case TextureFormat.RGB24:
+                case TextureFormat.RG16:
+                case TextureFormat.R8:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         bool CheckMatching(Texture2D a, Texture2D b, ref string warning)
         {
             if (a.width != b.width || a.height != b.height)
@@ -179,9 +207,9 @@ namespace Bones3Rebuilt
                 return false;
             }
 
-            if (a.format != b.format)
+            if (!IsCompressed(a.format) || !IsCompressed(b.format))
             {
-                warning = "Textures must all be the same compression format!";
+                warning = "Textures must uncompressed!!";
                 return false;
             }
 
