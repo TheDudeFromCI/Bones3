@@ -1,8 +1,10 @@
+using Bones3Rebuilt;
+
 using UnityEngine;
 
 #pragma warning disable 649
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// The main container for a texture atlas object.
@@ -20,19 +22,14 @@ namespace Bones3Rebuilt
         /// </summary>
         public Material Material => m_Material;
 
-        /// <summary>
-        /// Gets the unwrapped texture atlas object managed by this wrapped.
-        /// </summary>
-        public ITextureAtlas RawAtlas => TextureAtlas;
-
         #region Object Wrapper
         private ITextureAtlas m_TextureAtlas;
 
         /// <summary>
         /// The texture atlas currently maintained by this behaviour.
         /// </summary>
-        /// <value></value>
-        private ITextureAtlas TextureAtlas
+        /// <value>The raw texture atlas.</value>
+        public ITextureAtlas RawAtlas
         {
             get
             {
@@ -41,7 +38,7 @@ namespace Bones3Rebuilt
 
                 return m_TextureAtlas;
             }
-            set => m_TextureAtlas = value;
+            private set => m_TextureAtlas = value;
         }
 
         /// <summary>
@@ -75,13 +72,13 @@ namespace Bones3Rebuilt
 
         #region Object API
         /// <inheritdoc cref="ITextureAtlas"/>
-        public int Count => TextureAtlas.Count;
+        public int Count => RawAtlas.Count;
 
         /// <inheritdoc cref="ITextureAtlas"/>
-        public IBlockTexture AddTexture() => TextureAtlas.AddTexture();
+        public IBlockTexture AddTexture() => RawAtlas.AddTexture();
 
         /// <inheritdoc cref="ITextureAtlas"/>
-        public IBlockTexture GetTexture(int index) => TextureAtlas.GetTexture(index);
+        public IBlockTexture GetTexture(int index) => RawAtlas.GetTexture(index);
         #endregion
     }
 }

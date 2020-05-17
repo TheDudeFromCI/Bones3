@@ -1,4 +1,6 @@
-namespace Bones3Rebuilt
+using Bones3Rebuilt;
+
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A simple interface for determining how a specific world edit tool should be used.

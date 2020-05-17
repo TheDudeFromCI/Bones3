@@ -1,8 +1,10 @@
 using System.Linq;
 
+using Bones3Rebuilt;
+
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     public class ChunkMeshBuilder
     {

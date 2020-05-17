@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 
+using Bones3Rebuilt;
+
 using UnityEditor;
 
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A utility class for rendering a block preview.

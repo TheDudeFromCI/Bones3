@@ -1,10 +1,12 @@
+using Bones3Rebuilt;
+
 using UnityEditor;
 
 using UnityEditorInternal;
 
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     public class TextureArrayGenerator : EditorWindow
     {

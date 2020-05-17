@@ -1,8 +1,10 @@
+using Bones3Rebuilt;
+
 using UnityEditor;
 
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     [CustomPropertyDrawer(typeof(BlockFace))]
     public class BlockFaceDrawer : PropertyDrawer

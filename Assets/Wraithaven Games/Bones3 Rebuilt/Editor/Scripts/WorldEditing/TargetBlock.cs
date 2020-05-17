@@ -1,6 +1,8 @@
+using Bones3Rebuilt;
+
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// The block being targeting while world editing.

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Bones3.Demo
+namespace WraithavenGames.Bones3.Demo
 {
     public class FlyingCam : MonoBehaviour
     {

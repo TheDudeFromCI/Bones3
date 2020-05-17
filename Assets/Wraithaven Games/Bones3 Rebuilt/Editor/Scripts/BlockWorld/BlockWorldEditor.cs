@@ -1,6 +1,8 @@
+using Bones3Rebuilt;
+
 using UnityEditor;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     [CustomEditor(typeof(BlockWorld))]
     public class BlockWorldEditor : Editor

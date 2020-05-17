@@ -1,9 +1,11 @@
+using Bones3Rebuilt;
+
 using UnityEditor;
 using UnityEditor.EditorTools;
 
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     [EditorTool("World Edit Tool", typeof(BlockWorld))]
     public class WorldEditTool : EditorTool

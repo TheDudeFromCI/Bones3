@@ -1,8 +1,10 @@
+using Bones3Rebuilt;
+
 using UnityEditor;
 
 using UnityEngine;
 
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A simple wand type that fill a region based on a single mouse drag.
