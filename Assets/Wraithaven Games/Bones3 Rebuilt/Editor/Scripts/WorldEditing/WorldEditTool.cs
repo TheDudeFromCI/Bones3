@@ -27,10 +27,17 @@ namespace Bones3Rebuilt
             EditorTools.activeToolChanged += ActiveToolDidChange;
 
             wand = new FillRegion();
-            fillPattern = new FloodFill(2);
-            wand.SetFillPattern(fillPattern);
+            fillPattern = new FloodFill(2); // TODO Add block selection menu
+
+            // wand.SetFillPattern(fillPattern);
+            wand.SetFillPattern(new GlassFill());
 
             UpdateWorld();
+        }
+
+        public class GlassFill : IFillPattern
+        {
+            public ushort GetBlockID(BlockPosition pos) => (ushort) (pos.Y == 2 ? 3 : 2);
         }
 
         void OnDisable()

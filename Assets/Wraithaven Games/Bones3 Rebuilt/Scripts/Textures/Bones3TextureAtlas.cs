@@ -1,5 +1,7 @@
 using UnityEngine;
 
+#pragma warning disable 649
+
 namespace Bones3Rebuilt
 {
     /// <summary>
@@ -12,6 +14,16 @@ namespace Bones3Rebuilt
         [Tooltip("The texture array to apply to blocks using this texture atlas.")]
         [SerializeField] private Material m_Material;
         #endregion
+
+        /// <summary>
+        /// Gets the material represented by this texture atlas.
+        /// </summary>
+        public Material Material => m_Material;
+
+        /// <summary>
+        /// Gets the unwrapped texture atlas object managed by this wrapped.
+        /// </summary>
+        public ITextureAtlas RawAtlas => TextureAtlas;
 
         #region Object Wrapper
         private ITextureAtlas m_TextureAtlas;

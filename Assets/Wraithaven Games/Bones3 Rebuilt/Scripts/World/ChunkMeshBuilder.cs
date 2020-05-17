@@ -44,7 +44,6 @@ namespace Bones3Rebuilt
             }
 
             mesh.RecalculateBounds();
-            mesh.Optimize();
         }
 
         /// <summary>
@@ -53,8 +52,12 @@ namespace Bones3Rebuilt
         /// <param name="chunk">The chunk to refresh.</param>
         /// <param name="visualMesh">The new visual mesh data.</param>
         /// <param name="collisionMesh">The new collision mesh data.</param>
-        public void RefreshMeshes(BlockChunk chunk, LayeredProcMesh visualMesh, LayeredProcMesh collisionMesh)
+        public void RefreshMeshes(BlockChunk chunk, RemeshFinishEvent ev, Bones3TextureAtlasList atlasList)
         {
+            var visualMesh = ev.Report.VisualMesh;
+            var collisionMesh = ev.Report.CollisionMesh;
+            var atlases = ev.Report.Atlases;
+
             var meshFilter = chunk.GetComponent<MeshFilter>();
             var meshCollider = chunk.GetComponent<MeshCollider>();
             var meshRenderer = chunk.GetComponent<MeshRenderer>();
@@ -62,7 +65,11 @@ namespace Bones3Rebuilt
             UpdateMesh(visualMesh, meshFilter.sharedMesh);
             UpdateMesh(collisionMesh, meshCollider.sharedMesh);
 
-            meshRenderer.sharedMaterials = new Material[] { null };
+            var materials = new Material[visualMesh.TotalLayers];
+            for (int i = 0; i < materials.Length; i++)
+                materials[i] = atlasList.GetAtlas(atlases[i]).Material;
+
+            meshRenderer.sharedMaterials = materials;
 
             // To trigger a refresh.
             meshFilter.sharedMesh = meshFilter.sharedMesh;
