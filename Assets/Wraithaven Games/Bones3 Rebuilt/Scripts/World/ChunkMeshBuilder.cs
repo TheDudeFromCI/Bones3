@@ -14,7 +14,23 @@ namespace Bones3Rebuilt
         public void UpdateMesh(LayeredProcMesh procMesh, Mesh mesh)
         {
             mesh.Clear();
+            mesh.subMeshCount = procMesh.TotalLayers;
 
+            var root = CompileRootMesh(procMesh);
+            AssignVertexData(root, mesh);
+
+            AssignTriangleData(procMesh, mesh);
+
+            mesh.RecalculateBounds();
+        }
+
+        /// <summary>
+        /// Compiles the vertex data from a layered proc mesh into a single layered mesh.
+        /// </summary>
+        /// <param name="procMesh">The layered proc mesh.</param>
+        /// <returns>The single layered mesh.</returns>
+        private ProcMesh CompileRootMesh(LayeredProcMesh procMesh)
+        {
             ProcMesh root = new ProcMesh();
             for (int i = 0; i < procMesh.TotalLayers; i++)
             {
@@ -24,7 +40,16 @@ namespace Bones3Rebuilt
                 root.UVs.AddRange(layer.UVs);
             }
 
-            mesh.subMeshCount = procMesh.TotalLayers;
+            return root;
+        }
+
+        /// <summary>
+        /// Applies the vertex data from the given proc mesh to the target Unity mesh.
+        /// </summary>
+        /// <param name="root">The generated mesh.</param>
+        /// <param name="mesh">The target mesh.</param>
+        private void AssignVertexData(ProcMesh root, Mesh mesh)
+        {
             mesh.SetVertices(root.Vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
 
             if (root.Normals.Count > 0)
@@ -32,7 +57,15 @@ namespace Bones3Rebuilt
 
             if (root.UVs.Count > 0)
                 mesh.SetUVs(0, root.UVs.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
+        }
 
+        /// <summary>
+        /// Applies the generated triangle data to the target Unity mesh.
+        /// </summary>
+        /// <param name="root">The generated mesh.</param>
+        /// <param name="mesh">The target mesh.</param>
+        private void AssignTriangleData(LayeredProcMesh procMesh, Mesh mesh)
+        {
             int baseVertex = 0;
             int k = 0;
             for (int i = 0; i < procMesh.TotalLayers; i++)
@@ -42,8 +75,6 @@ namespace Bones3Rebuilt
                 mesh.SetTriangles(layer.Triangles, k++, true, baseVertex);
                 baseVertex += layer.Vertices.Count;
             }
-
-            mesh.RecalculateBounds();
         }
 
         /// <summary>
