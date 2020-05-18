@@ -1,0 +1,55 @@
+@startuml
+skinparam linetype ortho
+!$UNITY_IMPLEMENTATION = "true"
+
+frame "Unity Implementation" as UnityImplementation {
+    interface ISerializeCallbackReceiver
+    ISerializeCallbackReceiver : +OnSerialize() void
+    ISerializeCallbackReceiver : +OnDeserialize() void
+    ISerializeCallbackReceiver <|-- BlockWorld
+    ISerializeCallbackReceiver <|-- Blocks
+
+    class BlockWorld << MonoBehaviour >>
+    BlockWorld : -World
+    BlockWorld : -RemeshHandler
+    BlockWorld : -IWorldDatabase
+    BlockWorld : -Blocks
+    BlockWorld : +GetBlock(blockPos) BlockType
+    BlockWorld : +SetBlock(blockPos type) void
+    BlockWorld : +SetBlocks(editBatch) void
+    BlockWorld --o Blocks
+
+    class Blocks << ScriptableObject >> 
+    Blocks : -List<TextureAtlas>
+    Blocks : -BlockList
+    Blocks : +GetBlock(id) BlockType
+    Blocks : +AddBlock(blockType) void
+    Blocks : +GetTextureAtlas(index) Material
+    Blocks : +SetTextureAtlas(index, material) void
+
+    !if %variable_exists("$WORLD_COMPONENT")
+        BlockWorld --* World
+    !endif
+
+    !if %variable_exists("$REMESH_COMPONENT")
+        BlockWorld --* RemeshHandler
+    !endif
+
+    !if %variable_exists("$TEXTURE_ATLAS_COMPONENT")
+        Blocks --* TextureAtlas
+    !endif
+
+    !if %variable_exists("$WORLD_DATABASE_COMPONENT")
+        BlockWorld --* IWorldDatabase
+    !endif
+
+    !if %variable_exists("$BLOCK_TYPES_COMPONENT")
+        Blocks --* BlockList
+    !endif
+
+    !if %variable_exists("$DATA_TYPES")
+        BlockWorld --> BlockPosition
+    !endif
+}
+
+@enduml

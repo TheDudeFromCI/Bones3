@@ -1,0 +1,28 @@
+@startuml
+skinparam linetype ortho
+!$WORLD_COMPONENT = "true"
+
+frame "World Component" as WorldComponent {
+    class World
+    World : -List<Chunk> m_Chunks
+    World : +LoadChunk(chunkPos) void
+    World : +GetChunk(chunkPos) Chunk
+    World : +DoesChunkExist(chunkPos) Bool
+    World : +DeleteChunk(chunkPos) void
+    World --* Chunk
+
+    class Chunk
+    Chunk : +GetSize() GridSize
+    Chunk : +GetPosition() ChunkPosition
+    Chunk : +GetBlockAt(blockPos) ushort
+    Chunk : +SetBlockAt(blockPos) void
+
+    !if %variable_exists("$DATA_TYPES")
+        World --> ChunkPosition
+        Chunk --> ChunkPosition
+        Chunk --> BlockPosition
+        Chunk --> GridSize
+    !endif
+}
+
+@enduml

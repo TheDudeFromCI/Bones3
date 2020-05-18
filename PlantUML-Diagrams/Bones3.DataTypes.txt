@@ -1,0 +1,13 @@
+@startuml
+skinparam linetype ortho
+!$DATA_TYPES = "true"
+
+frame "Data Types" as DataTypes {
+    class BlockPosition
+    class ChunkPosition
+    class GridSize
+    class FaceRotation
+    class Vector3
+}
+
+@enduml

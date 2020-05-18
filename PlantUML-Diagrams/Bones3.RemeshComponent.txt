@@ -1,0 +1,64 @@
+@startuml
+skinparam linetype ortho
+!$REMESH_COMPONENT = "true"
+
+frame "Remesh Component" as RemeshComponent {
+    class MeshBlockDetails
+    MeshBlockDetails : +IsSolid() Bool
+    MeshBlockDetails : +IsVisible() Bool
+    MeshBlockDetails : +GetTextureID(faceID) Integer
+    MeshBlockDetails : +GetMaterialID(faceID) Integer
+    MeshBlockDetails : +GetFaceRotation(faceID) FaceRotation
+
+    class ChunkProperties
+    ChunkProperties : -List<MeshBlockDetails>
+    ChunkProperties : +GetSize() GridSize
+    ChunkProperties : +GetBlock(blockPos) MeshBlockDetails
+    ChunkProperties : +SetBlock(blockPos, blockDetails) void
+    ChunkProperties --> MeshBlockDetails
+
+    class RemeshTaskStack
+    RemeshTaskStack : -List<IRemeshTask>
+    RemeshTaskStack : +AddTask(task) void
+    RemeshTaskStack : +Finish() RemeshReport
+    RemeshTaskStack --> IRemeshTask
+    RemeshTaskStack --> RemeshReport
+
+    class LayeredProcMesh
+    LayeredProcMesh : -List<ProcMesh>
+    LayeredProcMesh <|-- ProcMesh
+
+    class ProcMesh
+    ProcMesh : +GetVertices() List<Vector3>
+    ProcMesh : +GetNormals() List<Vector3>
+    ProcMesh : +GetUVs() List<Vector3>
+    ProcMesh : +GetVertices() List<Integer>
+
+    class RemeshReport
+    RemeshReport : -LayeredProcMesh visualMesh
+    RemeshReport : -LayeredProcMesh collisionMesh
+    RemeshReport : +GetVisualMesh() LayeredProcMesh
+    RemeshReport : +GetCollisionMesh() LayeredProcMesh
+    RemeshReport --> LayeredProcMesh
+
+    class RemeshHandler
+    RemeshHandler : +RemeshContainer(chunkProperties) void
+    RemeshHandler --> ChunkProperties
+
+    interface IRemeshTask
+    IRemeshTask : +Finish() ProcMesh
+    IRemeshTask --> ProcMesh
+
+    interface IRemeshDistributor
+    IRemeshDistributor : +CreateTasks (chunkProperties, taskStack) void
+    IRemeshDistributor --> ChunkProperties
+    IRemeshDistributor --> RemeshTaskStack
+
+    !if %variable_exists("$DATA_TYPES")
+        ChunkProperties --> BlockPosition
+        ChunkProperties --> GridSize
+        ProcMesh --> Vector3
+    !endif
+}
+
+@enduml

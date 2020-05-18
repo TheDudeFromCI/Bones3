@@ -1,19 +1,16 @@
 @startuml
+skinparam linetype ortho
 
-interface IBlockList
-interface ITextureAtlas
-interface IBlockContainerProvider
-interface IRemeshHandler
-interface IWorldDatabase
+frame Core {
+    ' !include Bones3.DataTypes.txt
 
-class Blocks << (O, #FF7777) ScriptableObject >>
-Blocks --* IBlockList
-Blocks --* ITextureAtlas
+    !include Bones3.WorldComponent.txt
+    !include Bones3.RemeshComponent.txt
+    !include Bones3.BlockTypesComponent.txt
+    !include Bones3.TextureAtlasComponent.txt
+    !include Bones3.WorldDatabaseComponent.txt
+}
 
-class BlockWorld << (B, #FF7700) MonoBehaviour >>
-BlockWorld --o Blocks
-BlockWorld --* IBlockContainerProvider
-BlockWorld --* IRemeshHandler
-BlockWorld --* IWorldDatabase
+!include UnityImplementation.txt
 
 @enduml
