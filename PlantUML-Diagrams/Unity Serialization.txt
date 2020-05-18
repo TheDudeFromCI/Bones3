@@ -1,0 +1,19 @@
+@startuml
+
+interface IBlockList
+interface ITextureAtlas
+interface IBlockContainerProvider
+interface IRemeshHandler
+interface IWorldDatabase
+
+class Blocks << (O, #FF7777) ScriptableObject >>
+Blocks --* IBlockList
+Blocks --* ITextureAtlas
+
+class BlockWorld << (B, #FF7700) MonoBehaviour >>
+BlockWorld --o Blocks
+BlockWorld --* IBlockContainerProvider
+BlockWorld --* IRemeshHandler
+BlockWorld --* IWorldDatabase
+
+@enduml
