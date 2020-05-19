@@ -23,6 +23,7 @@ frame "Remesh Component" as RemeshComponent {
     RemeshTaskStack : +Finish() RemeshReport
     RemeshTaskStack --> IRemeshTask
     RemeshTaskStack --> RemeshReport
+    RemeshTaskStack --> IVisualRemeshTask
 
     class LayeredProcMesh
     LayeredProcMesh : -List<ProcMesh>
@@ -42,12 +43,19 @@ frame "Remesh Component" as RemeshComponent {
     RemeshReport --> LayeredProcMesh
 
     class RemeshHandler
-    RemeshHandler : +RemeshContainer(chunkProperties) void
+    RemeshHandler : -List<IRemeshDistributor>
+    RemeshHandler : -List<RemeshTaskStack>
+    RemeshHandler : +RemeshChunk(chunkProperties) void
+    RemeshHandler : +FinishTasks() List<RemeshReport>
     RemeshHandler --> ChunkProperties
 
     interface IRemeshTask
     IRemeshTask : +Finish() ProcMesh
     IRemeshTask --> ProcMesh
+
+    interface IVisualRemeshTask
+    IVisualRemeshTask : +GetMaterialID() Integer
+    IRemeshTask <|-- IVisualRemeshTask
 
     interface IRemeshDistributor
     IRemeshDistributor : +CreateTasks (chunkProperties, taskStack) void
