@@ -3,19 +3,19 @@ skinparam linetype ortho
 !$REMESH_COMPONENT = "true"
 
 frame "Remesh Component" as RemeshComponent {
-    class MeshBlockDetails
-    MeshBlockDetails : +IsSolid() Bool
-    MeshBlockDetails : +IsVisible() Bool
-    MeshBlockDetails : +GetTextureID(faceID) Integer
-    MeshBlockDetails : +GetMaterialID(faceID) Integer
-    MeshBlockDetails : +GetFaceRotation(faceID) FaceRotation
+    interface IMeshBlockDetails
+    IMeshBlockDetails : +IsSolid() Bool
+    IMeshBlockDetails : +IsVisible() Bool
+    IMeshBlockDetails : +GetTextureID(faceID) Integer
+    IMeshBlockDetails : +GetMaterialID(faceID) Integer
+    IMeshBlockDetails : +GetFaceRotation(faceID) FaceRotation
 
     class ChunkProperties
     ChunkProperties : -List<MeshBlockDetails>
     ChunkProperties : +GetSize() GridSize
     ChunkProperties : +GetBlock(blockPos) MeshBlockDetails
     ChunkProperties : +SetBlock(blockPos, blockDetails) void
-    ChunkProperties --> MeshBlockDetails
+    ChunkProperties --> IMeshBlockDetails
 
     class RemeshTaskStack
     RemeshTaskStack : -List<IRemeshTask>
