@@ -1,9 +1,0 @@
-@startuml
-skinparam linetype ortho
-!$WORLD_DATABASE_COMPONENT = "true"
-
-frame "World Database Component" as WorldDatabaseComponent {
-    interface IWorldDatabase
-}
-
-@enduml
