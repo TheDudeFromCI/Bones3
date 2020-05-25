@@ -22,6 +22,9 @@ namespace WraithavenGames.Bones3
         [Tooltip("Whether or not this block is visible.")]
         [SerializeField] protected bool m_Visible;
 
+        [Tooltip("Whether or not this block is transparent.")]
+        [SerializeField] protected bool m_Transparent;
+
         [Tooltip("The list of face properties for this block type.")]
         [SerializeField] protected BlockFace[] m_Faces = new BlockFace[6];
 
@@ -44,6 +47,11 @@ namespace WraithavenGames.Bones3
         /// Gets whether or not this block type is visible.
         /// </summary>
         public bool IsVisible => m_Visible;
+
+        /// <summary>
+        /// Gets whether or not this block is transparent.
+        /// </summary>
+        public bool IsTransparent => m_Transparent;
 
         /// <summary>
         /// Gets the material ID for the given face.

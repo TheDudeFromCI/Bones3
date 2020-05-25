@@ -22,9 +22,19 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             if (block.GetMaterialID(side) != MaterialID)
                 return false;
 
+            if (!block.IsVisible)
+                return false;
+
             var nextBlock = pos.ShiftAlongDirection(side);
             var next = chunkProperties.GetBlock(nextBlock);
-            return block.IsVisible && !next.IsVisible;
+
+            if (!next.IsVisible)
+                return true;
+
+            if (!next.IsTransparent)
+                return false;
+
+            return block != next;
         }
     }
 }
