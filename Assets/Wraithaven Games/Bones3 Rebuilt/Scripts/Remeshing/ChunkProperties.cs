@@ -1,3 +1,5 @@
+using WraithavenGames.Bones3;
+
 namespace Bones3Rebuilt.Remeshing
 {
     // TODO Add locking mechanisms to ensure thread safety to Reset() and SetBlock() methods.
@@ -7,7 +9,7 @@ namespace Bones3Rebuilt.Remeshing
     /// </summary>
     public class ChunkProperties
     {
-        private IMeshBlockDetails[] m_Blocks = new IMeshBlockDetails[0];
+        private BlockType[] m_Blocks = new BlockType[0];
 
         /// <summary>
         /// Gets the size of the chunk being handled.
@@ -42,7 +44,7 @@ namespace Bones3Rebuilt.Remeshing
             blockCount += chunkSize.Value * chunkSize.Value * 6; // Neighbor chunks
 
             if (m_Blocks.Length < blockCount)
-                m_Blocks = new IMeshBlockDetails[blockCount];
+                m_Blocks = new BlockType[blockCount];
             else
             {
                 for (int i = 0; i < m_Blocks.Length; i++)
@@ -58,7 +60,7 @@ namespace Bones3Rebuilt.Remeshing
         /// </summary>
         /// <param name="pos">The position of the block.</param>
         /// <returns>The block type.</returns>
-        public void SetBlock(BlockPosition pos, IMeshBlockDetails details)
+        public void SetBlock(BlockPosition pos, BlockType details)
         {
             m_Blocks[BlockIndex(pos)] = details;
         }
@@ -69,7 +71,7 @@ namespace Bones3Rebuilt.Remeshing
         /// </summary>
         /// <param name="pos">The position of the block.</param>
         /// <returns>The block type.</returns>
-        public IMeshBlockDetails GetBlock(BlockPosition pos)
+        public BlockType GetBlock(BlockPosition pos)
         {
             return m_Blocks[BlockIndex(pos)];
         }
