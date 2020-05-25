@@ -65,9 +65,9 @@ namespace WraithavenGames.Bones3
 
             mesh.Clear();
             mesh.subMeshCount = submeshCount;
-            mesh.SetVertices(procMesh.Vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
-            mesh.SetNormals(procMesh.Normals.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
-            mesh.SetUVs(0, procMesh.UVs.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
+            mesh.SetVertices(procMesh.Vertices);
+            mesh.SetNormals(procMesh.Normals);
+            mesh.SetUVs(0, procMesh.UVs);
         }
 
         /// <summary>

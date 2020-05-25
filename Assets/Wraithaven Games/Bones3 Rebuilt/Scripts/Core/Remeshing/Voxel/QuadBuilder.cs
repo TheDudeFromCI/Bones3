@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Bones3Rebuilt.Remeshing.Voxel
 {
     /// <summary>
@@ -150,10 +152,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int by = sy + quad.W;
             int bz = sz + quad.H;
 
-            Mesh.Vertices.Add(new Vec3(bx, by, bz));
-            Mesh.Vertices.Add(new Vec3(bx, sy, bz));
-            Mesh.Vertices.Add(new Vec3(bx, sy, sz));
-            Mesh.Vertices.Add(new Vec3(bx, by, sz));
+            Mesh.Vertices.Add(new Vector3(bx, by, bz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(bx, by, sz));
         }
 
         void AddQuadVerticesSide1(QuadMesh quad)
@@ -165,10 +167,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int by = sy + quad.W;
             int bz = sz + quad.H;
 
-            Mesh.Vertices.Add(new Vec3(sx, sy, sz));
-            Mesh.Vertices.Add(new Vec3(sx, sy, bz));
-            Mesh.Vertices.Add(new Vec3(sx, by, bz));
-            Mesh.Vertices.Add(new Vec3(sx, by, sz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(sx, by, bz));
+            Mesh.Vertices.Add(new Vector3(sx, by, sz));
         }
 
         void AddQuadVerticesSide2(QuadMesh quad)
@@ -181,10 +183,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int by = sy + 1;
             int bz = sz + quad.H;
 
-            Mesh.Vertices.Add(new Vec3(sx, by, sz));
-            Mesh.Vertices.Add(new Vec3(sx, by, bz));
-            Mesh.Vertices.Add(new Vec3(bx, by, bz));
-            Mesh.Vertices.Add(new Vec3(bx, by, sz));
+            Mesh.Vertices.Add(new Vector3(sx, by, sz));
+            Mesh.Vertices.Add(new Vector3(sx, by, bz));
+            Mesh.Vertices.Add(new Vector3(bx, by, bz));
+            Mesh.Vertices.Add(new Vector3(bx, by, sz));
         }
 
         void AddQuadVerticesSide3(QuadMesh quad)
@@ -196,10 +198,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int bx = sx + quad.W;
             int bz = sz + quad.H;
 
-            Mesh.Vertices.Add(new Vec3(bx, sy, bz));
-            Mesh.Vertices.Add(new Vec3(sx, sy, bz));
-            Mesh.Vertices.Add(new Vec3(sx, sy, sz));
-            Mesh.Vertices.Add(new Vec3(bx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, sz));
         }
 
         void AddQuadVerticesSide4(QuadMesh quad)
@@ -212,10 +214,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int by = sy + quad.H;
             int bz = sz + 1;
 
-            Mesh.Vertices.Add(new Vec3(bx, by, bz));
-            Mesh.Vertices.Add(new Vec3(sx, by, bz));
-            Mesh.Vertices.Add(new Vec3(sx, sy, bz));
-            Mesh.Vertices.Add(new Vec3(bx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(bx, by, bz));
+            Mesh.Vertices.Add(new Vector3(sx, by, bz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, bz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, bz));
         }
 
         void AddQuadVerticesSide5(QuadMesh quad)
@@ -227,10 +229,10 @@ namespace Bones3Rebuilt.Remeshing.Voxel
             int bx = sx + quad.W;
             int by = sy + quad.H;
 
-            Mesh.Vertices.Add(new Vec3(sx, sy, sz));
-            Mesh.Vertices.Add(new Vec3(sx, by, sz));
-            Mesh.Vertices.Add(new Vec3(bx, by, sz));
-            Mesh.Vertices.Add(new Vec3(bx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(sx, sy, sz));
+            Mesh.Vertices.Add(new Vector3(sx, by, sz));
+            Mesh.Vertices.Add(new Vector3(bx, by, sz));
+            Mesh.Vertices.Add(new Vector3(bx, sy, sz));
         }
 
         /// <summary>
@@ -258,7 +260,7 @@ namespace Bones3Rebuilt.Remeshing.Voxel
         void AddNormals(int side)
         {
             var dir = new BlockPosition(0, 0, 0).ShiftAlongDirection(side);
-            var vec = new Vec3(dir.X, dir.Y, dir.Z);
+            var vec = new Vector3(dir.X, dir.Y, dir.Z);
 
             for (int i = 0; i < 4; i++)
                 Mesh.Normals.Add(vec);

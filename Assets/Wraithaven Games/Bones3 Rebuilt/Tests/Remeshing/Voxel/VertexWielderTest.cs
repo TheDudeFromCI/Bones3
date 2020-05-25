@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Bones3Rebuilt;
+using UnityEngine;
 using Bones3Rebuilt.Remeshing;
 using System;
 
@@ -11,18 +11,18 @@ namespace Test
         public void WieldVertices_3Verts_SameProperties()
         {
             var mesh = new ProcMesh();
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(1, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.Normals.Add(new Vec3(1, 0, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
-            mesh.UVs.Add(new Vec3(1, 0, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(1, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.Normals.Add(new Vector3(1, 0, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
+            mesh.UVs.Add(new Vector3(1, 0, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
             mesh.Triangles.Add(0);
             mesh.Triangles.Add(1);
             mesh.Triangles.Add(2);
@@ -31,16 +31,16 @@ namespace Test
             mesh.WieldVertices();
 
             Assert.AreEqual(2, mesh.Vertices.Count);
-            Assert.AreEqual(new Vec3(0, 0, 0), mesh.Vertices[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.Vertices[1]);
+            Assert.AreEqual(new Vector3(0, 0, 0), mesh.Vertices[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.Vertices[1]);
 
             Assert.AreEqual(2, mesh.Normals.Count);
-            Assert.AreEqual(new Vec3(0, 1, 0), mesh.Normals[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.Normals[1]);
+            Assert.AreEqual(new Vector3(0, 1, 0), mesh.Normals[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.Normals[1]);
 
             Assert.AreEqual(2, mesh.UVs.Count);
-            Assert.AreEqual(new Vec3(0, 0, 0), mesh.UVs[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.UVs[1]);
+            Assert.AreEqual(new Vector3(0, 0, 0), mesh.UVs[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.UVs[1]);
 
             Assert.AreEqual(4, mesh.Triangles.Count);
             Assert.AreEqual(0, mesh.Triangles[0]);
@@ -53,14 +53,14 @@ namespace Test
         public void WieldVertices_NoNormals()
         {
             var mesh = new ProcMesh();
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(1, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
-            mesh.UVs.Add(new Vec3(1, 0, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(1, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
+            mesh.UVs.Add(new Vector3(1, 0, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
             mesh.Triangles.Add(0);
             mesh.Triangles.Add(1);
             mesh.Triangles.Add(2);
@@ -69,14 +69,14 @@ namespace Test
             mesh.WieldVertices();
 
             Assert.AreEqual(2, mesh.Vertices.Count);
-            Assert.AreEqual(new Vec3(0, 0, 0), mesh.Vertices[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.Vertices[1]);
+            Assert.AreEqual(new Vector3(0, 0, 0), mesh.Vertices[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.Vertices[1]);
 
             Assert.AreEqual(0, mesh.Normals.Count);
 
             Assert.AreEqual(2, mesh.UVs.Count);
-            Assert.AreEqual(new Vec3(0, 0, 0), mesh.UVs[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.UVs[1]);
+            Assert.AreEqual(new Vector3(0, 0, 0), mesh.UVs[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.UVs[1]);
 
             Assert.AreEqual(4, mesh.Triangles.Count);
             Assert.AreEqual(0, mesh.Triangles[0]);
@@ -89,14 +89,14 @@ namespace Test
         public void WieldVertices_NoUVs()
         {
             var mesh = new ProcMesh();
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(1, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.Normals.Add(new Vec3(1, 0, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(1, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.Normals.Add(new Vector3(1, 0, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
             mesh.Triangles.Add(0);
             mesh.Triangles.Add(1);
             mesh.Triangles.Add(2);
@@ -105,12 +105,12 @@ namespace Test
             mesh.WieldVertices();
 
             Assert.AreEqual(2, mesh.Vertices.Count);
-            Assert.AreEqual(new Vec3(0, 0, 0), mesh.Vertices[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.Vertices[1]);
+            Assert.AreEqual(new Vector3(0, 0, 0), mesh.Vertices[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.Vertices[1]);
 
             Assert.AreEqual(2, mesh.Normals.Count);
-            Assert.AreEqual(new Vec3(0, 1, 0), mesh.Normals[0]);
-            Assert.AreEqual(new Vec3(1, 0, 0), mesh.Normals[1]);
+            Assert.AreEqual(new Vector3(0, 1, 0), mesh.Normals[0]);
+            Assert.AreEqual(new Vector3(1, 0, 0), mesh.Normals[1]);
 
             Assert.AreEqual(0, mesh.UVs.Count);
 
@@ -125,13 +125,13 @@ namespace Test
         public void UnequalMeshCounts()
         {
             var mesh = new ProcMesh();
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Vertices.Add(new Vec3(1, 0, 0));
-            mesh.Vertices.Add(new Vec3(0, 0, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.Normals.Add(new Vec3(0, 1, 0));
-            mesh.UVs.Add(new Vec3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Vertices.Add(new Vector3(1, 0, 0));
+            mesh.Vertices.Add(new Vector3(0, 0, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.Normals.Add(new Vector3(0, 1, 0));
+            mesh.UVs.Add(new Vector3(0, 0, 0));
             mesh.Triangles.Add(0);
             mesh.Triangles.Add(1);
             mesh.Triangles.Add(2);

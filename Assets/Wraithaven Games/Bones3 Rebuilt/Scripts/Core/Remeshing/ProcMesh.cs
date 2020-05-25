@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Bones3Rebuilt.Remeshing
 {
@@ -11,19 +12,19 @@ namespace Bones3Rebuilt.Remeshing
         /// Gets the generated vertex list.
         /// </summary>
         /// <value>The vertex list.</value>
-        public List<Vec3> Vertices { get; } = new List<Vec3>();
+        public List<Vector3> Vertices { get; } = new List<Vector3>();
 
         /// <summary>
         /// Gets the generated normal list.
         /// </summary>
         /// <value>The normal list.</value>
-        public List<Vec3> Normals { get; } = new List<Vec3>();
+        public List<Vector3> Normals { get; } = new List<Vector3>();
 
         /// <summary>
         /// Gets the generated uv list, for local block uvs.
         /// </summary>
         /// <value>The uv list.</value>
-        public List<Vec3> UVs { get; } = new List<Vec3>();
+        public List<Vector3> UVs { get; } = new List<Vector3>();
 
         /// <summary>
         /// Gets the generated triangle list.

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Bones3Rebuilt.Remeshing.Voxel
 {
@@ -43,7 +44,7 @@ namespace Bones3Rebuilt.Remeshing.Voxel
         /// </summary>
         /// <param name="uvs">The list of UVs to write to.</param>
         /// <param name="specs">The quad uv information.</param>
-        public void Find(List<Vec3> uvs, UVSpecs specs)
+        public void Find(List<Vector3> uvs, UVSpecs specs)
         {
             ValidateQuad(specs);
             CorrectYFaces(ref specs);
@@ -72,7 +73,7 @@ namespace Bones3Rebuilt.Remeshing.Voxel
                 specs.Side = 3;
         }
 
-        void FindFront(List<Vec3> uvs, UVSpecs specs)
+        void FindFront(List<Vector3> uvs, UVSpecs specs)
         {
             if (specs.Rotation < 4)
                 FindFrontNormal(uvs, specs);
@@ -80,7 +81,7 @@ namespace Bones3Rebuilt.Remeshing.Voxel
                 FindFrontMirrored(uvs, specs);
         }
 
-        void FindBack(List<Vec3> uvs, UVSpecs specs)
+        void FindBack(List<Vector3> uvs, UVSpecs specs)
         {
             if (specs.Rotation < 4)
                 FindBackNormal(uvs, specs);
@@ -88,138 +89,138 @@ namespace Bones3Rebuilt.Remeshing.Voxel
                 FindBackMirrored(uvs, specs);
         }
 
-        void FindFrontNormal(List<Vec3> uvs, UVSpecs specs)
+        void FindFrontNormal(List<Vector3> uvs, UVSpecs specs)
         {
             switch (specs.Rotation)
             {
                 case 0:
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
                     break;
 
                 case 1:
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
                     break;
 
                 case 2:
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
                     break;
 
                 case 3:
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
                     break;
             }
         }
 
-        void FindFrontMirrored(List<Vec3> uvs, UVSpecs specs)
+        void FindFrontMirrored(List<Vector3> uvs, UVSpecs specs)
         {
             switch (specs.Rotation)
             {
                 case 4:
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
                     break;
 
                 case 5:
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
                     break;
 
                 case 6:
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
                     break;
 
                 case 7:
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
                     break;
             }
         }
 
-        void FindBackNormal(List<Vec3> uvs, UVSpecs specs)
+        void FindBackNormal(List<Vector3> uvs, UVSpecs specs)
         {
             switch (specs.Rotation)
             {
                 case 0:
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
                     break;
 
                 case 1:
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
                     break;
 
                 case 2:
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
                     break;
 
                 case 3:
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
                     break;
             }
         }
 
-        void FindBackMirrored(List<Vec3> uvs, UVSpecs specs)
+        void FindBackMirrored(List<Vector3> uvs, UVSpecs specs)
         {
             switch (specs.Rotation)
             {
                 case 4:
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
                     break;
 
                 case 5:
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
                     break;
 
                 case 6:
-                    uvs.Add(new Vec3(specs.H, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.W, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.H, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.W, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.H, 0, specs.Texture));
                     break;
 
                 case 7:
-                    uvs.Add(new Vec3(specs.W, 0, specs.Texture));
-                    uvs.Add(new Vec3(specs.W, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, specs.H, specs.Texture));
-                    uvs.Add(new Vec3(0, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, 0, specs.Texture));
+                    uvs.Add(new Vector3(specs.W, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, specs.H, specs.Texture));
+                    uvs.Add(new Vector3(0, 0, specs.Texture));
                     break;
             }
         }
