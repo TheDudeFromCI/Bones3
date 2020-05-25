@@ -81,7 +81,7 @@ namespace Bones3Rebuilt.Remeshing
         /// <returns>The block index.</returns>
         private int BlockIndex(BlockPosition pos)
         {
-            if (IsCorners(pos) || IsOutOfBounds(pos))
+            if (!IsValidPosition(pos))
                 throw new System.ArgumentException("Block position out of range!", "pos");
 
             int j = GetChunkSide(pos);
@@ -90,6 +90,16 @@ namespace Bones3Rebuilt.Remeshing
                 return pos.Index(ChunkSize);
 
             return GetNextBlock(pos, j);
+        }
+
+        /// <summary>
+        /// Checks whether or not the relative block position is in a valid position.
+        /// </summary>
+        /// <param name="pos">The block position to test.</param>
+        /// <returns>True if the position is valid, false otherwise.</returns>
+        public bool IsValidPosition(BlockPosition pos)
+        {
+            return !IsCorners(pos) && !IsOutOfBounds(pos);
         }
 
         /// <summary>

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace WraithavenGames.Bones3
 {
-    public class ChunkCreator
+    public static class ChunkCreator
     {
         /// <summary>
         /// Creates a new chunk object based on the given chunk position.
@@ -13,7 +13,7 @@ namespace WraithavenGames.Bones3
         /// <param name="chunkSize">The number of blocks in a chunk along 1 axis.</param>
         /// <param name="transform">The transform of the block world.</param>
         /// <returns>The newly created chunk game object.</returns>
-        public BlockChunk LoadChunk(ChunkPosition chunkPos, int chunkSize, Transform transform)
+        public static BlockChunk LoadChunk(ChunkPosition chunkPos, int chunkSize, Transform transform)
         {
             var go = new GameObject($"Chunk: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})");
             var chunk = go.AddComponent<BlockChunk>();
@@ -25,12 +25,17 @@ namespace WraithavenGames.Bones3
 
             var meshFilter = go.AddComponent<MeshFilter>();
             var meshCollider = go.AddComponent<MeshCollider>();
-            var meshRenderer = go.AddComponent<MeshRenderer>();
+            go.AddComponent<MeshRenderer>();
 
-            meshFilter.sharedMesh = new Mesh();
-            meshFilter.sharedMesh.name = $"Chunk Visual: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})";
-            meshCollider.sharedMesh = new Mesh();
-            meshCollider.sharedMesh.name = $"Chunk Collision: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})";
+            meshFilter.sharedMesh = new Mesh
+            {
+                name = $"Chunk Visual: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})"
+            };
+
+            meshCollider.sharedMesh = new Mesh
+            {
+                name = $"Chunk Collision: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})"
+            };
 
             return chunk;
         }
@@ -39,11 +44,26 @@ namespace WraithavenGames.Bones3
         /// Destroys a chunk game object and attached resources.
         /// </summary>
         /// <param name="chunk">The chunk to destroy.</param>
-        public void DestroyChunk(BlockChunk chunk)
+        public static void DestroyChunk(BlockChunk chunk)
         {
-            Object.DestroyImmediate(chunk.GetComponent<MeshFilter>().sharedMesh);
-            Object.DestroyImmediate(chunk.GetComponent<MeshCollider>().sharedMesh);
-            Object.DestroyImmediate(chunk.gameObject);
+#if UNITY_EDITOR
+            if (Application.isPlaying)
+            {
+                Object.Destroy(chunk.GetComponent<MeshFilter>().sharedMesh);
+                Object.Destroy(chunk.GetComponent<MeshCollider>().sharedMesh);
+                Object.Destroy(chunk.gameObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(chunk.GetComponent<MeshFilter>().sharedMesh);
+                Object.DestroyImmediate(chunk.GetComponent<MeshCollider>().sharedMesh);
+                Object.DestroyImmediate(chunk.gameObject);
+            }
+#else
+            Object.Destroy(chunk.GetComponent<MeshFilter>().sharedMesh);
+            Object.Destroy(chunk.GetComponent<MeshCollider>().sharedMesh);
+            Object.Destroy(chunk.gameObject);
+#endif
         }
     }
 }

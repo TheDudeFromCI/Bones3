@@ -30,5 +30,16 @@ namespace Bones3Rebuilt.Remeshing
         /// </summary>
         /// <value>The triangle list.</value>
         public List<int> Triangles { get; } = new List<int>();
+
+        /// <summary>
+        /// Clears all data in this mesh.
+        /// </summary>
+        public void Clear()
+        {
+            Vertices.Clear();
+            Normals.Clear();
+            UVs.Clear();
+            Triangles.Clear();
+        }
     }
 }

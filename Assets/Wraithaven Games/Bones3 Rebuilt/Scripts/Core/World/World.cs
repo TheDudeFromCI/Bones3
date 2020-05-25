@@ -43,7 +43,7 @@ namespace Bones3Rebuilt.World
         }
 
         /// <summary>
-        /// Creates a new chunk at the given chunk position.
+        /// Creates a new chunk at the given chunk position if it doesn't currently exist.
         /// </summary>
         /// <param name="pos">The chunk position.</param>
         /// <returns>

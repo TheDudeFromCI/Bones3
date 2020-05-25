@@ -10,14 +10,14 @@ namespace WraithavenGames.Bones3
     [EditorTool("World Edit Tool", typeof(BlockWorld))]
     public class WorldEditTool : EditorTool
     {
-        private GUIContent m_IconContent;
-        private BlockWorld blockWorld;
-        private IWand wand;
-        private IFillPattern fillPattern;
+        protected GUIContent m_IconContent;
+        protected BlockWorld blockWorld;
+        protected IWand wand;
+        protected IFillPattern fillPattern;
 
         public override GUIContent toolbarIcon { get => m_IconContent; }
 
-        void OnEnable()
+        protected void OnEnable()
         {
             m_IconContent = new GUIContent()
             {
@@ -39,10 +39,10 @@ namespace WraithavenGames.Bones3
 
         public class GlassFill : IFillPattern
         {
-            public ushort GetBlockID(BlockPosition pos) => (ushort) (pos.Y == 2 ? 3 : 2);
+            public ushort GetBlockID(BlockPosition pos) => (ushort) (pos.Y == 2 ? 4 : 2);
         }
 
-        void OnDisable()
+        protected void OnDisable()
         {
             EditorTools.activeToolChanged -= ActiveToolDidChange;
             wand?.SetWorld(null);

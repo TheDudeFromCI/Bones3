@@ -145,9 +145,7 @@ namespace WraithavenGames.Bones3
         public override void HandleRegion()
         {
             cubeFill.Set(Point1.Inside, Point2.Inside, FillPattern);
-            // World.WorldContainer.SetBlocks(cubeFill);
-
-            // TODO Apply edit batch
+            World.SetBlocks(cubeFill);
         }
     }
 }

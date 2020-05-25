@@ -40,7 +40,7 @@ MonoBehaviour:
       m_MaterialID: 0
       m_TextureID: 0
   - m_Name: Air
-    m_ID: 0
+    m_ID: 1
     m_Solid: 0
     m_Visible: 0
     m_Faces:
@@ -63,7 +63,7 @@ MonoBehaviour:
       m_MaterialID: 0
       m_TextureID: 0
   - m_Name: Grass
-    m_ID: 0
+    m_ID: 2
     m_Solid: 1
     m_Visible: 1
     m_Faces:
@@ -86,7 +86,7 @@ MonoBehaviour:
       m_MaterialID: 0
       m_TextureID: 0
   - m_Name: Dirt
-    m_ID: 0
+    m_ID: 3
     m_Solid: 1
     m_Visible: 1
     m_Faces:
@@ -109,7 +109,7 @@ MonoBehaviour:
       m_MaterialID: 0
       m_TextureID: 1
   - m_Name: Glass
-    m_ID: 0
+    m_ID: 4
     m_Solid: 1
     m_Visible: 1
     m_Faces:

@@ -13,5 +13,19 @@ namespace WraithavenGames.Bones3
 
         [Tooltip("The list of block types in this list.")]
         [SerializeField] protected BlockType[] m_BlockTypes;
+
+        /// <summary>
+        /// Gets the block with the given block ID.
+        /// </summary>
+        /// <param name="id">The block ID.</param>
+        /// <returns>The block type.</returns>
+        public BlockType GetBlockType(int id) => m_BlockTypes[id];
+
+        /// <summary>
+        /// Gets the material with the specified material ID.
+        /// </summary>
+        /// <param name="id">The material ID.</param>
+        /// <returns>The material.</returns>
+        public Material GetMaterial(int id) => m_Materials[id];
     }
 }

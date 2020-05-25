@@ -1,114 +1,143 @@
-/*
+using System.Collections.Generic;
 using System.Linq;
 
-using Bones3Rebuilt;
+using Bones3Rebuilt.Remeshing;
+using Bones3Rebuilt.Remeshing.Voxel;
 
 using UnityEngine;
 
 namespace WraithavenGames.Bones3
 {
-    public class ChunkMeshBuilder
+    /// <summary>
+    /// Handles converting remesh task data to chunk mesh data.
+    /// </summary>
+    public static class ChunkMeshBuilder
     {
         /// <summary>
-        /// Applies the given proc mesh to the Unity mesh.
+        /// Updates mesh data for the given chunk.
         /// </summary>
-        /// <param name="procMesh">The proc mesh to retrieve the data from.</param>
-        /// <param name="mesh">The Unity mesh to write to.</param>
-        public void UpdateMesh(LayeredProcMesh procMesh, Mesh mesh)
+        /// <param name="taskStack">The set of remesh tasks.</param>
+        /// <param name="chunk">The chunk to update.</param>
+        /// <param name="blockList">The block list.</param>
+        public static void UpdateMesh(RemeshTaskStack taskStack, BlockChunk chunk, BlockList blockList)
         {
+            ProcMesh procMesh = new ProcMesh();
+            UpdateVisualMesh(taskStack, chunk, blockList, procMesh);
+            UpdateCollisionMesh(taskStack, chunk, procMesh);
+        }
+
+        /// <summary>
+        /// Pulls vertex data from the task stack and puts it into the procMesh.
+        /// </summary>
+        /// <param name="taskStack">The task stack to pull from.</param>
+        /// <param name="procMesh">The proc mesh to write to.</param>
+        /// <param name="submeshCount">The number of submeshes being generated.</param>
+        /// <typeparam name="T">The type of task to look for.</typeparam>
+        private static void GetVertexData<T>(RemeshTaskStack taskStack, ProcMesh procMesh, out int submeshCount)
+        {
+            procMesh.Clear();
+            submeshCount = 0;
+
+            for (int i = 0; i < taskStack.TaskCount; i++)
+            {
+                var task = taskStack.GetTask(i);
+
+                if (task is T)
+                {
+                    var newMesh = task.Finish();
+                    procMesh.Vertices.AddRange(newMesh.Vertices);
+                    procMesh.Normals.AddRange(newMesh.Normals);
+                    procMesh.UVs.AddRange(newMesh.UVs);
+                    submeshCount++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves vertex data from the task stack and writes it to the mesh object.
+        /// </summary>
+        /// <param name="taskStack">The task stack to pull from.</param>
+        /// <param name="procMesh">The proc mesh to use as a data buffer.</param>
+        /// <param name="mesh">The mesh to write to.</param>
+        /// <typeparam name="T">The type of tasks to look for in the stack.</typeparam>
+        private static void ApplyVertexData<T>(RemeshTaskStack taskStack, ProcMesh procMesh, Mesh mesh)
+        {
+            GetVertexData<T>(taskStack, procMesh, out int submeshCount);
+
             mesh.Clear();
-            mesh.subMeshCount = procMesh.TotalLayers;
-
-            var root = CompileRootMesh(procMesh);
-            AssignVertexData(root, mesh);
-
-            AssignTriangleData(procMesh, mesh);
-
-            mesh.RecalculateBounds();
+            mesh.subMeshCount = submeshCount;
+            mesh.SetVertices(procMesh.Vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
+            mesh.SetNormals(procMesh.Normals.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
+            mesh.SetUVs(0, procMesh.UVs.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
         }
 
         /// <summary>
-        /// Compiles the vertex data from a layered proc mesh into a single layered mesh.
+        /// Looks for all visual mesh tasks and writes the generated meshes to the chunk.
         /// </summary>
-        /// <param name="procMesh">The layered proc mesh.</param>
-        /// <returns>The single layered mesh.</returns>
-        private ProcMesh CompileRootMesh(LayeredProcMesh procMesh)
+        /// <param name="taskStack">The task stack.</param>
+        /// <param name="chunk">The chunk to update.</param>
+        /// <param name="blockList">The block list being used.</param>
+        /// <param name="procMesh">The proc mesh to use as a data buffer.</param>
+        private static void UpdateVisualMesh(RemeshTaskStack taskStack, BlockChunk chunk, BlockList blockList, ProcMesh procMesh)
         {
-            ProcMesh root = new ProcMesh();
-            for (int i = 0; i < procMesh.TotalLayers; i++)
-            {
-                var layer = procMesh.GetLayer(i);
-                root.Vertices.AddRange(layer.Vertices);
-                root.Normals.AddRange(layer.Normals);
-                root.UVs.AddRange(layer.UVs);
-            }
-
-            return root;
-        }
-
-        /// <summary>
-        /// Applies the vertex data from the given proc mesh to the target Unity mesh.
-        /// </summary>
-        /// <param name="root">The generated mesh.</param>
-        /// <param name="mesh">The target mesh.</param>
-        private void AssignVertexData(ProcMesh root, Mesh mesh)
-        {
-            mesh.SetVertices(root.Vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
-
-            if (root.Normals.Count > 0)
-                mesh.SetNormals(root.Normals.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
-
-            if (root.UVs.Count > 0)
-                mesh.SetUVs(0, root.UVs.Select(v => new Vector3(v.X, v.Y, v.Z)).ToList());
-        }
-
-        /// <summary>
-        /// Applies the generated triangle data to the target Unity mesh.
-        /// </summary>
-        /// <param name="root">The generated mesh.</param>
-        /// <param name="mesh">The target mesh.</param>
-        private void AssignTriangleData(LayeredProcMesh procMesh, Mesh mesh)
-        {
-            int baseVertex = 0;
-            int k = 0;
-            for (int i = 0; i < procMesh.TotalLayers; i++)
-            {
-                var layer = procMesh.GetLayer(i);
-
-                mesh.SetTriangles(layer.Triangles, k++, true, baseVertex);
-                baseVertex += layer.Vertices.Count;
-            }
-        }
-
-        /// <summary>
-        /// Applied the given visual and collision meshes to the chunk object.
-        /// </summary>
-        /// <param name="chunk">The chunk to refresh.</param>
-        /// <param name="visualMesh">The new visual mesh data.</param>
-        /// <param name="collisionMesh">The new collision mesh data.</param>
-        public void RefreshMeshes(BlockChunk chunk, RemeshFinishEvent ev, Bones3TextureAtlasList atlasList)
-        {
-            var visualMesh = ev.Report.VisualMesh;
-            var collisionMesh = ev.Report.CollisionMesh;
-            var atlases = ev.Report.Atlases;
-
             var meshFilter = chunk.GetComponent<MeshFilter>();
-            var meshCollider = chunk.GetComponent<MeshCollider>();
             var meshRenderer = chunk.GetComponent<MeshRenderer>();
+            var visualMesh = meshFilter.sharedMesh;
 
-            UpdateMesh(visualMesh, meshFilter.sharedMesh);
-            UpdateMesh(collisionMesh, meshCollider.sharedMesh);
+            ApplyVertexData<VisualRemeshTask>(taskStack, procMesh, visualMesh);
 
-            var materials = new Material[visualMesh.TotalLayers];
-            for (int i = 0; i < materials.Length; i++)
-                materials[i] = atlasList.GetAtlas(atlases[i]).Material;
+            var materials = new Material[visualMesh.subMeshCount];
 
+            int baseVertex = 0;
+            int submeshIndex = 0;
+            for (int i = 0; i < taskStack.TaskCount; i++)
+            {
+                var task = taskStack.GetTask(i);
+
+                if (task is VisualRemeshTask vis)
+                {
+                    var newMesh = vis.Finish();
+                    visualMesh.SetTriangles(newMesh.Triangles, submeshIndex, true, baseVertex);
+                    materials[submeshIndex] = blockList.GetMaterial(vis.MaterialID);
+
+                    submeshIndex++;
+                }
+            }
+
+            meshFilter.sharedMesh = visualMesh;
             meshRenderer.sharedMaterials = materials;
+        }
 
-            // To trigger a refresh.
-            meshFilter.sharedMesh = meshFilter.sharedMesh;
-            meshCollider.sharedMesh = meshCollider.sharedMesh;
+        /// <summary>
+        /// Looks for all collision mesh tasks and writes the generated meshes to the chunk.
+        /// </summary>
+        /// <param name="taskStack">The task stack.</param>
+        /// <param name="chunk">The chunk to update.</param>
+        /// <param name="blockList">The block list being used.</param>
+        /// <param name="procMesh">The proc mesh to use as a data buffer.</param>
+        private static void UpdateCollisionMesh(RemeshTaskStack taskStack, BlockChunk chunk, ProcMesh procMesh)
+        {
+            var meshCollider = chunk.GetComponent<MeshCollider>();
+            var collisionMesh = meshCollider.sharedMesh;
+
+            ApplyVertexData<CollisionRemeshTask>(taskStack, procMesh, collisionMesh);
+
+            int baseVertex = 0;
+            int submeshIndex = 0;
+            for (int i = 0; i < taskStack.TaskCount; i++)
+            {
+                var task = taskStack.GetTask(i);
+
+                if (task is CollisionRemeshTask vis)
+                {
+                    var newMesh = vis.Finish();
+                    collisionMesh.SetTriangles(newMesh.Triangles, submeshIndex, true, baseVertex);
+
+                    submeshIndex++;
+                }
+            }
+
+            meshCollider.sharedMesh = collisionMesh;
         }
     }
 }
-*/

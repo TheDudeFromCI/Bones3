@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2554dd3abe28227158468178a24856ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Blocks: {fileID: 11400000, guid: 1312d598c99224683b9ff3e33af6d1f2, type: 2}
+  m_BlockList: {fileID: 11400000, guid: 1312d598c99224683b9ff3e33af6d1f2, type: 2}
 --- !u!4 &1818120719
 Transform:
   m_ObjectHideFlags: 0

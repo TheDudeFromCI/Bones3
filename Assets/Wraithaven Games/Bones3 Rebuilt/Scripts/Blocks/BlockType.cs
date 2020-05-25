@@ -14,7 +14,7 @@ namespace WraithavenGames.Bones3
         [SerializeField] protected string m_Name;
 
         [Tooltip("The ID of this block type.")]
-        [SerializeField] protected ushort m_ID;
+        [SerializeField] protected int m_ID;
 
         [Tooltip("Whether or not this block has collision.")]
         [SerializeField] protected bool m_Solid;
@@ -26,7 +26,7 @@ namespace WraithavenGames.Bones3
         [SerializeField] protected BlockFace[] m_Faces = new BlockFace[6];
 
         /// <inheritdoc cref="IMeshBlockDetails"/>
-        public ushort ID => m_ID;
+        public int ID => m_ID;
 
         /// <inheritdoc cref="IMeshBlockDetails"/>
         public string Name => m_Name;
