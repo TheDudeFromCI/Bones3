@@ -1,0 +1,17 @@
+{
+    "name": "Bones3.Editor",
+    "references": [
+        "GUID:13bef359365d01346be4e1ce26992fcd"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

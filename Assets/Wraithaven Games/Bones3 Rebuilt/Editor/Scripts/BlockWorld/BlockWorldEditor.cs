@@ -1,13 +1,12 @@
-using Bones3Rebuilt;
-
 using UnityEditor;
+using WraithavenGames.Bones3;
 
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     [CustomEditor(typeof(BlockWorld))]
-    public class BlockWorldEditor : Editor
+    public class BlockWorldEditor : UnityEditor.Editor
     {
-        void OnSceneGUI()
+        protected void OnSceneGUI()
         {
             if (target == null)
                 return;

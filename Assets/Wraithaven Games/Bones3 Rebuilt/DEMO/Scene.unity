@@ -321,10 +321,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1818120719}
   - component: {fileID: 1818120717}
-  - component: {fileID: 1818120716}
-  - component: {fileID: 1818120720}
-  - component: {fileID: 1818120718}
-  - component: {fileID: 1818120721}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -332,23 +328,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1818120716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1818120715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 765ed8e57a8f4a6e7a6cc0bc3ae126f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  width: 100
-  height: 100
-  amplitude: 20
-  smoothing: 20
-  blockWorld: {fileID: 1818120717}
 --- !u!114 &1818120717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -361,20 +340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2554dd3abe28227158468178a24856ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TextureAtlasList: {fileID: 1818120720}
---- !u!114 &1818120718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1818120715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b7b1fb8bdf99be089b703eab2ab8c66, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: bbb042d0c42c90e9d93da968c2fbef11, type: 2}
+  m_Blocks: {fileID: 11400000, guid: 1312d598c99224683b9ff3e33af6d1f2, type: 2}
 --- !u!4 &1818120719
 Transform:
   m_ObjectHideFlags: 0
@@ -389,31 +355,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1818120720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1818120715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cbd75395502c62c186829ca917c3b46, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AtlasList:
-  - {fileID: 1818120718}
-  - {fileID: 1818120721}
---- !u!114 &1818120721
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1818120715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b7b1fb8bdf99be089b703eab2ab8c66, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 451bb4bd5113d48f5a90448c1593b760, type: 2}
