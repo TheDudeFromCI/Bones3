@@ -27,5 +27,15 @@ namespace WraithavenGames.Bones3
         /// <param name="id">The material ID.</param>
         /// <returns>The material.</returns>
         public Material GetMaterial(int id) => m_Materials[id];
+
+        /// <summary>
+        /// Gets the number of block types in this list.
+        /// </summary>
+        public int BlockCount => m_BlockTypes.Length;
+
+        /// <summary>
+        /// Gets the number of materials in this list.
+        /// </summary>
+        public int MaterialCount => m_Materials.Length;
     }
 }

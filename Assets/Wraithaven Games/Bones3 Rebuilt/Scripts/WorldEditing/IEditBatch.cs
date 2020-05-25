@@ -20,6 +20,12 @@ namespace WraithavenGames.Bones3
     }
 
     /// <summary>
+    /// Enumerates over all blocks which need to be placed.
+    /// </summary>
+    /// <returns>The blocks to place.</returns>
+    public delegate IEnumerable<BlockPlacement> EditBatch();
+
+    /// <summary>
     /// Details for what block should be placed and where within an edit batch.
     /// </summary>
     public struct BlockPlacement
@@ -34,6 +40,6 @@ namespace WraithavenGames.Bones3
         /// Gets the block ID to place.
         /// </summary>
         /// <value>The block ID.</value>
-        public ushort BlockID { get; set; }
+        public int BlockID { get; set; }
     }
 }

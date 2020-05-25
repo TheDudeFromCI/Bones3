@@ -54,9 +54,15 @@ namespace WraithavenGames.Bones3
         /// Applies an edit batch to this world, remeshing chunks as needed.
         /// </summary>
         /// <param name="editBatch">The edit batch to apply.</param>
-        public void SetBlocks(IEditBatch editBatch)
+        public void SetBlocks(IEditBatch editBatch) => SetBlocks(editBatch.GetBlocks);
+
+        /// <summary>
+        /// Applies an edit batch to this world, remeshing chunks as needed.
+        /// </summary>
+        /// <param name="editBatch">The edit batch to apply.</param>
+        public void SetBlocks(EditBatch editBatch)
         {
-            foreach (var block in editBatch.GetBlocks())
+            foreach (var block in editBatch())
             {
                 var chunkPos = block.Position.ToChunkPosition(ChunkSize);
                 var blockPos = block.Position & ChunkSize.Mask;
@@ -67,11 +73,64 @@ namespace WraithavenGames.Bones3
                 if (chunk.GetBlockID(blockPos) == blockType)
                     continue; // Don't remesh unchanged chunks
 
-                chunk.SetBlockID(blockPos, blockType);
+                if (blockType < 0 || blockType >= m_BlockList.BlockCount)
+                {
+                    RemeshAllDirtyChunks();
+                    throw new System.ArgumentOutOfRangeException("editBatch", $"Invalid block type '{blockType}'!");
+                }
+
+                chunk.SetBlockID(blockPos, (ushort)blockType);
                 RemeshEffectedChunks(blockPos, chunkPos);
             }
 
             RemeshAllDirtyChunks();
+        }
+
+        /// <summary>
+        /// Sets a world in the world to a given ID.
+        /// </summary>
+        /// <param name="blockPos">The block position.</param>
+        /// <param name="blockID">The ID of the block to place.</param>
+        public void SetBlock(BlockPosition blockPos, int blockID)
+        {
+            SetBlocks(() => PlaceSingleBlock(blockPos, blockID));
+        }
+
+        /// <summary>
+        /// An edit batch delegate for placing a single block.
+        /// </summary>
+        /// <param name="blockPos">The block position.</param>
+        /// <param name="blockID">The block ID.</param>
+        /// <returns>The edit batch enumerable.</returns>
+        private IEnumerable<BlockPlacement> PlaceSingleBlock(BlockPosition blockPos, int blockID)
+        {
+            yield return new BlockPlacement
+            {
+                Position = blockPos,
+                BlockID = blockID,
+            };
+        }
+
+        /// <summary>
+        /// Gets the block type at the given world position.
+        /// 
+        /// For ungenerated or unloaded chunks, the Ungenerated block type is return.
+        /// </summary>
+        /// <param name="blockPosition">The position of the block.</param>
+        /// <param name="createChunk">Whether or not to create (or load) the chunk if it doesn't currently exist.</param>
+        /// <returns>The block type.</returns>
+        public BlockType GetBlock(BlockPosition blockPosition, bool createChunk = false)
+        {
+            var chunkPos = blockPosition.ToChunkPosition(ChunkSize);
+            var blockPos = blockPosition & ChunkSize.Mask;
+
+            ushort blockID;
+            if (createChunk)
+                blockID = m_World.CreateChunk(chunkPos).GetBlockID(blockPos);
+            else
+                blockID = m_World.GetChunk(chunkPos)?.GetBlockID(blockPos) ?? 0;
+
+            return m_BlockList.GetBlockType(blockID);
         }
 
         // A buffer for holding chunks to remesh
