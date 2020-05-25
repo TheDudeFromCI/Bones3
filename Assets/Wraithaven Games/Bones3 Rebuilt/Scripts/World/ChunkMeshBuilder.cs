@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 
 using Bones3Rebuilt.Remeshing;
@@ -101,6 +100,7 @@ namespace WraithavenGames.Bones3
                     materials[submeshIndex] = blockList.GetMaterial(vis.MaterialID);
 
                     submeshIndex++;
+                    baseVertex += newMesh.Vertices.Count;
                 }
             }
 
@@ -134,6 +134,7 @@ namespace WraithavenGames.Bones3
                     collisionMesh.SetTriangles(newMesh.Triangles, submeshIndex, true, baseVertex);
 
                     submeshIndex++;
+                    baseVertex += newMesh.Vertices.Count;
                 }
             }
 
