@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Remeshing.Voxel
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Generates the voxel collision mesh for a chunk.

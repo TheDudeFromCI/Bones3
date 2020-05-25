@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Represents a series of remesh tasks being executed for a chunk.

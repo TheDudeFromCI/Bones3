@@ -1,12 +1,8 @@
 using System.Collections.Generic;
-
-using Bones3Rebuilt;
-
 using UnityEditor;
-
 using UnityEngine;
 
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     /// <summary>
     /// A simple utility class for handling object picking.

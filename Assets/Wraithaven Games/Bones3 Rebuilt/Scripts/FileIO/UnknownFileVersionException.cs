@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Database
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Thrown when the received file version cannot be parsed.

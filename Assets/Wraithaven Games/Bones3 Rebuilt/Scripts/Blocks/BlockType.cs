@@ -1,6 +1,4 @@
 using UnityEngine;
-using Bones3Rebuilt.Remeshing;
-using Bones3Rebuilt;
 
 namespace WraithavenGames.Bones3
 {

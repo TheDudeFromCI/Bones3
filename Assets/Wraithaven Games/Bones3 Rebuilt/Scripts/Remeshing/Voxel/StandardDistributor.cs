@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Bones3Rebuilt.Remeshing.Voxel
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Generates the basic voxel visual and collision chunk meshes.

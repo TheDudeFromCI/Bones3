@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Bones3Rebuilt.Remeshing.Voxel
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Iterates over a set of chunk properties in order to generate a chunk mesh.

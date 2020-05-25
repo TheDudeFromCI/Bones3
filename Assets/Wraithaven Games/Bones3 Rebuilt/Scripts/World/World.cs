@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Bones3Rebuilt.World
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A container for the storage of all world data involved a voxel world representation.

@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A measurement for efficient grid sizes and utilities.

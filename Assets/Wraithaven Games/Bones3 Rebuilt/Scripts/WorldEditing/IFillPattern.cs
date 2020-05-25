@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A fill pattern is used to determine which block should be placed at a

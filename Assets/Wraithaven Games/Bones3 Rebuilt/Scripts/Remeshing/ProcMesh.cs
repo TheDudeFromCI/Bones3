@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A collection of data which is used to make up a mesh object.

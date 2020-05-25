@@ -1,11 +1,9 @@
-using Bones3Rebuilt;
-
 using UnityEditor;
 using UnityEditor.EditorTools;
 
 using UnityEngine;
 
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     [EditorTool("World Edit Tool", typeof(BlockWorld))]
     public class WorldEditTool : EditorTool
@@ -39,7 +37,7 @@ namespace WraithavenGames.Bones3
 
         public class GlassFill : IFillPattern
         {
-            public ushort GetBlockID(BlockPosition pos) => (ushort) (pos.Y == 2 ? 4 : 2);
+            public ushort GetBlockID(BlockPosition pos) => (ushort)(pos.Y == 2 ? 4 : 2);
         }
 
         protected void OnDisable()

@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Database.ChunkData
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Represents a block of chunk data which can be saved and loaded. This file

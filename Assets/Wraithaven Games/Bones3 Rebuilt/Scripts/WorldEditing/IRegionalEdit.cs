@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Represents an editing tool which takes in a cubic region to modify.

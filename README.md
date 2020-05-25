@@ -1,8 +1,6 @@
 # <div align="center">Bones³</div>
 
-<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>
-
-This project is the Unity implementation of the [Bones3-Core](https://github.com/Wraithaven-UnityTools/Bones3-Core) library. Designed to offer full voxel support both in-game and in-editor.
+*<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>*
 
 ---
 

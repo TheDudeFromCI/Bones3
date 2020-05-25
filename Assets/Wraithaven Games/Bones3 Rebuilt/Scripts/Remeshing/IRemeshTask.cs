@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A task which was executed to generate a single mesh layer of a chunk

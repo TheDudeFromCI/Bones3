@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Bones3Rebuilt.Remeshing.Voxel
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A utility class for combining quads on a plane in a greedy fashion.

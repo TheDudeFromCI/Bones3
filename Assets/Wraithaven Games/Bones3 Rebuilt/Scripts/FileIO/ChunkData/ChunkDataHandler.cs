@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Bones3Rebuilt.Database.ChunkData
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Used to maintain the saving and loading of block containers.

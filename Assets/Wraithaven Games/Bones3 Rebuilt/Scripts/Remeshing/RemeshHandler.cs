@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Holds a set of remesh distrbutors in order to generate a new mesh for a chunk.

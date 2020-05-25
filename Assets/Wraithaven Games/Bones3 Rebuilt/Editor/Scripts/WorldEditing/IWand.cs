@@ -1,6 +1,4 @@
-using Bones3Rebuilt;
-
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     /// <summary>
     /// A simple interface for determining how a specific world edit tool should be used.

@@ -1,6 +1,4 @@
-using WraithavenGames.Bones3;
-
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     // TODO Add locking mechanisms to ensure thread safety to Reset() and SetBlock() methods.
 

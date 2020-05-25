@@ -1,7 +1,3 @@
-using System;
-
-using Bones3Rebuilt;
-
 using UnityEngine;
 
 namespace WraithavenGames.Bones3

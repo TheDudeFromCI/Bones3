@@ -1,17 +1,13 @@
-using Bones3Rebuilt;
-
 using UnityEditor;
-
 using UnityEditorInternal;
-
 using UnityEngine;
 
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     public class TextureArrayGenerator : EditorWindow
     {
         [MenuItem("Assets/Create/Texture Array from Textures")]
-        static void Init()
+        protected static void Init()
         {
             TextureArrayGenerator window = EditorWindow.GetWindow<TextureArrayGenerator>();
             window.Show();
@@ -26,7 +22,7 @@ namespace WraithavenGames.Bones3
         private Material texturePreview;
         private ObjectPicker objectPicker;
 
-        void OnEnable()
+        protected void OnEnable()
         {
             tempObject = ScriptableObject.CreateInstance<TextureArrayGeneratorPropertyHolder>();
             SerializedObject propertyHolder = new SerializedObject(tempObject);
@@ -48,7 +44,7 @@ namespace WraithavenGames.Bones3
             objectPicker = new ObjectPicker();
         }
 
-        void OnDisable()
+        protected void OnDisable()
         {
             Object.DestroyImmediate(tempObject);
         }
@@ -69,7 +65,7 @@ namespace WraithavenGames.Bones3
 
         void DrawTextures(Rect rect, int index, bool active, bool focused)
         {
-            var tex = (Texture2D) textures.GetArrayElementAtIndex(index).objectReferenceValue;
+            var tex = (Texture2D)textures.GetArrayElementAtIndex(index).objectReferenceValue;
             var r = new Rect(rect.x, rect.y + 2, 64, 64);
             EditorGUI.DrawPreviewTexture(r, tex, texturePreview);
         }

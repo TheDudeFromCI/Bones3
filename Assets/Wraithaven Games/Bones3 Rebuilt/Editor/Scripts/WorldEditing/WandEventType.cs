@@ -1,4 +1,4 @@
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     public enum WandEventType
     {

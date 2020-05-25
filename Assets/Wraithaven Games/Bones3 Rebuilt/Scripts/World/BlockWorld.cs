@@ -1,10 +1,4 @@
 using System.Collections.Generic;
-
-using Bones3Rebuilt;
-using Bones3Rebuilt.Remeshing;
-using Bones3Rebuilt.Remeshing.Voxel;
-using Bones3Rebuilt.World;
-
 using UnityEngine;
 
 namespace WraithavenGames.Bones3

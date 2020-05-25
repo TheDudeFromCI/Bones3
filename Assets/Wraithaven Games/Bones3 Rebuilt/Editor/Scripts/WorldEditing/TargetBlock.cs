@@ -1,8 +1,4 @@
-using Bones3Rebuilt;
-
-using UnityEngine;
-
-namespace WraithavenGames.Bones3
+namespace WraithavenGames.Bones3.Editor
 {
     /// <summary>
     /// The block being targeting while world editing.

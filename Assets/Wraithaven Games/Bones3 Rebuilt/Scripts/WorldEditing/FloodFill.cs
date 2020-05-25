@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A simple fill pattern which flood fills the area with a single block type.

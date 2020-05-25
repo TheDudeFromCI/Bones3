@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Bones3Rebuilt.Database.WorldProps
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Handles file IO for a world properties object.

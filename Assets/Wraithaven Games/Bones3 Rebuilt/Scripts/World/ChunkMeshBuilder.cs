@@ -1,8 +1,3 @@
-using System.Linq;
-
-using Bones3Rebuilt.Remeshing;
-using Bones3Rebuilt.Remeshing.Voxel;
-
 using UnityEngine;
 
 namespace WraithavenGames.Bones3

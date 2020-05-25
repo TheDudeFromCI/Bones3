@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt
+namespace WraithavenGames.Bones3
 {
     public struct ChunkPosition : IVoxelPosition
     {

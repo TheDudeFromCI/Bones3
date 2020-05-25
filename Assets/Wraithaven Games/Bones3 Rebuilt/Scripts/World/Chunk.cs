@@ -1,6 +1,6 @@
 using System;
 
-namespace Bones3Rebuilt.World
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A cubic collection of block IDs.

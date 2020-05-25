@@ -1,5 +1,4 @@
 using UnityEditor;
-using WraithavenGames.Bones3;
 
 namespace WraithavenGames.Bones3.Editor
 {

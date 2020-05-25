@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     // TODO Refactor this mess.
 

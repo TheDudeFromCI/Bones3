@@ -1,4 +1,4 @@
-namespace Bones3Rebuilt.Remeshing
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// Analyzes a chunk when it is queued and generates new remesh tasks.

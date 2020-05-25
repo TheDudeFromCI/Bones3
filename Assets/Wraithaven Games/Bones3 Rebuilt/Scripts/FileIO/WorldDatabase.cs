@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 
-namespace Bones3Rebuilt.Database
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A file storage directory for handling saving and loading voxel worlds.

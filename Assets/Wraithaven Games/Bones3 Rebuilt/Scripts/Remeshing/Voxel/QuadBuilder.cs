@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Bones3Rebuilt.Remeshing.Voxel
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// A utility class for converting quad data into mesh data.
