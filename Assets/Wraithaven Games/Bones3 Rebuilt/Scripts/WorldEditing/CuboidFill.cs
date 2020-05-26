@@ -86,7 +86,7 @@ namespace WraithavenGames.Bones3
                         yield return new BlockPlacement
                         {
                             Position = pos,
-                                BlockID = m_FillPattern.GetBlockID(pos),
+                            BlockID = m_FillPattern.GetBlockID(pos),
                         };
                     }
         }

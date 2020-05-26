@@ -15,40 +15,65 @@ namespace WraithavenGames.Bones3
         private readonly List<BlockChunk> m_Chunks = new List<BlockChunk>();
         private World m_World;
         private RemeshHandler m_RemeshHandler;
-
-        private GridSize ChunkSize => new GridSize(4);
+        private ChunkCreator m_ChunkCreator;
+        private ChunkMeshBuilder m_ChunkMeshBuilder;
 
         /// <summary>
-        /// Called when the world is enabled, either in the editor or in game.
+        /// Gets the chunk size for this world.
+        /// 
+        /// If this value is modified, all existing world data should be deleted and recreated.
         /// </summary>
-        protected void OnEnable()
+        /// <returns>The chunk size.</returns>
+        public GridSize ChunkSize => new GridSize(4);
+
+        /// <summary>
+        /// Gets the block list being used by this world.
+        /// </summary>
+        public BlockList BlockList => m_BlockList;
+
+        /// <summary>
+        /// Called when the world object is constructed to initialize data.
+        /// </summary>
+        protected void Awake()
         {
             m_World = new World(ChunkSize);
 
             m_RemeshHandler = new RemeshHandler();
             m_RemeshHandler.AddDistributor(new StandardDistributor());
 
+            m_ChunkCreator = new ChunkCreator(this);
+            m_ChunkMeshBuilder = new ChunkMeshBuilder(this);
+        }
+
 #if UNITY_EDITOR
+        /// <summary>
+        /// Called when the world is enabled to subscribe to editor frame updates
+        /// and initialize.
+        /// </summary>
+        protected void OnEnable()
+        {
             if (!Application.isPlaying)
+            {
                 UnityEditor.EditorApplication.update += Update;
-#endif
+                Awake();
+            }
         }
 
         /// <summary>
-        /// Called when the world is disabled, either in the editor or in game.
+        /// Called when the world is disabled to unsubscribe from editor frame updates.
         /// </summary>
         protected void OnDisable()
         {
-            foreach (var chunk in m_Chunks)
-                ChunkCreator.DestroyChunk(chunk);
-
-            m_Chunks.Clear();
-
-#if UNITY_EDITOR
             if (!Application.isPlaying)
+            {
                 UnityEditor.EditorApplication.update -= Update;
-#endif
+
+                foreach (var chunk in m_Chunks)
+                    m_ChunkCreator.DestroyChunk(chunk);
+                m_Chunks.Clear();
+            }
         }
+#endif
 
         /// <summary>
         /// Applies an edit batch to this world, remeshing chunks as needed.
@@ -248,7 +273,7 @@ namespace WraithavenGames.Bones3
             foreach (var taskStack in taskStacks)
             {
                 var chunk = GetChunk(taskStack.ChunkPosition);
-                ChunkMeshBuilder.UpdateMesh(taskStack, chunk, m_BlockList);
+                m_ChunkMeshBuilder.UpdateMesh(taskStack, chunk);
             }
 
             taskStacks.Clear();
@@ -265,7 +290,7 @@ namespace WraithavenGames.Bones3
                 if (chunk.Position.Equals(chunkPos))
                     return chunk;
 
-            var c = ChunkCreator.LoadChunk(chunkPos, ChunkSize.Value, transform);
+            var c = m_ChunkCreator.LoadChunk(chunkPos);
             m_Chunks.Add(c);
 
             return c;

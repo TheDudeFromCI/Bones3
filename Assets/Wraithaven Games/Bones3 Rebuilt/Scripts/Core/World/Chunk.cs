@@ -5,7 +5,7 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// A cubic collection of block IDs.
     /// </summary>
-    public class Chunk
+    internal class Chunk
     {
         private readonly ushort[] m_Blocks;
 
@@ -13,13 +13,13 @@ namespace WraithavenGames.Bones3
         /// The number of blocks in this chunk along a single axis.
         /// </summary>
         /// <value>The size of this chunk.</value>
-        public GridSize Size { get; }
+        internal GridSize Size { get; }
 
         /// <summary>
         /// Gets the position of this chunk within the world, in chunk coordinates.
         /// </summary>
         /// <value>The chunk position.</value>
-        public ChunkPosition Position { get; }
+        internal ChunkPosition Position { get; }
 
         /// <summary>
         /// Creates a new chunk object.
@@ -42,7 +42,7 @@ namespace WraithavenGames.Bones3
         /// <exception cref="ArgumentOutOfRangeException">
         /// If the block position is not within the container.
         /// </exception>
-        public ushort GetBlockID(BlockPosition pos) => m_Blocks[pos.Index(Size)];
+        internal ushort GetBlockID(BlockPosition pos) => m_Blocks[pos.Index(Size)];
 
         /// <summary>
         /// Sets the block ID at the given local block position within the container.
@@ -52,6 +52,6 @@ namespace WraithavenGames.Bones3
         /// <exception cref="ArgumentOutOfRangeException">
         /// If the block position is not within the container.
         /// </exception>
-        public void SetBlockID(BlockPosition pos, ushort id) => m_Blocks[pos.Index(Size)] = id;
+        internal void SetBlockID(BlockPosition pos, ushort id) => m_Blocks[pos.Index(Size)] = id;
     }
 }

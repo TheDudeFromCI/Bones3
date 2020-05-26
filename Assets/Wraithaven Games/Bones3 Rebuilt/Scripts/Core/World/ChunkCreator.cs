@@ -2,24 +2,36 @@ using UnityEngine;
 
 namespace WraithavenGames.Bones3
 {
-    public static class ChunkCreator
+    /// <summary>
+    /// Creates and destroyed block chunk objects.
+    /// </summary>
+    internal class ChunkCreator
     {
+        private readonly BlockWorld m_BlockWorld;
+
+        /// <summary>
+        /// Creates a new chunk creator object.
+        /// </summary>
+        /// <param name="blockWorld">The block world this creator is acting on.</param>
+        internal ChunkCreator(BlockWorld blockWorld)
+        {
+            m_BlockWorld = blockWorld;
+        }
+
         /// <summary>
         /// Creates a new chunk object based on the given chunk position.
         /// </summary>
         /// <param name="chunkPos">The position of the chunk.</param>
-        /// <param name="chunkSize">The number of blocks in a chunk along 1 axis.</param>
-        /// <param name="transform">The transform of the block world.</param>
         /// <returns>The newly created chunk game object.</returns>
-        public static BlockChunk LoadChunk(ChunkPosition chunkPos, int chunkSize, Transform transform)
+        internal BlockChunk LoadChunk(ChunkPosition chunkPos)
         {
             var go = new GameObject($"Chunk: ({chunkPos.X}, {chunkPos.Y}, {chunkPos.Z})");
             var chunk = go.AddComponent<BlockChunk>();
             chunk.Position = chunkPos;
 
             go.hideFlags = HideFlags.HideAndDontSave;
-            go.transform.SetParent(transform);
-            go.transform.localPosition = new Vector3(chunkPos.X, chunkPos.Y, chunkPos.Z) * chunkSize;
+            go.transform.SetParent(m_BlockWorld.transform);
+            go.transform.localPosition = new Vector3(chunkPos.X, chunkPos.Y, chunkPos.Z) * m_BlockWorld.ChunkSize.Value;
 
             var meshFilter = go.AddComponent<MeshFilter>();
             var meshCollider = go.AddComponent<MeshCollider>();
@@ -42,7 +54,7 @@ namespace WraithavenGames.Bones3
         /// Destroys a chunk game object and attached resources.
         /// </summary>
         /// <param name="chunk">The chunk to destroy.</param>
-        public static void DestroyChunk(BlockChunk chunk)
+        internal void DestroyChunk(BlockChunk chunk)
         {
 #if UNITY_EDITOR
             if (Application.isPlaying)
