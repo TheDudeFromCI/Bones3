@@ -124,6 +124,9 @@ namespace WraithavenGames.Bones3.Editor
         /// <inheritdoc/>
         public override void Render()
         {
+            if (World == null)
+                return;
+
             Vector3 p1 = new Vector3(Point1.Inside.X, Point1.Inside.Y, Point1.Inside.Z);
             Vector3 p2 = new Vector3(Point2.Inside.X, Point2.Inside.Y, Point2.Inside.Z);
 

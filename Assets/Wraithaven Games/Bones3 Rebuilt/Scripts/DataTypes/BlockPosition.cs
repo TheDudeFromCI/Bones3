@@ -48,6 +48,21 @@ namespace WraithavenGames.Bones3
             };
         }
 
+        /// <summary>
+        /// Converts a local block position into a world block position.
+        /// </summary>
+        /// <param name="chunkSize">The size of the chunk the block is in.</param>
+        /// <param name="chunkPos">The position of the chunk the block is in.</param>
+        public BlockPosition LocalToWorld(GridSize chunkSize, ChunkPosition chunkPos)
+        {
+            return new BlockPosition
+            {
+                X = X + chunkPos.X * chunkSize.Value,
+                Y = Y + chunkPos.Y * chunkSize.Value,
+                Z = Z + chunkPos.Z * chunkSize.Value,
+            };
+        }
+
         public override string ToString() => $"Block Pos:[{X}, {Y}, {Z}]";
 
         public static BlockPosition operator +(BlockPosition a, BlockPosition b) =>

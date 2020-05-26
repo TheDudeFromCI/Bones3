@@ -40,6 +40,6 @@ namespace WraithavenGames.Bones3
         /// Gets the block ID to place.
         /// </summary>
         /// <value>The block ID.</value>
-        public int BlockID { get; set; }
+        public ushort BlockID { get; set; }
     }
 }
