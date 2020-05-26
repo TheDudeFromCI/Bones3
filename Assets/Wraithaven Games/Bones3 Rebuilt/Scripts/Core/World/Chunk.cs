@@ -7,8 +7,6 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class Chunk
     {
-        private readonly ushort[] m_Blocks;
-
         /// <summary>
         /// The number of blocks in this chunk along a single axis.
         /// </summary>
@@ -22,6 +20,18 @@ namespace WraithavenGames.Bones3
         internal ChunkPosition Position { get; }
 
         /// <summary>
+        /// Gets whether or not this chunk has been modified since the last save.
+        /// </summary>
+        /// <value>True if the chunk has been modified. False otherwise.</value>
+        internal bool IsModified { get; set; } = true;
+
+        /// <summary>
+        /// Gets the array of blocks being stored in this chunk. (This should not be modified.)
+        /// </summary>
+        /// <value>The block data.</value>
+        internal ushort[] Blocks { get; }
+
+        /// <summary>
         /// Creates a new chunk object.
         /// </summary>
         /// <param name="chunkSize">The chunk size.</param>
@@ -30,8 +40,7 @@ namespace WraithavenGames.Bones3
         {
             Size = chunkSize;
             Position = position;
-
-            m_Blocks = new ushort[Size.Volume];
+            Blocks = new ushort[Size.Volume];
         }
 
         /// <summary>
@@ -42,7 +51,7 @@ namespace WraithavenGames.Bones3
         /// <exception cref="ArgumentOutOfRangeException">
         /// If the block position is not within the container.
         /// </exception>
-        internal ushort GetBlockID(BlockPosition pos) => m_Blocks[pos.Index(Size)];
+        internal ushort GetBlockID(BlockPosition pos) => Blocks[pos.Index(Size)];
 
         /// <summary>
         /// Sets the block ID at the given local block position within the container.
@@ -52,6 +61,15 @@ namespace WraithavenGames.Bones3
         /// <exception cref="ArgumentOutOfRangeException">
         /// If the block position is not within the container.
         /// </exception>
-        internal void SetBlockID(BlockPosition pos, ushort id) => m_Blocks[pos.Index(Size)] = id;
+        internal void SetBlockID(BlockPosition pos, ushort id)
+        {
+            int index = pos.Index(Size);
+
+            if (Blocks[index] == id)
+                return;
+
+            Blocks[index] = id;
+            IsModified = true;
+        }
     }
 }

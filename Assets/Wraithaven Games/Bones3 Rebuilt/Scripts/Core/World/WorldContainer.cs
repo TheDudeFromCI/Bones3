@@ -14,12 +14,12 @@ namespace WraithavenGames.Bones3
         private readonly RemeshHandler m_RemeshHandler;
 
         /// <summary>
-        /// Creates a new world container for a chunk of the given size.
+        /// Creates a new world container for the given world.
         /// </summary>
-        /// <param name="chunkSize">The chunk size.</param>
-        internal WorldContainer(GridSize chunkSize)
+        /// <param name="world">The world.</param>
+        internal WorldContainer(World world)
         {
-            m_World = new World(chunkSize);
+            m_World = world;
 
             m_RemeshHandler = new RemeshHandler();
             m_RemeshHandler.AddDistributor(new StandardDistributor());

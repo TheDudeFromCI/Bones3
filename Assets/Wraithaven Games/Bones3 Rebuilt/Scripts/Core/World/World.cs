@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace WraithavenGames.Bones3
@@ -8,12 +9,19 @@ namespace WraithavenGames.Bones3
     internal class World
     {
         private readonly List<Chunk> m_Chunks = new List<Chunk>();
+        private readonly List<IChunkLoadHandler> m_ChunkLoadHandlers = new List<IChunkLoadHandler>();
 
         /// <summary>
         /// The number of blocks in a chunk along a single axis.
         /// </summary>
         /// <value>The size of a chunk.</value>
         internal GridSize ChunkSize { get; }
+
+        /// <summary>
+        /// Gets this world's GUID value.
+        /// </summary>
+        /// <value>The world ID.</value>
+        internal Guid ID { get; set; }
 
         /// <summary>
         /// Creates a new world object.
@@ -58,6 +66,9 @@ namespace WraithavenGames.Bones3
             var newChunk = new Chunk(ChunkSize, pos);
             m_Chunks.Add(newChunk);
 
+            foreach (var handler in m_ChunkLoadHandlers)
+                handler.OnChunkLoad(newChunk);
+
             return newChunk;
         }
 
@@ -70,6 +81,22 @@ namespace WraithavenGames.Bones3
             var chunk = GetChunk(pos);
             if (chunk != null)
                 m_Chunks.Remove(chunk);
+        }
+
+        /// <summary>
+        /// Adds a new chunk load handler to this world.
+        /// </summary>
+        /// <param name="loadHandler">The handler.</param>
+        internal void AddChunkLoadHandler(IChunkLoadHandler loadHandler) => m_ChunkLoadHandlers.Add(loadHandler);
+
+        /// <summary>
+        /// Iterates over all chunks in this world.
+        /// </summary>
+        /// <returns>The chunk iterator.</returns>
+        internal IEnumerable<Chunk> ChunkIterator()
+        {
+            foreach (var chunk in m_Chunks)
+                yield return chunk;
         }
     }
 }

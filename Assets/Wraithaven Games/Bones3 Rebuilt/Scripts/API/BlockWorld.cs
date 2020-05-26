@@ -16,6 +16,7 @@ namespace WraithavenGames.Bones3
         private WorldContainer m_WorldContainer;
         private ChunkCreator m_ChunkCreator;
         private ChunkMeshBuilder m_ChunkMeshBuilder;
+        private WorldSaver m_WorldSaver;
 
         /// <summary>
         /// Gets the chunk size for this world.
@@ -35,7 +36,10 @@ namespace WraithavenGames.Bones3
         /// </summary>
         protected void Awake()
         {
-            m_WorldContainer = new WorldContainer(ChunkSize);
+            var world = new World(ChunkSize);
+            m_WorldContainer = new WorldContainer(world);
+
+            m_WorldSaver = new WorldSaver(world);
 
             m_ChunkCreator = new ChunkCreator(this);
             m_ChunkMeshBuilder = new ChunkMeshBuilder(this);
@@ -155,5 +159,10 @@ namespace WraithavenGames.Bones3
 
             return c;
         }
+
+        /// <summary>
+        /// Saves the world to file.
+        /// </summary>
+        public void SaveWorld() => m_WorldSaver.SaveWorld();
     }
 }
