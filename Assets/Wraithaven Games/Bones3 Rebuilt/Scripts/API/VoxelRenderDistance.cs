@@ -137,7 +137,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void LoadNearbyChunks()
         {
-            if (m_BlockWorld.ChunksBeingLoaded >= m_MaxLoadingOperations)
+            if (m_BlockWorld.WorldContainer.ChunkLoader.ActiveTasks >= m_MaxLoadingOperations)
                 return;
 
             for (int i = 0; i < m_ChecksPerFrame; i++)

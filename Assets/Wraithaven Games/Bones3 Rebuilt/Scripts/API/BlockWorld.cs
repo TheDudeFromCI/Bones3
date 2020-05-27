@@ -36,9 +36,9 @@ namespace WraithavenGames.Bones3
         public BlockList BlockList => m_BlockList;
 
         /// <summary>
-        /// Gets the number of chunks currently being loaded in the background.
+        /// Gets the world container for this behaviour.
         /// </summary>
-        internal int ChunksBeingLoaded => m_WorldContainer.ChunksBeingLoaded;
+        internal WorldContainer WorldContainer => m_WorldContainer;
 
         /// <summary>
         /// Called when the world object is constructed to initialize data.

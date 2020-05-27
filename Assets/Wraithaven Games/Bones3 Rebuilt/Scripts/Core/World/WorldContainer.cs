@@ -13,12 +13,12 @@ namespace WraithavenGames.Bones3
         private readonly World m_World;
         private readonly RemeshHandler m_RemeshHandler;
         private readonly BlockWorld m_BlockWorld;
-        private readonly AsyncChunkLoader m_ChunkLoader;
 
         /// <summary>
-        /// Gets the number of chunks currently being loaded in the background.
+        /// Gets the chunk loader being used by this container.
         /// </summary>
-        internal int ChunksBeingLoaded => m_ChunkLoader.ActiveTasks;
+        /// <value>The chunk loader.</value>
+        internal AsyncChunkLoader ChunkLoader { get; }
 
         /// <summary>
         /// Creates a new world container for the given world.
@@ -29,8 +29,8 @@ namespace WraithavenGames.Bones3
             m_World = world;
             m_BlockWorld = blockWorld;
 
-            m_ChunkLoader = new AsyncChunkLoader();
-            m_ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
+            ChunkLoader = new AsyncChunkLoader();
+            ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
 
             m_RemeshHandler = new RemeshHandler();
             m_RemeshHandler.AddDistributor(new StandardDistributor());
@@ -83,7 +83,7 @@ namespace WraithavenGames.Bones3
                 return chunk;
 
             chunk = m_World.CreateChunk(chunkPos);
-            bool remesh = m_ChunkLoader.LoadSync(chunk);
+            bool remesh = ChunkLoader.LoadSync(chunk);
 
             if (remesh)
             {
@@ -230,7 +230,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void CheckAsyncWorldLoader()
         {
-            var requiresRemesh = m_ChunkLoader.Update(out Chunk chunk);
+            var requiresRemesh = ChunkLoader.Update(out Chunk chunk);
 
             if (requiresRemesh)
             {
@@ -251,7 +251,7 @@ namespace WraithavenGames.Bones3
                 return false;
 
             chunk = m_World.CreateChunk(chunkPos);
-            m_ChunkLoader.LoadAsync(chunk);
+            ChunkLoader.LoadAsync(chunk);
             return true;
         }
     }
