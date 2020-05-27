@@ -43,8 +43,6 @@ namespace WraithavenGames.Bones3
             m_WorldContainer = new WorldContainer(world, this);
             m_WorldSaver = new WorldSaver(world);
 
-            m_WorldContainer.AddChunkLoadHandler(m_WorldSaver);
-
             m_ChunkCreator = new ChunkCreator(this);
             m_ChunkMeshBuilder = new ChunkMeshBuilder(this);
         }

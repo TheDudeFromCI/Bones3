@@ -10,10 +10,10 @@ namespace WraithavenGames.Bones3
     {
         private readonly List<Chunk> chunksToRemesh = new List<Chunk>();
         private readonly List<RemeshTaskStack> taskStacks = new List<RemeshTaskStack>();
-        private readonly List<IChunkLoadHandler> m_ChunkLoadHandlers = new List<IChunkLoadHandler>();
         private readonly World m_World;
         private readonly RemeshHandler m_RemeshHandler;
         private readonly BlockWorld m_BlockWorld;
+        private readonly AsyncChunkLoader m_ChunkLoader;
 
         /// <summary>
         /// Creates a new world container for the given world.
@@ -23,6 +23,9 @@ namespace WraithavenGames.Bones3
         {
             m_World = world;
             m_BlockWorld = blockWorld;
+
+            m_ChunkLoader = new AsyncChunkLoader();
+            m_ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
 
             m_RemeshHandler = new RemeshHandler();
             m_RemeshHandler.AddDistributor(new StandardDistributor());
@@ -62,6 +65,12 @@ namespace WraithavenGames.Bones3
             return GetChunk(chunkPos, createChunk)?.GetBlockID(blockPos) ?? 0;
         }
 
+        /// <summary>
+        /// Gets the chunk at the target chunk position.
+        /// </summary>
+        /// <param name="chunkPos">The chunk position.</param>
+        /// <param name="create">Whether or not to create the chunk if it doesn't currently exist.</param>
+        /// <returns>The chunk, or null if it doesn't exist.</returns>
         private Chunk GetChunk(ChunkPosition chunkPos, bool create)
         {
             var chunk = m_World.GetChunk(chunkPos);
@@ -69,10 +78,7 @@ namespace WraithavenGames.Bones3
                 return chunk;
 
             chunk = m_World.CreateChunk(chunkPos);
-
-            bool remesh = false;
-            foreach (var handler in m_ChunkLoadHandlers)
-                remesh |= handler.OnChunkLoad(chunk);
+            bool remesh = m_ChunkLoader.LoadSync(chunk);
 
             if (remesh)
             {
@@ -166,6 +172,8 @@ namespace WraithavenGames.Bones3
             var chunkProperties = new ChunkProperties();
             chunkProperties.Reset(chunk.Position, chunkSize);
 
+            // TODO Refactor and Optimize this
+
             for (int x = -1; x <= chunkSize.Value; x++)
                 for (int y = -1; y <= chunkSize.Value; y++)
                     for (int z = -1; z <= chunkSize.Value; z++)
@@ -209,11 +217,5 @@ namespace WraithavenGames.Bones3
 
             taskStacks.Clear();
         }
-
-        /// <summary>
-        /// Adds a new chunk load handler to this world.
-        /// </summary>
-        /// <param name="loadHandler">The handler.</param>
-        internal void AddChunkLoadHandler(IChunkLoadHandler loadHandler) => m_ChunkLoadHandlers.Add(loadHandler);
     }
 }
