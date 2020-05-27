@@ -18,12 +18,10 @@ namespace WraithavenGames.Bones3
         [Tooltip("The number of chunks to check loading per frame.")]
         [SerializeField, Range(5, 50)] protected int m_ChecksPerFrame = 20;
 
-        [Tooltip("Limits the maximum number of chunks being loaded at once.")]
-        [SerializeField, Range(1, 16)] protected int m_MaxLoadingOperations = 4;
-
         private BlockWorld m_BlockWorld;
         private ChunkLoadPatternIterator m_ChunkLoadPatternIterator;
         private ChunkPosition m_LastCameraPosition;
+        private int m_CoolingDown;
 
         /// <summary>
         /// Called when the behaviour is initialized to load the block world
@@ -44,6 +42,8 @@ namespace WraithavenGames.Bones3
         {
             if (!Application.isPlaying)
                 UnityEditor.EditorApplication.update += Update;
+
+            m_ChunkLoadPatternIterator.Reset();
         }
 
         /// <summary>
@@ -137,8 +137,18 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void LoadNearbyChunks()
         {
-            if (m_BlockWorld.WorldContainer.ChunkLoader.ActiveTasks >= m_MaxLoadingOperations)
+            if (m_BlockWorld.WorldContainer.ChunkLoader.ActiveTasks > 0
+                || m_BlockWorld.WorldContainer.RemeshHandler.ActiveTasks > 0)
+            {
+                m_CoolingDown = 3;
                 return;
+            }
+
+            if (m_CoolingDown > 0)
+            {
+                m_CoolingDown--;
+                return;
+            }
 
             for (int i = 0; i < m_ChecksPerFrame; i++)
             {

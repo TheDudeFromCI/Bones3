@@ -365,16 +365,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1632449630}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89682439bc24e44b9931c05e20941cc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 0}
-  m_ViewDistance: {x: 10, y: 5, z: 10}
+  m_ViewDistance: {x: 1, y: 1, z: 1}
   m_ChunkLoadingPattern: 0
   m_ChecksPerFrame: 5
-  m_MaxLoadingOperations: 1
 --- !u!114 &1632449634
 MonoBehaviour:
   m_ObjectHideFlags: 0

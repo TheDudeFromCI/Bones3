@@ -11,7 +11,6 @@ namespace WraithavenGames.Bones3
         private readonly List<Chunk> chunksToRemesh = new List<Chunk>();
         private readonly List<RemeshTaskStack> taskStacks = new List<RemeshTaskStack>();
         private readonly World m_World;
-        private readonly RemeshHandler m_RemeshHandler;
         private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
@@ -19,6 +18,12 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <value>The chunk loader.</value>
         internal AsyncChunkLoader ChunkLoader { get; }
+
+        /// <summary>
+        /// Gets the remesh handler being used by this container.
+        /// </summary>
+        /// <value>The remesh handler.</value>
+        internal RemeshHandler RemeshHandler { get; }
 
         /// <summary>
         /// Creates a new world container for the given world.
@@ -32,8 +37,8 @@ namespace WraithavenGames.Bones3
             ChunkLoader = new AsyncChunkLoader();
             ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
 
-            m_RemeshHandler = new RemeshHandler();
-            m_RemeshHandler.AddDistributor(new StandardDistributor());
+            RemeshHandler = new RemeshHandler();
+            RemeshHandler.AddDistributor(new StandardDistributor());
         }
 
         /// <summary>
@@ -206,7 +211,7 @@ namespace WraithavenGames.Bones3
                         chunkProperties.SetBlock(blockPos, blockType);
                     }
 
-            m_RemeshHandler.RemeshChunk(chunkProperties);
+            RemeshHandler.RemeshChunk(chunkProperties);
         }
 
         /// <summary>
@@ -217,7 +222,7 @@ namespace WraithavenGames.Bones3
         {
             CheckAsyncWorldLoader();
 
-            m_RemeshHandler.FinishTasks(taskStacks);
+            RemeshHandler.FinishTasks(taskStacks);
 
             foreach (var taskStack in taskStacks)
                 action(taskStack);

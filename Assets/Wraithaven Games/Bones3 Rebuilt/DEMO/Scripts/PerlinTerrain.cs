@@ -16,6 +16,8 @@ namespace WraithavenGames.Bones3Demo
                     float worldX = x + chunk.Position.X * size;
                     float worldZ = z + chunk.Position.Z * size;
 
+                    // TODO Remove Unity PerlinNoise calls in favor of thread-safe randomness options
+
                     int h = Mathf.FloorToInt(Mathf.PerlinNoise(worldX, worldZ) * 25);
                     h -= chunk.Position.Y * size;
                     h = Mathf.Min(h, size);

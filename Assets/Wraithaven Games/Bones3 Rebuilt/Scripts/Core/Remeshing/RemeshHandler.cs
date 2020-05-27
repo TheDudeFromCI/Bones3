@@ -5,16 +5,21 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// Holds a set of remesh distrbutors in order to generate a new mesh for a chunk.
     /// </summary>
-    public class RemeshHandler
+    internal class RemeshHandler
     {
         private readonly List<IRemeshDistributor> m_Distributors = new List<IRemeshDistributor>();
         private readonly List<RemeshTaskStack> m_ActiveTasks = new List<RemeshTaskStack>();
 
         /// <summary>
+        /// Gets the number of active tasks currently being run.
+        /// </summary>
+        internal int ActiveTasks => m_ActiveTasks.Count;
+
+        /// <summary>
         /// Analyses the given chunk and starts a set of remesh tasks for handling that chunk.
         /// </summary>
         /// <param name="properties">The chunk properties to analyze.</param>
-        public void RemeshChunk(ChunkProperties properties)
+        internal void RemeshChunk(ChunkProperties properties)
         {
             var taskStack = new RemeshTaskStack(properties.ChunkPosition);
             m_ActiveTasks.Add(taskStack);
@@ -27,7 +32,7 @@ namespace WraithavenGames.Bones3
         /// Waits for all current tasks to finish executing before continuing.
         /// </summary>
         /// <param name="finishedTasks">The list to write the finished task stacks to.</param>
-        public void FinishTasks(List<RemeshTaskStack> finishedTasks)
+        internal void FinishTasks(List<RemeshTaskStack> finishedTasks)
         {
             while (m_ActiveTasks.Count > 0)
             {
@@ -43,7 +48,7 @@ namespace WraithavenGames.Bones3
         /// Adds a remesh distributor to this handler.
         /// </summary>
         /// <param name="distributor">The distributor to add.</param>
-        public void AddDistributor(IRemeshDistributor distributor)
+        internal void AddDistributor(IRemeshDistributor distributor)
         {
             if (distributor == null)
                 return;

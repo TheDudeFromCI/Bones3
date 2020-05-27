@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Linq;
 
 namespace WraithavenGames.Bones3
 {
@@ -89,7 +88,8 @@ namespace WraithavenGames.Bones3
                     for (int z = -extents.z; z <= extents.z; z++)
                         positions[i++] = new ChunkPosition(x, y, z);
 
-            positions.OrderBy(c => c.X * c.X + c.Y * c.Y + c.Z * c.Z).GetEnumerator();
+            System.Array.Sort(positions, (a, b) =>
+                (a.X * a.X + a.Y * a.Y + a.Z * a.Z) - (b.X * b.X + b.Y * b.Y + b.Z * b.Z));
         }
     }
 }
