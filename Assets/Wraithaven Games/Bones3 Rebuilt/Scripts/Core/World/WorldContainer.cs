@@ -189,8 +189,6 @@ namespace WraithavenGames.Bones3
                     for (int z = -1; z <= chunkSize.Value; z++)
                     {
                         var blockPos = new BlockPosition(x, y, z);
-                        if (!chunkProperties.IsValidPosition(blockPos))
-                            continue;
 
                         ushort blockID;
                         if (blockPos.IsWithinGrid(chunkSize))

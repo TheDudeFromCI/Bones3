@@ -38,8 +38,8 @@ namespace WraithavenGames.Bones3
             ChunkPosition = chunkPos;
             ChunkSize = chunkSize;
 
-            int blockCount = chunkSize.Volume;
-            blockCount += chunkSize.Value * chunkSize.Value * 6; // Neighbor chunks
+            int blockCount = chunkSize.Value + 2;
+            blockCount *= blockCount * blockCount;
 
             if (m_Blocks.Length < blockCount)
                 m_Blocks = new BlockType[blockCount];
@@ -81,112 +81,8 @@ namespace WraithavenGames.Bones3
         /// <returns>The block index.</returns>
         private int BlockIndex(BlockPosition pos)
         {
-            if (!IsValidPosition(pos))
-                throw new System.ArgumentException("Block position out of range!", "pos");
-
-            int j = GetChunkSide(pos);
-
-            if (j == -1)
-                return pos.Index(ChunkSize);
-
-            return GetNextBlock(pos, j);
-        }
-
-        /// <summary>
-        /// Checks whether or not the relative block position is in a valid position.
-        /// </summary>
-        /// <param name="pos">The block position to test.</param>
-        /// <returns>True if the position is valid, false otherwise.</returns>
-        public bool IsValidPosition(BlockPosition pos)
-        {
-            return !IsCorners(pos) && !IsOutOfBounds(pos);
-        }
-
-        /// <summary>
-        /// Checks if the block position is on the corner of 3 or more relevant chunks.
-        /// </summary>
-        /// <param name="pos">The block position.</param>
-        /// <returns>True if the block position is touching 3 or more relevant chunks.</returns>
-        private bool IsCorners(BlockPosition pos)
-        {
-            int n = 0;
-
-            if (pos.X < 0 || pos.X >= ChunkSize.Value) n++;
-            if (pos.Y < 0 || pos.Y >= ChunkSize.Value) n++;
-            if (pos.Z < 0 || pos.Z >= ChunkSize.Value) n++;
-
-            return n > 1;
-        }
-
-        /// <summary>
-        /// Checks if the position is more than one block away from the check.
-        /// </summary>
-        /// <param name="pos">The block position.</param>
-        /// <returns>True if the block position is too far from the chunk.</returns>
-        private bool IsOutOfBounds(BlockPosition pos)
-        {
-            if (pos.X < -1 || pos.X > ChunkSize.Value) return true;
-            if (pos.Y < -1 || pos.Y > ChunkSize.Value) return true;
-            if (pos.Z < -1 || pos.Z > ChunkSize.Value) return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Gets the side of the chunk the block position is.
-        /// </summary>
-        /// <param name="pos">The block position.</param>
-        /// <returns>The chunk side, or -1 if the position is within the chunk.</returns>
-        private int GetChunkSide(BlockPosition pos)
-        {
-            if (pos.X < 0)
-                return 0;
-
-            if (pos.X >= ChunkSize.Value)
-                return 1;
-
-            if (pos.Y < 0)
-                return 2;
-
-            if (pos.Y >= ChunkSize.Value)
-                return 3;
-
-            if (pos.Z < 0)
-                return 4;
-
-            if (pos.Z >= ChunkSize.Value)
-                return 5;
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Gets the index of the neighbor block based on the given block position and chunk edge.
-        /// </summary>
-        /// <param name="pos">The block position.</param>
-        /// <param name="j">The chunk edge.</param>
-        /// <returns>The block index.</returns>
-        private int GetNextBlock(BlockPosition pos, int j)
-        {
-            switch (j)
-            {
-                case 0:
-                case 1:
-                    pos = new BlockPosition(j, pos.Y, pos.Z);
-                    break;
-
-                case 2:
-                case 3:
-                    pos = new BlockPosition(j, pos.X, pos.Z);
-                    break;
-
-                case 4:
-                case 5:
-                    pos = new BlockPosition(j, pos.X, pos.Y);
-                    break;
-            }
-
-            return pos.Index(ChunkSize) + ChunkSize.Volume;
+            int size = ChunkSize.Value + 2;
+            return (pos.X + 1) * size * size + (pos.Y + 1) * size + (pos.Z + 1);
         }
     }
 }
