@@ -10,16 +10,19 @@ namespace WraithavenGames.Bones3
     {
         private readonly List<Chunk> chunksToRemesh = new List<Chunk>();
         private readonly List<RemeshTaskStack> taskStacks = new List<RemeshTaskStack>();
+        private readonly List<IChunkLoadHandler> m_ChunkLoadHandlers = new List<IChunkLoadHandler>();
         private readonly World m_World;
         private readonly RemeshHandler m_RemeshHandler;
+        private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
         /// Creates a new world container for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
-        internal WorldContainer(World world)
+        internal WorldContainer(World world, BlockWorld blockWorld)
         {
             m_World = world;
+            m_BlockWorld = blockWorld;
 
             m_RemeshHandler = new RemeshHandler();
             m_RemeshHandler.AddDistributor(new StandardDistributor());
@@ -33,9 +36,9 @@ namespace WraithavenGames.Bones3
         internal void SetBlock(BlockPosition blockPos, ushort blockID)
         {
             var chunkPos = blockPos.ToChunkPosition(m_World.ChunkSize);
-            blockPos = blockPos & m_World.ChunkSize.Mask;
+            blockPos &= m_World.ChunkSize.Mask;
 
-            var chunk = m_World.CreateChunk(chunkPos);
+            var chunk = GetChunk(chunkPos, true);
             if (chunk.GetBlockID(blockPos) == blockID)
                 return;
 
@@ -56,10 +59,43 @@ namespace WraithavenGames.Bones3
             var chunkPos = blockPos.ToChunkPosition(m_World.ChunkSize);
             blockPos &= m_World.ChunkSize.Mask;
 
-            if (createChunk)
-                return m_World.CreateChunk(chunkPos).GetBlockID(blockPos);
+            return GetChunk(chunkPos, createChunk)?.GetBlockID(blockPos) ?? 0;
+        }
 
-            return m_World.GetChunk(chunkPos)?.GetBlockID(blockPos) ?? 0;
+        private Chunk GetChunk(ChunkPosition chunkPos, bool create)
+        {
+            var chunk = m_World.GetChunk(chunkPos);
+            if (chunk != null || !create)
+                return chunk;
+
+            chunk = m_World.CreateChunk(chunkPos);
+
+            bool remesh = false;
+            foreach (var handler in m_ChunkLoadHandlers)
+                remesh |= handler.OnChunkLoad(chunk);
+
+            if (remesh)
+            {
+                RemeshAllNeighbors(chunkPos);
+                RemeshDirtyChunks();
+            }
+
+            return chunk;
+        }
+
+        /// <summary>
+        /// Remeshes the chunk at the given position and all chunks touching it.
+        /// </summary>
+        /// <param name="chunkPos">The chunk position.</param>
+        private void RemeshAllNeighbors(ChunkPosition chunkPos)
+        {
+            RemeshChunkAt(chunkPos);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(0));
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(1));
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(2));
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(3));
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(4));
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(5));
         }
 
         /// <summary>
@@ -110,11 +146,10 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Triggers all dirty chunks to be remeshed.
         /// </summary>
-        /// <param name="blockList">The block list to used when remeshing.</param>
-        internal void RemeshDirtyChunks(BlockList blockList)
+        internal void RemeshDirtyChunks()
         {
             foreach (var chunk in chunksToRemesh)
-                UpdateChunk(chunk, blockList);
+                UpdateChunk(chunk, m_BlockWorld.BlockList);
 
             chunksToRemesh.Clear();
         }
@@ -174,5 +209,11 @@ namespace WraithavenGames.Bones3
 
             taskStacks.Clear();
         }
+
+        /// <summary>
+        /// Adds a new chunk load handler to this world.
+        /// </summary>
+        /// <param name="loadHandler">The handler.</param>
+        internal void AddChunkLoadHandler(IChunkLoadHandler loadHandler) => m_ChunkLoadHandlers.Add(loadHandler);
     }
 }

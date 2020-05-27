@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace WraithavenGames.Bones3
@@ -11,6 +12,8 @@ namespace WraithavenGames.Bones3
     {
         [Tooltip("The block properties container to use for this world.")]
         [SerializeField] protected BlockList m_BlockList;
+
+        [SerializeField, HideInInspector] protected string ID = System.Guid.NewGuid().ToString();
 
         private readonly List<BlockChunk> m_Chunks = new List<BlockChunk>();
         private WorldContainer m_WorldContainer;
@@ -36,10 +39,11 @@ namespace WraithavenGames.Bones3
         /// </summary>
         protected void Awake()
         {
-            var world = new World(ChunkSize);
-            m_WorldContainer = new WorldContainer(world);
-
+            var world = new World(ChunkSize, ID);
+            m_WorldContainer = new WorldContainer(world, this);
             m_WorldSaver = new WorldSaver(world);
+
+            m_WorldContainer.AddChunkLoadHandler(m_WorldSaver);
 
             m_ChunkCreator = new ChunkCreator(this);
             m_ChunkMeshBuilder = new ChunkMeshBuilder(this);
@@ -67,10 +71,7 @@ namespace WraithavenGames.Bones3
             if (!Application.isPlaying)
             {
                 UnityEditor.EditorApplication.update -= Update;
-
-                foreach (var chunk in m_Chunks)
-                    m_ChunkCreator.DestroyChunk(chunk);
-                m_Chunks.Clear();
+                ClearWorld(); // TODO Move this to ISerializationCallback
             }
         }
 #endif
@@ -91,14 +92,14 @@ namespace WraithavenGames.Bones3
             {
                 if (block.BlockID >= m_BlockList.BlockCount)
                 {
-                    m_WorldContainer.RemeshDirtyChunks(m_BlockList);
+                    m_WorldContainer.RemeshDirtyChunks();
                     throw new System.ArgumentOutOfRangeException("editBatch", $"Invalid block type '{block.BlockID}'!");
                 }
 
                 m_WorldContainer.SetBlock(block.Position, block.BlockID);
             }
 
-            m_WorldContainer.RemeshDirtyChunks(m_BlockList);
+            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>
@@ -112,7 +113,7 @@ namespace WraithavenGames.Bones3
                 throw new System.ArgumentOutOfRangeException("blockID", $"Invalid block type '{blockID}'!");
 
             m_WorldContainer.SetBlock(blockPos, blockID);
-            m_WorldContainer.RemeshDirtyChunks(m_BlockList);
+            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>
@@ -164,5 +165,36 @@ namespace WraithavenGames.Bones3
         /// Saves the world to file.
         /// </summary>
         public void SaveWorld() => m_WorldSaver.SaveWorld();
+
+        /// <summary>
+        /// Clears all loaded chunk data for this world.
+        /// </summary>
+        public void ClearWorld()
+        {
+            foreach (var chunk in m_Chunks)
+                m_ChunkCreator.DestroyChunk(chunk);
+            m_Chunks.Clear();
+
+            Awake(); // Reset to default state
+        }
+
+        /// <summary>
+        /// Force loads all chunks within a given region, if not already loaded.
+        /// </summary>
+        /// <param name="center">The center of the bounding region.</param>
+        /// <param name="extents">The radius of each axis.</param>
+        public void LoadChunkRegion(Vector3Int center, Vector3Int extents)
+        {
+            var min = center - extents;
+            var max = center + extents;
+
+            for (int x = min.x; x <= max.x; x++)
+                for (int y = min.y; y <= max.y; y++)
+                    for (int z = min.z; z <= max.z; z++)
+                    {
+                        var blockPos = new BlockPosition(x, y, z) * ChunkSize.Value;
+                        m_WorldContainer.GetBlock(blockPos, true);
+                    }
+        }
     }
 }

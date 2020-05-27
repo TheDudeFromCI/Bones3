@@ -9,6 +9,7 @@ namespace WraithavenGames.Bones3
         /// Called when a new chunk is first created in memory.
         /// </summary>
         /// <param name="chunk">The chunk.</param>
-        void OnChunkLoad(Chunk chunk);
+        /// <returns>True if any blocks where changed on this chunk while loading.</returns>
+        bool OnChunkLoad(Chunk chunk);
     }
 }

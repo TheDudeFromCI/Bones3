@@ -1,9 +1,12 @@
 {
   "scopedRegistries": [
     {
-      "name": "Unity NuGet",
-      "url": "https://unitynuget-registry.azurewebsites.net",
-      "scopes": ["org.nuget"]
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.dbrizov.naughtyattributes",
+        "com.openupm"
+      ]
     }
   ],
   "dependencies": {

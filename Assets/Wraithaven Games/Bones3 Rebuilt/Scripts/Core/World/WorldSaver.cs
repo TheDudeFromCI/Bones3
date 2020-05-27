@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace WraithavenGames.Bones3
@@ -16,26 +18,25 @@ namespace WraithavenGames.Bones3
         internal WorldSaver(World world)
         {
             m_World = world;
-            m_World.AddChunkLoadHandler(this);
         }
 
         /// <inheritdoc cref="IChunkLoadHandler"/>
-        public void OnChunkLoad(Chunk chunk)
+        public bool OnChunkLoad(Chunk chunk)
         {
 #if UNITY_EDITOR
             // In the editor, all world data is in this one folder.
-            string folder = $"{Application.dataPath}/Wraithaven Games/Bones3 Rebuilt/StreamingAssets/Worlds/{m_World.ID}/Chunks";
-            TryLoadChunk(chunk, folder);
+            string folder = $"{Application.dataPath}/../Bones3/Worlds/{m_World.ID}/Chunks";
+            return TryLoadChunk(chunk, folder);
 
 #else
             // First try to load the chunk from persistant data path.
             string folder = $"{Application.persistentDataPath}/Worlds/{m_World.ID}/Chunks";
-            if(TryLoadChunk(chunk, folder))
-                return;
+            if (TryLoadChunk(chunk, folder))
+                return true;
 
             // If it doesn't exist, try loading from the streaming assets path.
             folder = $"{Application.streamingAssetsPath}/Worlds/{m_World.ID}/Chunks";
-            TryLoadChunk(chunk, folder);
+            return TryLoadChunk(chunk, folder);
 #endif
         }
 
@@ -47,8 +48,16 @@ namespace WraithavenGames.Bones3
         /// <returns>True if data was loaded. False otherwise.</returns>
         private bool TryLoadChunk(Chunk chunk, string folder)
         {
-            // TODO Load the chunk
-            return true;
+            var task = new ChunkLoadOperation(folder, chunk);
+            try
+            {
+                task.FinishTask();
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -56,23 +65,34 @@ namespace WraithavenGames.Bones3
         /// </summary>
         internal void SaveWorld()
         {
-            foreach (var chunk in m_World.ChunkIterator())
-                SaveChunk(chunk);
-        }
-
-        /// <summary>
-        /// Saves a given chunk to file.
-        /// </summary>
-        /// <param name="chunk">The chunk to save.</param>
-        private void SaveChunk(Chunk chunk)
-        {
+            List<ChunkSaveOperation> operations = new List<ChunkSaveOperation>();
 #if UNITY_EDITOR
-            string folder = $"{Application.dataPath}/Wraithaven Games/Bones3 Rebuilt/StreamingAssets/Worlds/{m_World.ID}/Chunks";
+            string folder = $"{Application.dataPath}/../Bones3/Worlds/{m_World.ID}/Chunks";
 #else
             string folder = $"{Application.persistentDataPath}/Worlds/{m_World.ID}/Chunks";
 #endif
 
-            // TODO Save the chunk
+            foreach (var chunk in m_World.ChunkIterator())
+            {
+                if (chunk.IsModified)
+                    operations.Add(new ChunkSaveOperation(folder, chunk));
+            }
+
+            List<System.Exception> exceptions = new List<System.Exception>();
+            foreach (var op in operations)
+            {
+                try
+                {
+                    op.FinishTask();
+                }
+                catch (System.Exception e)
+                {
+                    exceptions.Add(e);
+                }
+            }
+
+            if (exceptions.Count > 0) // We still want to throw all exceptions, but ensure tasks finish first.
+                throw new System.AggregateException(exceptions);
         }
     }
 }

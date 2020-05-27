@@ -14,8 +14,18 @@ namespace WraithavenGames.Bones3
         private const int CHUNK_FILE_VERSION = 1;
 
         private readonly Task m_Task;
-        private readonly string m_File;
-        private readonly Chunk m_Chunk;
+
+        /// <summary>
+        /// Gets the file being targeted by this operation.
+        /// </summary>
+        /// <value>The file.</value>
+        internal string OutputFile { get; }
+
+        /// <summary>
+        /// Gets the chunk being targeted by this operation.
+        /// </summary>
+        /// <value>The chunk.</value>
+        internal Chunk Chunk { get; }
 
         /// <summary>
         /// Creates and starts a new chunk save operation for the given chunk.
@@ -24,8 +34,8 @@ namespace WraithavenGames.Bones3
         /// <param name="chunk">The chunk to save.</param>
         internal ChunkSaveOperation(string folder, Chunk chunk)
         {
-            m_File = $"{folder}/{chunk.Position.X}-{chunk.Position.Y}-{chunk.Position.Z}.dat";
-            m_Chunk = chunk;
+            OutputFile = $"{folder}/{chunk.Position.X}-{chunk.Position.Y}-{chunk.Position.Z}.dat";
+            Chunk = chunk;
 
             m_Task = Task.Run(Run);
         }
@@ -38,15 +48,15 @@ namespace WraithavenGames.Bones3
         /// </exception>
         private void Run()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(m_File));
+            Directory.CreateDirectory(Path.GetDirectoryName(OutputFile));
 
-            var fileStream = File.Open(m_File, FileMode.OpenOrCreate);
+            var fileStream = File.Open(OutputFile, FileMode.OpenOrCreate);
             using(var writer = new BinaryWriter(fileStream))
             {
                 writer.Write(CHUNK_FILE_VERSION);
-                writer.Write(m_Chunk.Size.IntBits);
+                writer.Write(Chunk.Size.IntBits);
 
-                var blocks = m_Chunk.Blocks;
+                var blocks = Chunk.Blocks;
                 for (int i = 0; i < blocks.Length; i++)
                     writer.Write(blocks[i]);
             }
@@ -61,7 +71,7 @@ namespace WraithavenGames.Bones3
         public void FinishTask()
         {
             m_Task.Wait();
-            m_Chunk.IsModified = false;
+            Chunk.IsModified = false;
         }
     }
 }

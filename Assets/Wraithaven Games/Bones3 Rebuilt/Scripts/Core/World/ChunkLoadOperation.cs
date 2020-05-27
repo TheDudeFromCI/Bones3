@@ -9,8 +9,18 @@ namespace WraithavenGames.Bones3
     internal class ChunkLoadOperation
     {
         private readonly Task m_Task;
-        private readonly string m_File;
-        private readonly Chunk m_Chunk;
+
+        /// <summary>
+        /// Gets the file being targeted by this operation.
+        /// </summary>
+        /// <value>The file.</value>
+        internal string OutputFile { get; }
+
+        /// <summary>
+        /// Gets the chunk being targeted by this operation.
+        /// </summary>
+        /// <value>The chunk.</value>
+        internal Chunk Chunk { get; }
 
         /// <summary>
         /// Creates and starts a new chunk load operation for the given chunk.
@@ -19,8 +29,8 @@ namespace WraithavenGames.Bones3
         /// <param name="chunk">The chunk to load.</param>
         internal ChunkLoadOperation(string folder, Chunk chunk)
         {
-            m_File = $"{folder}/{chunk.Position.X}-{chunk.Position.Y}-{chunk.Position.Z}.dat";
-            m_Chunk = chunk;
+            OutputFile = $"{folder}/{chunk.Position.X}-{chunk.Position.Y}-{chunk.Position.Z}.dat";
+            Chunk = chunk;
 
             m_Task = Task.Run(Run);
         }
@@ -36,7 +46,7 @@ namespace WraithavenGames.Bones3
         /// </exception>
         private void Run()
         {
-            var fileStream = File.Open(m_File, FileMode.Open);
+            var fileStream = File.Open(OutputFile, FileMode.Open);
             using(var reader = new BinaryReader(fileStream))
             {
                 int fileVersion = reader.ReadInt32();
@@ -60,10 +70,10 @@ namespace WraithavenGames.Bones3
         private void LoadChunkDataVersion1(BinaryReader reader)
         {
             var chunkSize = reader.ReadInt32();
-            if (chunkSize != m_Chunk.Size.IntBits)
+            if (chunkSize != Chunk.Size.IntBits)
                 throw new InvalidDataException("Chunk size does not match expected!");
 
-            var blocks = m_Chunk.Blocks;
+            var blocks = Chunk.Blocks;
             for (int i = 0; i < blocks.Length; i++)
                 blocks[i] = reader.ReadUInt16();
         }
@@ -77,7 +87,7 @@ namespace WraithavenGames.Bones3
         public void FinishTask()
         {
             m_Task.Wait();
-            m_Chunk.IsModified = false;
+            Chunk.IsModified = false;
         }
     }
 }
