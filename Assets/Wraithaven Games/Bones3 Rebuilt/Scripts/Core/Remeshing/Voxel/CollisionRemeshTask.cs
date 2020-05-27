@@ -3,15 +3,15 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// Generates the voxel collision mesh for a chunk.
     /// </summary>
-    public class CollisionRemeshTask : VoxelChunkMesher
+    internal class CollisionRemeshTask : VoxelChunkMesher
     {
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        public CollisionRemeshTask(ChunkProperties chunkProperties) :
-            base(chunkProperties, true, false)
+        internal CollisionRemeshTask(ChunkProperties chunkProperties, GreedyMesher mesher) :
+            base(chunkProperties, mesher)
         { }
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        public override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
+        protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
             if (!block.IsSolid)

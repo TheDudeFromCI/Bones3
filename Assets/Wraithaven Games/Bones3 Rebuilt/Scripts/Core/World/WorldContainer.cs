@@ -8,9 +8,7 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class WorldContainer
     {
-        private readonly List<Chunk> chunksToRemesh = new List<Chunk>();
         private readonly List<RemeshTaskStack> taskStacks = new List<RemeshTaskStack>();
-        private readonly World m_World;
         private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
@@ -26,19 +24,25 @@ namespace WraithavenGames.Bones3
         internal RemeshHandler RemeshHandler { get; }
 
         /// <summary>
+        /// Gets the world this container is managing.
+        /// </summary>
+        /// <value></value>
+        internal World World { get; }
+
+        /// <summary>
         /// Creates a new world container for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
         internal WorldContainer(World world, BlockWorld blockWorld)
         {
-            m_World = world;
+            World = world;
             m_BlockWorld = blockWorld;
 
             ChunkLoader = new AsyncChunkLoader();
             ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
 
-            RemeshHandler = new RemeshHandler();
-            RemeshHandler.AddDistributor(new StandardDistributor());
+            RemeshHandler = new RemeshHandler(blockWorld);
+            RemeshHandler.AddDistributor(new StandardDistributor(World.ChunkSize));
         }
 
         /// <summary>
@@ -48,8 +52,8 @@ namespace WraithavenGames.Bones3
         /// <param name="blockID">The block ID to assign.</param>
         internal void SetBlock(BlockPosition blockPos, ushort blockID)
         {
-            var chunkPos = blockPos.ToChunkPosition(m_World.ChunkSize);
-            blockPos &= m_World.ChunkSize.Mask;
+            var chunkPos = blockPos.ToChunkPosition(World.ChunkSize);
+            blockPos &= World.ChunkSize.Mask;
 
             var chunk = GetChunk(chunkPos, true);
             if (chunk.GetBlockID(blockPos) == blockID)
@@ -69,8 +73,8 @@ namespace WraithavenGames.Bones3
         /// <returns>The block type.</returns>
         internal ushort GetBlock(BlockPosition blockPos, bool createChunk = false)
         {
-            var chunkPos = blockPos.ToChunkPosition(m_World.ChunkSize);
-            blockPos &= m_World.ChunkSize.Mask;
+            var chunkPos = blockPos.ToChunkPosition(World.ChunkSize);
+            blockPos &= World.ChunkSize.Mask;
 
             return GetChunk(chunkPos, createChunk)?.GetBlockID(blockPos) ?? 0;
         }
@@ -83,18 +87,15 @@ namespace WraithavenGames.Bones3
         /// <returns>The chunk, or null if it doesn't exist.</returns>
         private Chunk GetChunk(ChunkPosition chunkPos, bool create)
         {
-            var chunk = m_World.GetChunk(chunkPos);
+            var chunk = World.GetChunk(chunkPos);
             if (chunk != null || !create)
                 return chunk;
 
-            chunk = m_World.CreateChunk(chunkPos);
+            chunk = World.CreateChunk(chunkPos);
             bool remesh = ChunkLoader.LoadSync(chunk);
 
             if (remesh)
-            {
-                RemeshAllNeighbors(chunkPos);
-                RemeshDirtyChunks();
-            }
+                RemeshAllNeighbors(chunkPos, false);
 
             return chunk;
         }
@@ -103,15 +104,15 @@ namespace WraithavenGames.Bones3
         /// Remeshes the chunk at the given position and all chunks touching it.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
-        private void RemeshAllNeighbors(ChunkPosition chunkPos)
+        private void RemeshAllNeighbors(ChunkPosition chunkPos, bool later)
         {
-            RemeshChunkAt(chunkPos);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(0));
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(1));
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(2));
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(3));
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(4));
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(5));
+            RemeshChunkAt(chunkPos, later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(0), later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(1), later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(2), later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(3), later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(4), later);
+            RemeshChunkAt(chunkPos.ShiftAlongDirection(5), later);
         }
 
         /// <summary>
@@ -121,27 +122,27 @@ namespace WraithavenGames.Bones3
         /// <param name="toRemesh">The chunk position.</param>
         private void RemeshEffectedChunks(BlockPosition blockPos, ChunkPosition chunkPos)
         {
-            RemeshChunkAt(chunkPos);
+            RemeshChunkAt(chunkPos, false);
 
-            int max = m_World.ChunkSize.Mask;
+            int max = World.ChunkSize.Mask;
 
             if (blockPos.X == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(1));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(1), false);
 
             if (blockPos.X == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(0));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(0), false);
 
             if (blockPos.Y == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(3));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(3), false);
 
             if (blockPos.Y == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(2));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(2), false);
 
             if (blockPos.Z == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(5));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(5), false);
 
             if (blockPos.Z == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(4));
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(4), false);
         }
 
         /// <summary>
@@ -149,70 +150,16 @@ namespace WraithavenGames.Bones3
         /// Preforms no action if the chunk does not exist.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
-        private void RemeshChunkAt(ChunkPosition chunkPos)
+        /// <param name="later">Whether to remesh the chunk now or later.</param>
+        private void RemeshChunkAt(ChunkPosition chunkPos, bool later)
         {
-            var chunk = m_World.GetChunk(chunkPos);
-            if (chunk == null)
+            if (!World.DoesChunkExist(chunkPos))
                 return;
 
-            if (!chunksToRemesh.Contains(chunk))
-                chunksToRemesh.Add(chunk);
-        }
-
-        /// <summary>
-        /// Triggers all dirty chunks to be remeshed.
-        /// </summary>
-        internal void RemeshDirtyChunks(bool later = false)
-        {
-            foreach (var chunk in chunksToRemesh)
-                UpdateChunk(chunk, m_BlockWorld.BlockList, later);
-
-            chunksToRemesh.Clear();
-        }
-
-        /// <summary>
-        /// Sends a chunk to the remesh handler.
-        /// </summary>
-        /// <param name="chunk">The chunk to remesh.</param>
-        /// <param name="blockList">The blockList to use when remeshing this chunk.</param>
-        private void UpdateChunk(Chunk chunk, BlockList blockList, bool later = false)
-        {
-            var chunkSize = m_World.ChunkSize;
-
-            var chunkProperties = new ChunkProperties();
-            chunkProperties.Reset(chunk.Position, chunkSize);
-
-            // TODO Refactor and Optimize this
-
-            for (int x = -1; x <= chunkSize.Value; x++)
-                for (int y = -1; y <= chunkSize.Value; y++)
-                    for (int z = -1; z <= chunkSize.Value; z++)
-                    {
-                        var blockPos = new BlockPosition(x, y, z);
-
-                        ushort blockID;
-                        if (blockPos.IsWithinGrid(chunkSize))
-                            blockID = chunk.GetBlockID(blockPos);
-                        else
-                        {
-                            var worldBlockPos = blockPos.LocalToWorld(chunkSize, chunk.Position);
-                            var neighborChunkPos = worldBlockPos.ToChunkPosition(chunkSize);
-                            var neighborChunk = m_World.GetChunk(neighborChunkPos);
-
-                            if (neighborChunk == null)
-                                blockID = 0;
-                            else
-                                blockID = neighborChunk.GetBlockID(worldBlockPos & chunkSize.Mask);
-                        }
-
-                        var blockType = blockList.GetBlockType(blockID);
-                        chunkProperties.SetBlock(blockPos, blockType);
-                    }
-
             if (later)
-                RemeshHandler.RemeshChunkLater(chunkProperties);
+                RemeshHandler.RemeshChunkLater(chunkPos);
             else
-                RemeshHandler.RemeshChunk(chunkProperties);
+                RemeshHandler.RemeshChunk(chunkPos);
         }
 
         /// <summary>
@@ -239,10 +186,7 @@ namespace WraithavenGames.Bones3
             var requiresRemesh = ChunkLoader.Update(out Chunk chunk);
 
             if (requiresRemesh)
-            {
-                RemeshAllNeighbors(chunk.Position);
-                RemeshDirtyChunks(true);
-            }
+                RemeshAllNeighbors(chunk.Position, true);
         }
 
         /// <summary>
@@ -252,11 +196,11 @@ namespace WraithavenGames.Bones3
         /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
         public bool LoadChunkAsync(ChunkPosition chunkPos)
         {
-            var chunk = m_World.GetChunk(chunkPos);
+            var chunk = World.GetChunk(chunkPos);
             if (chunk != null)
                 return false;
 
-            chunk = m_World.CreateChunk(chunkPos);
+            chunk = World.CreateChunk(chunkPos);
             ChunkLoader.LoadAsync(chunk);
             return true;
         }

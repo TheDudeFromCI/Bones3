@@ -73,8 +73,8 @@ namespace WraithavenGames.Bones3
             }
         }
 
+        private readonly StandardDistributor m_Distributor;
         private readonly QuadBuilder m_QuadBuilder;
-        private readonly bool m_EnableUVs;
         private readonly Quad[] m_Quads;
         private readonly int m_ChunkSize;
 
@@ -82,13 +82,13 @@ namespace WraithavenGames.Bones3
         /// Creates a new greedy mesher.
         /// </summary>
         /// <param name="chunkSize">The size of the chunk being meshed.</param>
-        /// <param name="enableUVs">Whether or not to generate UVs.</param>
-        public GreedyMesher(GridSize chunkSize, bool enableUVs)
+        /// <param name="distributor">The distributor which created this mesher.</param>
+        internal GreedyMesher(GridSize chunkSize, StandardDistributor distributor)
         {
+            m_Distributor = distributor;
             m_ChunkSize = chunkSize.Value;
-            m_EnableUVs = enableUVs;
             m_Quads = new Quad[m_ChunkSize * m_ChunkSize];
-            m_QuadBuilder = new QuadBuilder(enableUVs);
+            m_QuadBuilder = new QuadBuilder();
         }
 
         /// <summary>
@@ -102,9 +102,6 @@ namespace WraithavenGames.Bones3
         /// </remarks>
         public void SetQuad(int x, int y, Quad state)
         {
-            if (!m_EnableUVs && state.Active)
-                state = new Quad(0, 0);
-
             if (x < 0 || x >= m_ChunkSize ||
                 y < 0 || y >= m_ChunkSize)
                 throw new System.ArgumentOutOfRangeException($"Quad position ({x}, {y}) not within chunk!");
@@ -207,6 +204,14 @@ namespace WraithavenGames.Bones3
             for (int x = 0; x < m_ChunkSize; x++)
                 for (int y = 0; y < m_ChunkSize; y++)
                     yield return new QuadPos(x, y, GetQuad(x, y));
+        }
+
+        /// <summary>
+        /// Returns this mesher back to the pool when it is done being used.
+        /// </summary>
+        internal void ReturnToPool()
+        {
+            m_Distributor.ReturnMesher(this);
         }
     }
 }

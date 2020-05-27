@@ -95,15 +95,10 @@ namespace WraithavenGames.Bones3
             foreach (var block in editBatch())
             {
                 if (block.BlockID >= m_BlockList.BlockCount)
-                {
-                    m_WorldContainer.RemeshDirtyChunks();
                     throw new System.ArgumentOutOfRangeException("editBatch", $"Invalid block type '{block.BlockID}'!");
-                }
 
                 m_WorldContainer.SetBlock(block.Position, block.BlockID);
             }
-
-            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>
@@ -117,7 +112,6 @@ namespace WraithavenGames.Bones3
                 throw new System.ArgumentOutOfRangeException("blockID", $"Invalid block type '{blockID}'!");
 
             m_WorldContainer.SetBlock(blockPos, blockID);
-            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>
@@ -134,18 +128,22 @@ namespace WraithavenGames.Bones3
             return m_BlockList.GetBlockType(blockID);
         }
 
-        // A buffer for pulling remesh tasks.
-
         /// <summary>
         /// Called each frame to pull remesh tasks from the remesh handler.
         /// </summary>
         protected void Update()
         {
-            m_WorldContainer.FinishRemeshTasks(task =>
-            {
-                var chunk = GetChunk(task.ChunkPosition);
-                m_ChunkMeshBuilder.UpdateMesh(task, chunk);
-            });
+            m_WorldContainer.FinishRemeshTasks(BuildChunkMesh);
+        }
+
+        /// <summary>
+        /// Updates a chunk mesh based on the results of a finished task stack.
+        /// </summary>
+        /// <param name="task">The finished task stack.</param>
+        private void BuildChunkMesh(RemeshTaskStack task)
+        {
+            var chunk = GetChunk(task.ChunkPosition);
+            m_ChunkMeshBuilder.UpdateMesh(task, chunk);
         }
 
         /// <summary>

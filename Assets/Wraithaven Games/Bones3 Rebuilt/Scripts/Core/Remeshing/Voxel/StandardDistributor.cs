@@ -5,9 +5,18 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// Generates the basic voxel visual and collision chunk meshes.
     /// </summary>
-    public class StandardDistributor : IRemeshDistributor
+    internal class StandardDistributor : IRemeshDistributor
     {
+        private const int MAX_MESHER_POOL_SIZE = 16;
+
+        private readonly List<GreedyMesher> m_GreedyMesherPool = new List<GreedyMesher>();
+        private readonly GridSize m_ChunkSize;
         private bool[] m_MaterialBuffer = new bool[128];
+
+        internal StandardDistributor(GridSize chunkSize)
+        {
+            m_ChunkSize = chunkSize;
+        }
 
         /// <inheritdoc cref="IRemeshTask"/>
         public void CreateTasks(ChunkProperties properties, RemeshTaskStack taskStack)
@@ -39,7 +48,7 @@ namespace WraithavenGames.Bones3
                         continue;
 
                     m_MaterialBuffer[material] = true;
-                    taskStack.AddTask(new VisualRemeshTask(properties, material));
+                    taskStack.AddTask(new VisualRemeshTask(properties, material, PullMesher()));
                 }
             }
         }
@@ -83,7 +92,7 @@ namespace WraithavenGames.Bones3
 
                 if (type.IsSolid)
                 {
-                    taskStack.AddTask(new CollisionRemeshTask(properties));
+                    taskStack.AddTask(new CollisionRemeshTask(properties, PullMesher()));
                     return;
                 }
             }
@@ -100,6 +109,35 @@ namespace WraithavenGames.Bones3
                 for (int y = 0; y < chunkSize; y++)
                     for (int z = 0; z < chunkSize; z++)
                         yield return new BlockPosition(x, y, z);
+        }
+
+        /// <summary>
+        /// Pulls a greedy mesher instance from the object pool.
+        /// </summary>
+        /// <returns>The greedy mesher.</returns>
+        private GreedyMesher PullMesher()
+        {
+            if (m_GreedyMesherPool.Count > 0)
+            {
+                var index = m_GreedyMesherPool.Count - 1;
+                var mesher = m_GreedyMesherPool[index];
+                m_GreedyMesherPool.RemoveAt(index);
+                return mesher;
+            }
+
+            return new GreedyMesher(m_ChunkSize, this);
+        }
+
+        /// <summary>
+        /// Returns a greedy mesher back to the object pool.
+        /// </summary>
+        /// <param name="mesher">The mesher to return.</param>
+        internal void ReturnMesher(GreedyMesher mesher)
+        {
+            if (m_GreedyMesherPool.Count >= MAX_MESHER_POOL_SIZE)
+                return;
+
+            m_GreedyMesherPool.Add(mesher);
         }
     }
 }

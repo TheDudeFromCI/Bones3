@@ -3,7 +3,7 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// Generates a visual chunk mesh for a single submesh layer.
     /// </summary>
-    public class VisualRemeshTask : VoxelChunkMesher
+    internal class VisualRemeshTask : VoxelChunkMesher
     {
         /// <summary>
         /// Gets the material ID this remesh task is targeting.
@@ -12,11 +12,11 @@ namespace WraithavenGames.Bones3
         public int MaterialID { get; }
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        public VisualRemeshTask(ChunkProperties chunkProperties, int materialID) :
-            base(chunkProperties, false, true) => MaterialID = materialID;
+        internal VisualRemeshTask(ChunkProperties chunkProperties, int materialID, GreedyMesher mesher) :
+            base(chunkProperties, mesher) => MaterialID = materialID;
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        public override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
+        protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
             if (block.GetMaterialID(side) != MaterialID)

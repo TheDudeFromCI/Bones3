@@ -35,6 +35,8 @@ namespace WraithavenGames.Bones3
 
         public override string ToString() => $"Chunk Pos:[{X}, {Y}, {Z}]";
 
+        public bool Equals(ChunkPosition other) => X == other.X && Y == other.Y && Z == other.Z;
+
         public static ChunkPosition operator +(ChunkPosition a, ChunkPosition b) =>
             new ChunkPosition(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 

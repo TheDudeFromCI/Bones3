@@ -85,15 +85,8 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="grid">The grid to compare within.</param>
         /// <returns>The array index at the given location.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// If the voxel position is negative or greater than or equal to the
-        /// grid size along any axis.
-        /// </exception>
         public static int Index(this IVoxelPosition pos, GridSize grid)
         {
-            if (!pos.IsWithinGrid(grid))
-                throw new System.ArgumentOutOfRangeException($"Voxel position ({pos}) is outside of this grid size ({grid})!");
-
             int size = grid.Value;
             return pos.X * size * size + pos.Y * size + pos.Z;
         }

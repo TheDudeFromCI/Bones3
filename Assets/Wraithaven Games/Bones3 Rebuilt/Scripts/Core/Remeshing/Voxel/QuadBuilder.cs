@@ -63,22 +63,12 @@ namespace WraithavenGames.Bones3
         }
 
         private readonly UVLookupTable m_UVLookupTable = new UVLookupTable();
-        private readonly bool m_EnableUVs;
 
         /// <summary>
         /// Gets the mesh this builder is writing to.
         /// </summary>
         /// <value>The mesh.</value>
         public ProcMesh Mesh { get; set; }
-
-        /// <summary>
-        /// Creates a new quad builder.
-        /// </summary>
-        /// <param name="enableUVs">Whether or not UVs should be generated for quads.</param>
-        public QuadBuilder(bool enableUVs)
-        {
-            m_EnableUVs = enableUVs;
-        }
 
         /// <summary>
         /// Writes a quad to the mesh.
@@ -89,9 +79,7 @@ namespace WraithavenGames.Bones3
             AddTriangleIndices();
             AddVertices(quad);
             AddNormals(quad.Side);
-
-            if (m_EnableUVs)
-                AddUVs(quad);
+            AddUVs(quad);
         }
 
         /// <summary>

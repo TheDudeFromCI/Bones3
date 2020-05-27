@@ -8,6 +8,7 @@ namespace WraithavenGames.Bones3
     public class RemeshTaskStack
     {
         private readonly List<IRemeshTask> m_Tasks = new List<IRemeshTask>();
+        private ChunkProperties m_ChunkProperties;
 
         /// <summary>
         /// Gets the position of the chunk this task stack is targeting.
@@ -44,8 +45,12 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Creates a new remesh task stack.
         /// </summary>
-        /// <param name="chunkPosition">The position of the chunk being remeshed.</param>
-        internal RemeshTaskStack(ChunkPosition chunkPosition) => ChunkPosition = chunkPosition;
+        /// <param name="chunkProperties">The chunk properties remeshed.</param>
+        internal RemeshTaskStack(ChunkProperties chunkProperties)
+        {
+            m_ChunkProperties = chunkProperties;
+            ChunkPosition = chunkProperties.ChunkPosition;
+        }
 
         /// <summary>
         /// Adds a remesh task to this stack.
@@ -63,10 +68,14 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Waits for all tasks to finish before returning.
         /// </summary>
-        internal void Finish()
+        internal ChunkProperties Finish()
         {
             foreach (var task in m_Tasks)
                 task.Finish();
+
+            var props = m_ChunkProperties;
+            m_ChunkProperties = null; // Clear memory reference
+            return props;
         }
     }
 }

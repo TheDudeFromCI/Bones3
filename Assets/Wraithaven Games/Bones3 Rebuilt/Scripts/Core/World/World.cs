@@ -47,9 +47,11 @@ namespace WraithavenGames.Bones3
         /// <returns>The block container, or null if it doesn't exist.</returns>
         internal Chunk GetChunk(ChunkPosition pos)
         {
-            foreach (var chunk in m_Chunks)
-                if (chunk.Position.Equals(pos))
-                    return chunk;
+            for (int i = 0; i < m_Chunks.Count; i++)
+            {
+                if (m_Chunks[i].Position.Equals(pos))
+                    return m_Chunks[i];
+            }
 
             return null;
         }

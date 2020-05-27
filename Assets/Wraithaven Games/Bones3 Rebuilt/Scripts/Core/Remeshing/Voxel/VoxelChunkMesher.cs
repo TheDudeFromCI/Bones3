@@ -6,11 +6,10 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// Iterates over a set of chunk properties in order to generate a chunk mesh.
     /// </summary>
-    public abstract class VoxelChunkMesher : IRemeshTask
+    internal abstract class VoxelChunkMesher : IRemeshTask
     {
         private readonly ChunkProperties m_ChunkProperties;
         private readonly GreedyMesher m_GreedyMesher;
-        private readonly bool m_WieldVertices;
         private readonly Task m_Task;
         private readonly ProcMesh m_Mesh;
 
@@ -21,16 +20,12 @@ namespace WraithavenGames.Bones3
         /// Creates a new voxel chunk mesher.
         /// </summary>
         /// <param name="chunkProperties">The chunk properties to handle.</param>
-        /// <param name="wield">Whether or not to wield vertices after remeshing.</param>
-        /// <param name="enableUVs">Whether or not to generate UVs in the mesh.</param>
-        public VoxelChunkMesher(ChunkProperties chunkProperties, bool wieldVertices, bool enableUVs)
+        /// <param name="greedyMesher">The greedy mesher to use.</param>
+        internal VoxelChunkMesher(ChunkProperties chunkProperties, GreedyMesher greedyMesher)
         {
             m_ChunkProperties = chunkProperties;
-            m_GreedyMesher = new GreedyMesher(chunkProperties.ChunkSize, enableUVs);
-            m_WieldVertices = wieldVertices;
-
+            m_GreedyMesher = greedyMesher;
             m_Mesh = new ProcMesh();
-
             m_Task = Task.Run(Remesh);
         }
 
@@ -38,7 +33,7 @@ namespace WraithavenGames.Bones3
         /// Iterates over all the blocks in a chunk and generates quads as needed, finally
         /// remeshing them into the output mesh when complete.
         /// </summary>
-        void Remesh()
+        private void Remesh()
         {
             int chunkSize = m_ChunkProperties.ChunkSize.Value;
 
@@ -71,8 +66,7 @@ namespace WraithavenGames.Bones3
                 }
             }
 
-            if (m_WieldVertices)
-                m_Mesh.WieldVertices();
+            m_Mesh.WieldVertices();
         }
 
         /// <summary>
@@ -108,7 +102,7 @@ namespace WraithavenGames.Bones3
         /// <param name="t">The layer.</param>
         /// <param name="a">The plane X coordinate.</param>
         /// <param name="b">The plane Y coordinate.</param>
-        BlockPosition GetAsBlockCoords(int j, int t, int a, int b)
+        private BlockPosition GetAsBlockCoords(int j, int t, int a, int b)
         {
             switch (j)
             {
@@ -143,6 +137,6 @@ namespace WraithavenGames.Bones3
         /// <param name="pos">The block position.</param>
         /// <param name="side">The side of the block being checked.</param>
         /// <returns>True if the quad should be placed. False otherwise.</returns>
-        public abstract bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side);
+        protected abstract bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side);
     }
 }

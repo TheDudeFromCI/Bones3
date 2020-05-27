@@ -9,39 +9,59 @@ namespace WraithavenGames.Bones3
     {
         private readonly List<IRemeshDistributor> m_Distributors = new List<IRemeshDistributor>();
         private readonly List<RemeshTaskStack> m_ActiveTasks = new List<RemeshTaskStack>();
-        private readonly List<ChunkProperties> m_PendingRemesh = new List<ChunkProperties>();
+        private readonly List<ChunkPosition> m_PendingRemesh = new List<ChunkPosition>();
+        private readonly ChunkPropertiesPool m_ChunkPropertiesPool;
+        private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
         /// Gets the number of active tasks currently being run.
         /// </summary>
         internal int ActiveTasks => m_ActiveTasks.Count;
 
+        internal RemeshHandler(BlockWorld blockWorld)
+        {
+            m_BlockWorld = blockWorld;
+            m_ChunkPropertiesPool = new ChunkPropertiesPool(m_BlockWorld.ChunkSize);
+        }
+
         /// <summary>
         /// Analyses the given chunk and starts a set of remesh tasks for handling that chunk.
         /// If the chunk was scheduled to be remeshed later, it will be immediately be remeshed.
         /// If the chunk is already being remeshed, this method does nothing.
         /// </summary>
-        /// <param name="properties">The chunk properties to analyze.</param>
-        internal void RemeshChunk(ChunkProperties properties, bool pendingTask = false)
+        /// <param name="chunkPos">The chunk target position.</param>
+        /// <param name="pendingTask">
+        /// If true, this task is allowed to task any number of frames to finish. Otherwise, the task
+        /// is required to finish the next frame.
+        /// </param>
+        internal void RemeshChunk(ChunkPosition chunkPos, bool pendingTask = false)
         {
-            foreach (var task in m_ActiveTasks)
-                if (task.ChunkPosition.Equals(properties.ChunkPosition))
+            for (int i = 0; i < m_ActiveTasks.Count; i++)
+            {
+                if (m_ActiveTasks[i].ChunkPosition.Equals(chunkPos))
+                {
+                    m_ActiveTasks[i].IsPendingTask = false;
                     return;
+                }
+            }
 
             for (int i = 0; i < m_PendingRemesh.Count; i++)
             {
-                if (m_PendingRemesh[i].ChunkPosition.Equals(properties.ChunkPosition))
+                if (m_PendingRemesh[i].Equals(chunkPos))
                 {
                     m_PendingRemesh.RemoveAt(i);
                     break;
                 }
             }
 
-            var taskStack = new RemeshTaskStack(properties.ChunkPosition);
-            m_ActiveTasks.Add(taskStack);
+            var properties = m_ChunkPropertiesPool.Pull();
+            var blockList = m_BlockWorld.BlockList;
+            var world = m_BlockWorld.WorldContainer.World;
+            ChunkAnalyzer.LoadProperties(properties, blockList, world, chunkPos);
 
-            if (pendingTask)
-                taskStack.IsPendingTask = true;
+            var taskStack = new RemeshTaskStack(properties);
+            taskStack.IsPendingTask = pendingTask;
+            m_ActiveTasks.Add(taskStack);
 
             foreach (var dis in m_Distributors)
                 dis.CreateTasks(properties, taskStack);
@@ -51,19 +71,19 @@ namespace WraithavenGames.Bones3
         /// Schedules the chunk to be remeshed at a later point in time, after all primary
         /// remesh tasks are finished.
         /// </summary>
-        /// <param name="properties">The chunk properties to analyze</param>
+        /// <param name="chunkPos">The target chunk position.</param>
         /// <see cref="RemeshChunk(ChunkProperties)"/>
-        internal void RemeshChunkLater(ChunkProperties properties)
+        internal void RemeshChunkLater(ChunkPosition chunkPos)
         {
             foreach (var task in m_ActiveTasks)
-                if (task.ChunkPosition.Equals(properties.ChunkPosition))
+                if (task.ChunkPosition.Equals(chunkPos))
                     return;
 
             foreach (var task in m_PendingRemesh)
-                if (task.ChunkPosition.Equals(properties.ChunkPosition))
+                if (task.Equals(chunkPos))
                     return;
 
-            m_PendingRemesh.Add(properties);
+            m_PendingRemesh.Add(chunkPos);
         }
 
         /// <summary>
@@ -85,8 +105,9 @@ namespace WraithavenGames.Bones3
                 }
 
                 m_ActiveTasks.RemoveAt(skipped);
+                var properties = task.Finish();
+                m_ChunkPropertiesPool.Return(properties);
 
-                task.Finish();
                 finishedTasks.Add(task);
             }
         }

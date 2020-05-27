@@ -1,53 +1,31 @@
 namespace WraithavenGames.Bones3
 {
-    // TODO Add locking mechanisms to ensure thread safety to Reset() and SetBlock() methods.
-
     /// <summary>
     /// Provides a method of storing chunk properties for remeshing.
     /// </summary>
     public class ChunkProperties
     {
-        private BlockType[] m_Blocks = new BlockType[0];
+        private readonly BlockType[] m_Blocks = new BlockType[0];
 
         /// <summary>
         /// Gets the size of the chunk being handled.
         /// </summary>
         /// <value>The chunk size.</value>
-        public GridSize ChunkSize { get; private set; }
+        public GridSize ChunkSize { get; }
 
         /// <summary>
         /// Gets the position of the chunk.
         /// </summary>
         /// <value>The chunk position.</value>
-        public ChunkPosition ChunkPosition { get; private set; }
+        public ChunkPosition ChunkPosition { get; internal set; }
 
-        /// <summary>
-        /// Prepares this chunk properties for a chunk with the given size and position. This
-        /// should only be called by the main thread when tasks are not actively using it. This
-        /// method will also clear all block data currently stored.
-        /// </summary>
-        /// <param name="chunkPos">The chunk position.</param>
-        /// <param name="chunkSize">The chunk size.</param>
-        /// <remarks>
-        /// If the chunk size is less than the allocated memory size, then a new array is allocated.
-        /// If analyzing many chunks of different sizes, it minimizes garbage creation by scanning
-        /// the largest chunk first.
-        /// </remarks>
-        public void Reset(ChunkPosition chunkPos, GridSize chunkSize)
+        internal ChunkProperties(GridSize chunkSize)
         {
-            ChunkPosition = chunkPos;
             ChunkSize = chunkSize;
 
             int blockCount = chunkSize.Value + 2;
             blockCount *= blockCount * blockCount;
-
-            if (m_Blocks.Length < blockCount)
-                m_Blocks = new BlockType[blockCount];
-            else
-            {
-                for (int i = 0; i < m_Blocks.Length; i++)
-                    m_Blocks[i] = null;
-            }
+            m_Blocks = new BlockType[blockCount];
         }
 
         /// <summary>
