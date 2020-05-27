@@ -89,7 +89,7 @@ namespace WraithavenGames.Bones3
                     m_Camera = Camera.main;
             }
             else
-                m_Camera = UnityEditor.SceneView.lastActiveSceneView?.camera;
+                m_Camera = UnityEditor.SceneView.GetAllSceneCameras()?[0];
 #else
             if (m_Camera == null)
                 m_Camera = Camera.main;

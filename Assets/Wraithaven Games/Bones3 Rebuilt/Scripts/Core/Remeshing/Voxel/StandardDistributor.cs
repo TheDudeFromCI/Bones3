@@ -7,6 +7,8 @@ namespace WraithavenGames.Bones3
     /// </summary>
     public class StandardDistributor : IRemeshDistributor
     {
+        private bool[] m_MaterialBuffer = new bool[128];
+
         /// <inheritdoc cref="IRemeshTask"/>
         public void CreateTasks(ChunkProperties properties, RemeshTaskStack taskStack)
         {
@@ -21,7 +23,7 @@ namespace WraithavenGames.Bones3
         /// <param name="tasks">The task list to add to.</param>
         private void GenerateVisuals(ChunkProperties properties, RemeshTaskStack taskStack)
         {
-            List<int> materials = new List<int>();
+            ResetMaterialBuffer();
 
             foreach (var pos in BlockIterator(properties.ChunkSize.Value))
             {
@@ -33,13 +35,39 @@ namespace WraithavenGames.Bones3
                 for (int j = 0; j < 6; j++)
                 {
                     var material = type.GetMaterialID(j);
-                    if (materials.Contains(material))
+                    if (ContainsMaterial(material))
                         continue;
 
-                    materials.Add(material);
+                    m_MaterialBuffer[material] = true;
                     taskStack.AddTask(new VisualRemeshTask(properties, material));
                 }
             }
+        }
+
+        /// <summary>
+        /// Resets all material IDs in the material buffer.
+        /// </summary>
+        private void ResetMaterialBuffer()
+        {
+            for (int i = 0; i < m_MaterialBuffer.Length; i++)
+                m_MaterialBuffer[i] = false;
+        }
+
+        /// <summary>
+        /// Checks if the material is currently in the material buffer.
+        /// </summary>
+        /// <param name="materialID">The material ID.</param>
+        /// <returns>True if the material was already handled, false otherwise.</returns>
+        private bool ContainsMaterial(int materialID)
+        {
+            if (materialID >= m_MaterialBuffer.Length)
+            {
+                var newBuffer = new bool[materialID + 1];
+                System.Array.Copy(m_MaterialBuffer, newBuffer, m_MaterialBuffer.Length);
+                m_MaterialBuffer = newBuffer;
+            }
+
+            return m_MaterialBuffer[materialID];
         }
 
         /// <summary>
