@@ -5,16 +5,20 @@
       "path": "."
     },
     {
-      "name": "Source",
-      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts"
+      "name": "Demo",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/DEMO"
     },
     {
       "name": "Editor",
       "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Editor/Scripts"
     },
     {
-      "name": "Demo",
-      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/DEMO"
+      "name": "Source",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Scripts"
+    },
+    {
+      "name": "Shaders",
+      "path": "Assets/Wraithaven Games/Bones3 Rebuilt/Shaders"
     }
   ],
   "settings": {
