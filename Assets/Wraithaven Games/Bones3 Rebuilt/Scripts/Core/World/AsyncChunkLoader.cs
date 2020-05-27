@@ -8,8 +8,13 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class AsyncChunkLoader
     {
-        private readonly List<BackgroundLoadChunkTask> operations = new List<BackgroundLoadChunkTask>();
+        private readonly List<BackgroundLoadChunkTask> m_Operations = new List<BackgroundLoadChunkTask>();
         private readonly List<IChunkLoadHandler> m_ChunkLoadHandlers = new List<IChunkLoadHandler>();
+
+        /// <summary>
+        /// Gets the current number of active chunk loading operations.
+        /// </summary>
+        internal int ActiveTasks => m_Operations.Count;
 
         /// <summary>
         /// Triggers a chunk to load in a background task. The chunk should *not* be accessed in
@@ -24,32 +29,28 @@ namespace WraithavenGames.Bones3
             if (GetTask(chunk) != null)
                 return;
 
-            operations.Add(new BackgroundLoadChunkTask(chunk, m_ChunkLoadHandlers.ToArray()));
+            m_Operations.Add(new BackgroundLoadChunkTask(chunk, m_ChunkLoadHandlers.ToArray()));
         }
 
         /// <summary>
-        /// Loads the given chunk in the current thread.
+        /// Loads the given chunk in the current thread. If the chunk is already being loading
+        /// in the background, this method will wait for the chunk to finish before continuing.
         /// </summary>
         /// <param name="chunk">The chunk to load.</param>
         /// <returns>Whether or not the chunk needs to be remeshed.</returns>
         internal bool LoadSync(Chunk chunk)
         {
+            var oldOp = GetTask(chunk);
+            if (oldOp != null)
+            {
+                oldOp.Finish();
+                return oldOp.RequiresRemesh;
+            }
+
             var op = new BackgroundLoadChunkTask(chunk, m_ChunkLoadHandlers.ToArray());
             op.Finish();
 
             return op.RequiresRemesh;
-        }
-
-        /// <summary>
-        /// Blocks the current thread until the given chunk has finished loading.
-        /// This method returns immediately if the task is already finished or was
-        /// not being loaded.
-        /// </summary>
-        /// <param name="chunk">The chunk to wait for.</param>
-        /// <returns>Whether or not the chunk needs to be remeshed.</returns>
-        internal bool Finish(Chunk chunk)
-        {
-            return FinishTask(GetTask(chunk));
         }
 
         /// <summary>
@@ -59,7 +60,7 @@ namespace WraithavenGames.Bones3
         /// <returns>The task.</returns>
         private BackgroundLoadChunkTask GetTask(Chunk chunk)
         {
-            foreach (var op in operations)
+            foreach (var op in m_Operations)
                 if (op.Chunk == chunk)
                     return op;
 
@@ -79,7 +80,7 @@ namespace WraithavenGames.Bones3
             FinishTask(op);
 
             chunk = op?.Chunk;
-            return op.RequiresRemesh;
+            return op?.RequiresRemesh ?? false;
         }
 
         /// <summary>
@@ -92,7 +93,7 @@ namespace WraithavenGames.Bones3
             if (op == null)
                 return false;
 
-            operations.Remove(op);
+            m_Operations.Remove(op);
             op.Finish();
 
             return op.RequiresRemesh;
@@ -104,7 +105,7 @@ namespace WraithavenGames.Bones3
         /// <returns>A random finished task, or null if there isn't one.</returns>
         private BackgroundLoadChunkTask GetFinishedTask()
         {
-            foreach (var op in operations)
+            foreach (var op in m_Operations)
                 if (op.IsFinished)
                     return op;
 

@@ -7,7 +7,8 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// The main behaviour for containing a voxel block world.
     /// </summary>
-    [SelectionBase, ExecuteAlways]
+    [AddComponentMenu("Bones3/Block World")]
+    [SelectionBase, ExecuteAlways, DisallowMultipleComponent]
     public class BlockWorld : MonoBehaviour
     {
         [Tooltip("The block properties container to use for this world.")]
@@ -33,6 +34,11 @@ namespace WraithavenGames.Bones3
         /// Gets the block list being used by this world.
         /// </summary>
         public BlockList BlockList => m_BlockList;
+
+        /// <summary>
+        /// Gets the number of chunks currently being loaded in the background.
+        /// </summary>
+        internal int ChunksBeingLoaded => m_WorldContainer.ChunksBeingLoaded;
 
         /// <summary>
         /// Called when the world object is constructed to initialize data.
@@ -194,5 +200,12 @@ namespace WraithavenGames.Bones3
                         m_WorldContainer.GetBlock(blockPos, true);
                     }
         }
+
+        /// <summary>
+        /// Requests the chunk at the given position to start loading in the background.
+        /// </summary>
+        /// <param name="chunkPos">The chunk position.</param>
+        /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
+        public bool LoadChunkAsync(ChunkPosition chunkPos) => m_WorldContainer.LoadChunkAsync(chunkPos);
     }
 }

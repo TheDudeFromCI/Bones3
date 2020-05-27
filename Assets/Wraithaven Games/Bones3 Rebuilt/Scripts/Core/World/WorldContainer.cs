@@ -16,6 +16,11 @@ namespace WraithavenGames.Bones3
         private readonly AsyncChunkLoader m_ChunkLoader;
 
         /// <summary>
+        /// Gets the number of chunks currently being loaded in the background.
+        /// </summary>
+        internal int ChunksBeingLoaded => m_ChunkLoader.ActiveTasks;
+
+        /// <summary>
         /// Creates a new world container for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
@@ -210,12 +215,44 @@ namespace WraithavenGames.Bones3
         /// <param name="action">The action to preform on each task.</param>
         internal void FinishRemeshTasks(Action<RemeshTaskStack> action)
         {
+            CheckAsyncWorldLoader();
+
             m_RemeshHandler.FinishTasks(taskStacks);
 
             foreach (var taskStack in taskStacks)
                 action(taskStack);
 
             taskStacks.Clear();
+        }
+
+        /// <summary>
+        /// Called each frame to handle any finished async world loading operations.
+        /// </summary>
+        private void CheckAsyncWorldLoader()
+        {
+            var requiresRemesh = m_ChunkLoader.Update(out Chunk chunk);
+
+            if (requiresRemesh)
+            {
+                RemeshAllNeighbors(chunk.Position);
+                RemeshDirtyChunks();
+            }
+        }
+
+        /// <summary>
+        /// Requests the chunk at the given position to start loading in the background.
+        /// </summary>
+        /// <param name="chunkPos">The chunk position.</param>
+        /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
+        public bool LoadChunkAsync(ChunkPosition chunkPos)
+        {
+            var chunk = m_World.GetChunk(chunkPos);
+            if (chunk != null)
+                return false;
+
+            chunk = m_World.CreateChunk(chunkPos);
+            m_ChunkLoader.LoadAsync(chunk);
+            return true;
         }
     }
 }
