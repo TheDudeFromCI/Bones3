@@ -21,6 +21,27 @@ namespace WraithavenGames.Bones3
         public int TaskCount => m_Tasks.Count;
 
         /// <summary>
+        /// Gets whether or not this task was marked as a pending stack. A pending
+        /// stack is allowed to take as long as needed to finish.
+        /// </summary>
+        internal bool IsPendingTask { get; set; } = false;
+
+        /// <summary>
+        /// Gets whether or not this task stack has finished.
+        /// </summary>
+        internal bool IsFinished
+        {
+            get
+            {
+                foreach (var task in m_Tasks)
+                    if (!task.IsFinished)
+                        return false;
+
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Creates a new remesh task stack.
         /// </summary>
         /// <param name="chunkPosition">The position of the chunk being remeshed.</param>

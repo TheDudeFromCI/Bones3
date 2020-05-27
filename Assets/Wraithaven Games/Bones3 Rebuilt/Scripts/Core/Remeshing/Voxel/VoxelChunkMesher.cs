@@ -14,6 +14,9 @@ namespace WraithavenGames.Bones3
         private readonly Task m_Task;
         private readonly ProcMesh m_Mesh;
 
+        /// <inheritdoc cref="IRemeshTask"/>
+        public bool IsFinished => m_Task.IsCompleted;
+
         /// <summary>
         /// Creates a new voxel chunk mesher.
         /// </summary>

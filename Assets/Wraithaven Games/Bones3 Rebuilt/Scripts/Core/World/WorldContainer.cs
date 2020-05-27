@@ -162,10 +162,10 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Triggers all dirty chunks to be remeshed.
         /// </summary>
-        internal void RemeshDirtyChunks()
+        internal void RemeshDirtyChunks(bool later = false)
         {
             foreach (var chunk in chunksToRemesh)
-                UpdateChunk(chunk, m_BlockWorld.BlockList);
+                UpdateChunk(chunk, m_BlockWorld.BlockList, later);
 
             chunksToRemesh.Clear();
         }
@@ -175,7 +175,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="chunk">The chunk to remesh.</param>
         /// <param name="blockList">The blockList to use when remeshing this chunk.</param>
-        private void UpdateChunk(Chunk chunk, BlockList blockList)
+        private void UpdateChunk(Chunk chunk, BlockList blockList, bool later = false)
         {
             var chunkSize = m_World.ChunkSize;
 
@@ -211,7 +211,10 @@ namespace WraithavenGames.Bones3
                         chunkProperties.SetBlock(blockPos, blockType);
                     }
 
-            RemeshHandler.RemeshChunk(chunkProperties);
+            if (later)
+                RemeshHandler.RemeshChunkLater(chunkProperties);
+            else
+                RemeshHandler.RemeshChunk(chunkProperties);
         }
 
         /// <summary>
@@ -240,7 +243,7 @@ namespace WraithavenGames.Bones3
             if (requiresRemesh)
             {
                 RemeshAllNeighbors(chunk.Position);
-                RemeshDirtyChunks();
+                RemeshDirtyChunks(true);
             }
         }
 
