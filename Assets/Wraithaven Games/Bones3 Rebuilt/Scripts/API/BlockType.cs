@@ -52,6 +52,11 @@ namespace WraithavenGames.Bones3
         public bool IsTransparent => m_Transparent;
 
         /// <summary>
+        /// Gets the array of faces for this block type.
+        /// </summary>
+        internal BlockFace[] Faces => m_Faces;
+
+        /// <summary>
         /// Gets the material ID for the given face.
         /// </summary>
         /// <param name="face">The face index.</param>

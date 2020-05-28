@@ -21,14 +21,28 @@ namespace WraithavenGames.Bones3
             properties.ChunkPosition = chunkPos;
 
             int size = world.ChunkSize.Value;
+            int intBits = world.ChunkSize.IntBits;
+            int extendedSize = size + 2;
+
             for (int x = -1; x <= size; x++)
                 for (int y = -1; y <= size; y++)
                     for (int z = -1; z <= size; z++)
                     {
-                        var blockPos = new BlockPosition(x, y, z);
-                        var blockId = GetBlock(blockPos, world.ChunkSize);
+                        var local = (x & world.ChunkSize.Mask) * size * size
+                                  + (y & world.ChunkSize.Mask) * size
+                                  + (z & world.ChunkSize.Mask);
+
+                        var chunkIndex = ((x >> intBits) + 1) * 3 * 3
+                                       + ((y >> intBits) + 1) * 3
+                                       + ((z >> intBits) + 1);
+
+                        var index = (x + 1) * extendedSize * extendedSize
+                                  + (y + 1) * extendedSize
+                                  + (z + 1);
+
+                        var blockId = m_ChunkBuffer[chunkIndex]?.Blocks[local] ?? 0;
                         var blockType = blockList.GetBlockType(blockId);
-                        properties.SetBlock(blockPos, blockType);
+                        properties.Blocks[index] = blockType;
                     }
         }
 

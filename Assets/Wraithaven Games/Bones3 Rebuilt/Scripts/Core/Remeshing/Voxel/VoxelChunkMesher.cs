@@ -9,9 +9,9 @@ namespace WraithavenGames.Bones3
     internal abstract class VoxelChunkMesher : IRemeshTask
     {
         private readonly ChunkProperties m_ChunkProperties;
-        private readonly GreedyMesher m_GreedyMesher;
         private readonly Task m_Task;
         private readonly ProcMesh m_Mesh;
+        private GreedyMesher m_GreedyMesher;
 
         /// <inheritdoc cref="IRemeshTask"/>
         public bool IsFinished => m_Task.IsCompleted;
@@ -127,6 +127,10 @@ namespace WraithavenGames.Bones3
         public ProcMesh Finish()
         {
             m_Task.Wait();
+
+            m_GreedyMesher?.ReturnToPool();
+            m_GreedyMesher = null;
+
             return m_Mesh;
         }
 

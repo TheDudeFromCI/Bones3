@@ -42,7 +42,7 @@ namespace WraithavenGames.Bones3
             ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
 
             RemeshHandler = new RemeshHandler(blockWorld);
-            RemeshHandler.AddDistributor(new StandardDistributor(World.ChunkSize));
+            RemeshHandler.AddDistributor(new StandardDistributor(m_BlockWorld));
         }
 
         /// <summary>

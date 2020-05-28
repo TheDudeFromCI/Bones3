@@ -51,7 +51,10 @@ namespace WraithavenGames.Bones3
         /// <exception cref="ArgumentOutOfRangeException">
         /// If the block position is not within the container.
         /// </exception>
-        public ushort GetBlockID(BlockPosition pos) => Blocks[pos.Index(Size)];
+        public ushort GetBlockID(BlockPosition pos)
+        {
+            return Blocks[pos.Index(Size)];
+        }
 
         /// <summary>
         /// Sets the block ID at the given local block position within the container.

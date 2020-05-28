@@ -7,15 +7,16 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class StandardDistributor : IRemeshDistributor
     {
+        // TODO Move GreedyMesher pool to own class.
         private const int MAX_MESHER_POOL_SIZE = 16;
 
         private readonly List<GreedyMesher> m_GreedyMesherPool = new List<GreedyMesher>();
-        private readonly GridSize m_ChunkSize;
-        private bool[] m_MaterialBuffer = new bool[128];
+        private readonly BlockWorld m_BlockWorld;
+        private bool[] m_MaterialBuffer = new bool[1024];
 
-        internal StandardDistributor(GridSize chunkSize)
+        internal StandardDistributor(BlockWorld blockWorld)
         {
-            m_ChunkSize = chunkSize;
+            m_BlockWorld = blockWorld;
         }
 
         /// <inheritdoc cref="IRemeshTask"/>
@@ -32,24 +33,52 @@ namespace WraithavenGames.Bones3
         /// <param name="tasks">The task list to add to.</param>
         private void GenerateVisuals(ChunkProperties properties, RemeshTaskStack taskStack)
         {
+            PrepareMaterialBuffer();
+            VisualBlockIterator(properties, taskStack);
             ResetMaterialBuffer();
+        }
 
-            foreach (var pos in BlockIterator(properties.ChunkSize.Value))
+        /// <summary>
+        /// Iterates over all blocks in the chunk, creating visual tasks as needed.
+        /// </summary>
+        /// <param name="properties">The chunk properties.</param>
+        /// <param name="tasks">The task list to add to.</param>
+        private void VisualBlockIterator(ChunkProperties properties, RemeshTaskStack taskStack)
+        {
+            var volume = m_BlockWorld.ChunkSize.Volume;
+            var blocks = properties.Blocks;
+
+            for (int i = 0; i < volume; i++)
             {
-                var type = properties.GetBlock(pos);
+                var type = blocks[i];
 
                 if (!type.IsVisible)
                     continue;
 
+                var faces = type.Faces;
                 for (int j = 0; j < 6; j++)
                 {
-                    var material = type.GetMaterialID(j);
-                    if (ContainsMaterial(material))
+                    var material = faces[j].MaterialID;
+                    if (m_MaterialBuffer[material])
                         continue;
 
                     m_MaterialBuffer[material] = true;
                     taskStack.AddTask(new VisualRemeshTask(properties, material, PullMesher()));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Ensure the material buffer has a large enough capacity.
+        /// </summary>
+        private void PrepareMaterialBuffer()
+        {
+            int materialCount = m_BlockWorld.BlockList.MaterialCount;
+            if (materialCount >= m_MaterialBuffer.Length)
+            {
+                var newBuffer = new bool[materialCount];
+                System.Array.Copy(m_MaterialBuffer, newBuffer, m_MaterialBuffer.Length);
+                m_MaterialBuffer = newBuffer;
             }
         }
 
@@ -63,32 +92,16 @@ namespace WraithavenGames.Bones3
         }
 
         /// <summary>
-        /// Checks if the material is currently in the material buffer.
-        /// </summary>
-        /// <param name="materialID">The material ID.</param>
-        /// <returns>True if the material was already handled, false otherwise.</returns>
-        private bool ContainsMaterial(int materialID)
-        {
-            if (materialID >= m_MaterialBuffer.Length)
-            {
-                var newBuffer = new bool[materialID + 1];
-                System.Array.Copy(m_MaterialBuffer, newBuffer, m_MaterialBuffer.Length);
-                m_MaterialBuffer = newBuffer;
-            }
-
-            return m_MaterialBuffer[materialID];
-        }
-
-        /// <summary>
         /// Generates the collision remesh task, as needed.
         /// </summary>
         /// <param name="properties">The chunk properties.</param>
         /// <param name="tasks">The task list to add to.</param>
         private void GenerateCollision(ChunkProperties properties, RemeshTaskStack taskStack)
         {
-            foreach (var pos in BlockIterator(properties.ChunkSize.Value))
+            int volume = m_BlockWorld.ChunkSize.Volume;
+            for (int i = 0; i < volume; i++)
             {
-                var type = properties.GetBlock(pos);
+                var type = properties.Blocks[i];
 
                 if (type.IsSolid)
                 {
@@ -96,19 +109,6 @@ namespace WraithavenGames.Bones3
                     return;
                 }
             }
-        }
-
-        /// <summary>
-        /// Iterates over all block positions within a chunk bounds.
-        /// </summary>
-        /// <param name="chunkSize">The size of the chunk.</param>
-        /// <returns>The block position iterator.</returns>
-        private IEnumerable<BlockPosition> BlockIterator(int chunkSize)
-        {
-            for (int x = 0; x < chunkSize; x++)
-                for (int y = 0; y < chunkSize; y++)
-                    for (int z = 0; z < chunkSize; z++)
-                        yield return new BlockPosition(x, y, z);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace WraithavenGames.Bones3
                 return mesher;
             }
 
-            return new GreedyMesher(m_ChunkSize, this);
+            return new GreedyMesher(m_BlockWorld.ChunkSize, this);
         }
 
         /// <summary>
