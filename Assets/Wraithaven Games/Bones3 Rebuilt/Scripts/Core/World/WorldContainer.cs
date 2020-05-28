@@ -8,7 +8,8 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class WorldContainer
     {
-        private readonly List<RemeshTaskStack> taskStacks = new List<RemeshTaskStack>();
+        private readonly List<RemeshTaskStack> m_TaskStacks = new List<RemeshTaskStack>();
+        private readonly List<ChunkPosition> m_DirtyChunks = new List<ChunkPosition>();
         private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
@@ -95,54 +96,46 @@ namespace WraithavenGames.Bones3
             bool remesh = ChunkLoader.LoadSync(chunk);
 
             if (remesh)
-                RemeshAllNeighbors(chunkPos, false);
+            {
+                m_DirtyChunks.Add(chunkPos);
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(0));
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(1));
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(2));
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(3));
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(4));
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(5));
+                RemeshDirtyChunks();
+            }
 
             return chunk;
-        }
-
-        /// <summary>
-        /// Remeshes the chunk at the given position and all chunks touching it.
-        /// </summary>
-        /// <param name="chunkPos">The chunk position.</param>
-        private void RemeshAllNeighbors(ChunkPosition chunkPos, bool later)
-        {
-            RemeshChunkAt(chunkPos, later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(0), later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(1), later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(2), later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(3), later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(4), later);
-            RemeshChunkAt(chunkPos.ShiftAlongDirection(5), later);
         }
 
         /// <summary>
         /// Determines which chunks should be remeshed based on the given block position.
         /// </summary>
         /// <param name="blockPos">The local block position.</param>
-        /// <param name="toRemesh">The chunk position.</param>
+        /// <param name="chunkPos">The chunk position.</param>
         private void RemeshEffectedChunks(BlockPosition blockPos, ChunkPosition chunkPos)
         {
-            RemeshChunkAt(chunkPos, false);
-
-            int max = World.ChunkSize.Mask;
+            m_DirtyChunks.Add(chunkPos);
 
             if (blockPos.X == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(1), false);
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(1));
 
-            if (blockPos.X == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(0), false);
+            if (blockPos.X == World.ChunkSize.Mask)
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(0));
 
             if (blockPos.Y == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(3), false);
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(3));
 
-            if (blockPos.Y == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(2), false);
+            if (blockPos.Y == World.ChunkSize.Mask)
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(2));
 
             if (blockPos.Z == 0)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(5), false);
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(5));
 
-            if (blockPos.Z == max)
-                RemeshChunkAt(chunkPos.ShiftAlongDirection(4), false);
+            if (blockPos.Z == World.ChunkSize.Mask)
+                m_DirtyChunks.Add(chunkPos.ShiftAlongDirection(4));
         }
 
         /// <summary>
@@ -170,12 +163,12 @@ namespace WraithavenGames.Bones3
         {
             CheckAsyncWorldLoader();
 
-            RemeshHandler.FinishTasks(taskStacks);
+            RemeshHandler.FinishTasks(m_TaskStacks);
 
-            foreach (var taskStack in taskStacks)
+            foreach (var taskStack in m_TaskStacks)
                 action(taskStack);
 
-            taskStacks.Clear();
+            m_TaskStacks.Clear();
         }
 
         /// <summary>
@@ -186,7 +179,16 @@ namespace WraithavenGames.Bones3
             var requiresRemesh = ChunkLoader.Update(out Chunk chunk);
 
             if (requiresRemesh)
-                RemeshAllNeighbors(chunk.Position, true);
+            {
+                var chunkPos = chunk.Position;
+                RemeshChunkAt(chunkPos, true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(0), true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(1), true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(2), true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(3), true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(4), true);
+                RemeshChunkAt(chunkPos.ShiftAlongDirection(5), true);
+            }
         }
 
         /// <summary>
@@ -202,7 +204,19 @@ namespace WraithavenGames.Bones3
 
             chunk = World.CreateChunk(chunkPos);
             ChunkLoader.LoadAsync(chunk);
+
             return true;
+        }
+
+        /// <summary>
+        /// Remeshes all chunks which are marked as dirty.
+        /// </summary>
+        internal void RemeshDirtyChunks()
+        {
+            for (int i = 0; i < m_DirtyChunks.Count; i++)
+                RemeshChunkAt(m_DirtyChunks[i], false);
+
+            m_DirtyChunks.Clear();
         }
     }
 }

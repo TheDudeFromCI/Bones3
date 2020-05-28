@@ -99,6 +99,8 @@ namespace WraithavenGames.Bones3
 
                 m_WorldContainer.SetBlock(block.Position, block.BlockID);
             }
+
+            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>
@@ -112,6 +114,7 @@ namespace WraithavenGames.Bones3
                 throw new System.ArgumentOutOfRangeException("blockID", $"Invalid block type '{blockID}'!");
 
             m_WorldContainer.SetBlock(blockPos, blockID);
+            m_WorldContainer.RemeshDirtyChunks();
         }
 
         /// <summary>

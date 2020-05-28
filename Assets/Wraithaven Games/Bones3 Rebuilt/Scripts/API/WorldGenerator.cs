@@ -8,11 +8,17 @@ namespace WraithavenGames.Bones3
     [ExecuteAlways, DisallowMultipleComponent, RequireComponent(typeof(BlockWorld))]
     public abstract class WorldGenerator : MonoBehaviour, IChunkLoadHandler
     {
+        private bool m_AlreadyEnabled;
+
         /// <summary>
         /// Called during the startup phase to atttach this chunk loader to the block world.
         /// </summary>
-        protected void Start()
+        protected void OnEnable()
         {
+            if (m_AlreadyEnabled)
+                return;
+
+            m_AlreadyEnabled = true;
             var blockWorld = GetComponent<BlockWorld>();
             blockWorld.WorldContainer.ChunkLoader.AddChunkLoadHandler(this);
         }
