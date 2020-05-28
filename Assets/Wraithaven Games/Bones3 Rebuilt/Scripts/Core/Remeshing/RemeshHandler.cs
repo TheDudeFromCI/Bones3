@@ -60,8 +60,8 @@ namespace WraithavenGames.Bones3
             ChunkAnalyzer.LoadProperties(properties, blockList, world, chunkPos);
 
             var taskStack = new RemeshTaskStack(properties);
-            taskStack.IsPendingTask = pendingTask;
             m_ActiveTasks.Add(taskStack);
+            taskStack.IsPendingTask = pendingTask;
 
             foreach (var dis in m_Distributors)
                 dis.CreateTasks(properties, taskStack);

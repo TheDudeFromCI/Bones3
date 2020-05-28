@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace WraithavenGames.Bones3.Editor
 {
+    // TODO Refactor this class
+
     public class TextureArrayGenerator : EditorWindow
     {
         [MenuItem("Assets/Create/Texture Array from Textures")]
         protected static void Init()
         {
-            TextureArrayGenerator window = EditorWindow.GetWindow<TextureArrayGenerator>();
+            TextureArrayGenerator window = GetWindow<TextureArrayGenerator>();
             window.Show();
         }
 
@@ -24,7 +26,7 @@ namespace WraithavenGames.Bones3.Editor
 
         protected void OnEnable()
         {
-            tempObject = ScriptableObject.CreateInstance<TextureArrayGeneratorPropertyHolder>();
+            tempObject = CreateInstance<TextureArrayGeneratorPropertyHolder>();
             SerializedObject propertyHolder = new SerializedObject(tempObject);
 
             textures = propertyHolder.FindProperty("textures");
@@ -46,7 +48,7 @@ namespace WraithavenGames.Bones3.Editor
 
         protected void OnDisable()
         {
-            Object.DestroyImmediate(tempObject);
+            DestroyImmediate(tempObject);
         }
 
         void DrawTexturesHeader(Rect rect) =>
@@ -70,7 +72,7 @@ namespace WraithavenGames.Bones3.Editor
             EditorGUI.DrawPreviewTexture(r, tex, texturePreview);
         }
 
-        void OnGUI()
+        protected void OnGUI()
         {
             var newTexture = objectPicker.PickerObject("textures");
             if (newTexture != null)
@@ -100,9 +102,9 @@ namespace WraithavenGames.Bones3.Editor
         void BuildTexture()
         {
             string path = "Assets";
-            foreach (Object obj in UnityEditor.Selection.GetFiltered(typeof(Object), UnityEditor.SelectionMode.Assets))
+            foreach (Object obj in Selection.GetFiltered(typeof(Object), SelectionMode.Assets))
             {
-                path = UnityEditor.AssetDatabase.GetAssetPath(obj);
+                path = AssetDatabase.GetAssetPath(obj);
 
                 if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
                 {
@@ -128,7 +130,7 @@ namespace WraithavenGames.Bones3.Editor
             };
 
             AssetDatabase.CreateAsset(texture, path + "/Voxel Texture Atlas.asset");
-            AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(texture));
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(texture));
 
             for (int i = 0; i < textures.arraySize; i++)
             {
@@ -232,20 +234,6 @@ namespace WraithavenGames.Bones3.Editor
             return true;
         }
 
-        bool MatchingFormat()
-        {
-            TextureFormat form = (textures.GetArrayElementAtIndex(0).objectReferenceValue as Texture2D).format;
-            for (int i = 1; i < textures.arraySize; i++)
-            {
-                var form2 = (textures.GetArrayElementAtIndex(i).objectReferenceValue as Texture2D).format;
-
-                if (form != form2)
-                    return false;
-            }
-
-            return true;
-        }
-
         void ValidateTextureList()
         {
             for (int i = 0; i < textures.arraySize; i++)
@@ -258,15 +246,10 @@ namespace WraithavenGames.Bones3.Editor
             }
         }
 
-#pragma warning disable 169
-
-        private class TextureArrayGeneratorPropertyHolder : ScriptableObject
+        internal class TextureArrayGeneratorPropertyHolder : ScriptableObject
         {
-            [SerializeField]
-            private Texture2D[] textures;
-
-            [SerializeField]
-            private bool linearColorSpace;
+            [SerializeField] protected Texture2D[] m_Textures;
+            [SerializeField] protected bool m_LinearColorSpace;
         }
     }
 }

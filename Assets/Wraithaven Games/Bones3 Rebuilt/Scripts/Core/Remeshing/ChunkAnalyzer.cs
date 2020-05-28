@@ -58,21 +58,5 @@ namespace WraithavenGames.Bones3
                     for (int z = 0; z < 3; z++)
                         m_ChunkBuffer[x * 3 * 3 + y * 3 + z] = world.GetChunk(new ChunkPosition(x - 1, y - 1, z - 1) + chunkPos);
         }
-
-        /// <summary>
-        /// Gets the block within the chunk grid based on the given block position.
-        /// </summary>
-        /// <param name="blockPos">The block position.</param>
-        /// <param name="chunkSize">The chunk size.</param>
-        /// <returns>The block ID.</returns>
-        private static ushort GetBlock(BlockPosition blockPos, GridSize chunkSize)
-        {
-            var local = blockPos & chunkSize.Mask;
-            var chunkIndex = ((blockPos.X >> chunkSize.IntBits) + 1) * 3 * 3
-                           + ((blockPos.Y >> chunkSize.IntBits) + 1) * 3
-                           + ((blockPos.Z >> chunkSize.IntBits) + 1);
-
-            return m_ChunkBuffer[chunkIndex]?.GetBlockID(local) ?? 0;
-        }
     }
 }

@@ -11,7 +11,7 @@ namespace WraithavenGames.Bones3.Demo
         private float pitch;
         private bool locked = false;
 
-        void Update()
+        protected void Update()
         {
             Look();
             Fly();
