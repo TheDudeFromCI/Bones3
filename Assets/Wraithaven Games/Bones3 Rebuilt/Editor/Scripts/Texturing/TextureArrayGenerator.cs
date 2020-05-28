@@ -246,6 +246,8 @@ namespace WraithavenGames.Bones3.Editor
             }
         }
 
+#pragma warning disable 649
+
         internal class TextureArrayGeneratorPropertyHolder : ScriptableObject
         {
             [SerializeField] protected Texture2D[] m_Textures;

@@ -19,9 +19,12 @@ namespace WraithavenGames.Bones3
         [SerializeField, Range(5, 50)] protected int m_ChecksPerFrame = 20;
 
         private BlockWorld m_BlockWorld;
-        private ChunkLoadPatternIterator m_ChunkLoadPatternIterator;
         private ChunkPosition m_LastCameraPosition;
-        private int m_CoolingDown;
+
+        /// <summary>
+        /// Gets the loading pattern currently being used.
+        /// </summary>
+        internal ChunkLoadPatternIterator LoadPatternIterator { get; private set; }
 
         /// <summary>
         /// Called when the behaviour is initialized to load the block world
@@ -43,7 +46,7 @@ namespace WraithavenGames.Bones3
             if (!Application.isPlaying)
                 UnityEditor.EditorApplication.update += Update;
 
-            m_ChunkLoadPatternIterator.Reset();
+            LoadPatternIterator.Reset();
         }
 
         /// <summary>
@@ -70,7 +73,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void UpdatePatternIterator()
         {
-            m_ChunkLoadPatternIterator = ChunkLoadPatternIterator.Build(m_ChunkLoadingPattern, m_ViewDistance);
+            LoadPatternIterator = ChunkLoadPatternIterator.Build(m_ChunkLoadingPattern, m_ViewDistance);
         }
 
         /// <summary>
@@ -128,7 +131,7 @@ namespace WraithavenGames.Bones3
             if (!chunkPos.Equals(m_LastCameraPosition))
             {
                 m_LastCameraPosition = chunkPos;
-                m_ChunkLoadPatternIterator.Reset();
+                LoadPatternIterator.Reset();
             }
         }
 
@@ -137,25 +140,16 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void LoadNearbyChunks()
         {
-            if (m_BlockWorld.WorldContainer.ChunkLoader.ActiveTasks > 0
-                || m_BlockWorld.WorldContainer.RemeshHandler.ActiveTasks > 0)
-            {
-                m_CoolingDown = 3;
+            if (m_BlockWorld.ActiveChunkLoadingTasks > 0
+                || m_BlockWorld.ActiveRemeshingTasks > 0)
                 return;
-            }
-
-            if (m_CoolingDown > 0)
-            {
-                m_CoolingDown--;
-                return;
-            }
 
             for (int i = 0; i < m_ChecksPerFrame; i++)
             {
-                if (!m_ChunkLoadPatternIterator.HasNext)
+                if (!LoadPatternIterator.HasNext)
                     return;
 
-                var pos = m_ChunkLoadPatternIterator.Next;
+                var pos = LoadPatternIterator.Next;
                 var startedLoading = m_BlockWorld.LoadChunkAsync(pos + m_LastCameraPosition);
 
                 if (startedLoading)
@@ -169,6 +163,14 @@ namespace WraithavenGames.Bones3
         private void UnloadDistantChunks()
         {
             // TODO Unload distant chunks
+        }
+
+        /// <summary>
+        /// Called when all world data is cleared. Should reset the iterator.
+        /// </summary>
+        protected void OnWorldClear()
+        {
+            LoadPatternIterator.Reset();
         }
     }
 }

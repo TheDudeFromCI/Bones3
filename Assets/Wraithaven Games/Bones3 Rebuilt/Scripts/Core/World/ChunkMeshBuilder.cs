@@ -7,16 +7,16 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class ChunkMeshBuilder
     {
-        private readonly BlockWorld m_BlockWorld;
+        private readonly BlockListManager m_BlockList;
         private readonly ProcMesh m_ProcMesh;
 
         /// <summary>
         /// Creates a new chunk mesh builder.
         /// </summary>
-        /// <param name="blockWorld">The block world this mesh builder is acting on.</param>
-        internal ChunkMeshBuilder(BlockWorld blockWorld)
+        /// <param name="blockList">The block list to read from.</param>
+        internal ChunkMeshBuilder(BlockListManager blockList)
         {
-            m_BlockWorld = blockWorld;
+            m_BlockList = blockList;
             m_ProcMesh = new ProcMesh();
         }
 
@@ -101,7 +101,7 @@ namespace WraithavenGames.Bones3
                 {
                     var newMesh = vis.Finish();
                     visualMesh.SetTriangles(newMesh.Triangles, submeshIndex, true, baseVertex);
-                    materials[submeshIndex] = m_BlockWorld.BlockList.GetMaterial(vis.MaterialID);
+                    materials[submeshIndex] = m_BlockList.GetMaterial(vis.MaterialID);
 
                     submeshIndex++;
                     baseVertex += newMesh.Vertices.Count;

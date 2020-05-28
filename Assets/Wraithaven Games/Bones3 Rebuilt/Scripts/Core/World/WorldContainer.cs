@@ -10,7 +10,6 @@ namespace WraithavenGames.Bones3
     {
         private readonly List<RemeshTaskStack> m_TaskStacks = new List<RemeshTaskStack>();
         private readonly List<ChunkPosition> m_DirtyChunks = new List<ChunkPosition>();
-        private readonly BlockWorld m_BlockWorld;
 
         /// <summary>
         /// Gets the chunk loader being used by this container.
@@ -34,16 +33,15 @@ namespace WraithavenGames.Bones3
         /// Creates a new world container for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
-        internal WorldContainer(World world, BlockWorld blockWorld)
+        internal WorldContainer(World world, BlockListManager blockList)
         {
             World = world;
-            m_BlockWorld = blockWorld;
 
             ChunkLoader = new AsyncChunkLoader();
-            ChunkLoader.AddChunkLoadHandler(new WorldLoader(world));
+            ChunkLoader.AddChunkLoadHandler(new WorldLoader(world.ID));
 
-            RemeshHandler = new RemeshHandler(blockWorld);
-            RemeshHandler.AddDistributor(new StandardDistributor(m_BlockWorld));
+            RemeshHandler = new RemeshHandler(blockList, world);
+            RemeshHandler.AddDistributor(new StandardDistributor(world.ChunkSize, blockList));
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace WraithavenGames.Bones3
         /// <param name="blockList">The block list to reference.</param>
         /// <param name="world">The world to load from.</param>
         /// <param name="chunkPos">The target chunk.</param>
-        internal static void LoadProperties(ChunkProperties properties, BlockList blockList, World world, ChunkPosition chunkPos)
+        internal static void LoadProperties(ChunkProperties properties, BlockListManager blockList, World world, ChunkPosition chunkPos)
         {
             GetChunkGrid(world, chunkPos);
             properties.ChunkPosition = chunkPos;

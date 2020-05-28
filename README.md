@@ -1,6 +1,6 @@
 # <div align="center">Bones³</div>
 
-*<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>*
+_<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>_
 
 ---
 
@@ -23,3 +23,12 @@ Bones3 is a Unity in-editor/in-engine script which makes it natural for users to
 Note that the current branch has a few more tweaks to be done before you can use it, however, here is a video of an old prototype version of Bones3 to show what we're aiming for:
 
 [![Bones3 Prototype Demo](http://img.youtube.com/vi/GzNd_Lnkytk/0.jpg)](http://www.youtube.com/watch?v=GzNd_Lnkytk "Bones3 Prototype Demo")
+
+## Messages
+
+// TODO Move this into official documentation, once it exists.
+
+MonoBehaviour Messages:
+
+- Sent by BlockWorld:
+  - OnWorldCleared()

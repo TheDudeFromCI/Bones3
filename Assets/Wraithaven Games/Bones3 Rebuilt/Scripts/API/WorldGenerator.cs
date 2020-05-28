@@ -5,24 +5,9 @@ namespace WraithavenGames.Bones3
     /// <summary>
     /// A simple abstract behaviour for generating terrain on block worlds.
     /// </summary>
-    [ExecuteAlways, DisallowMultipleComponent, RequireComponent(typeof(BlockWorld))]
+    [DisallowMultipleComponent]
     public abstract class WorldGenerator : MonoBehaviour, IChunkLoadHandler
     {
-        private bool m_AlreadyEnabled;
-
-        /// <summary>
-        /// Called during the startup phase to atttach this chunk loader to the block world.
-        /// </summary>
-        protected void OnEnable()
-        {
-            if (m_AlreadyEnabled)
-                return;
-
-            m_AlreadyEnabled = true;
-            var blockWorld = GetComponent<BlockWorld>();
-            blockWorld.WorldContainer.ChunkLoader.AddChunkLoadHandler(this);
-        }
-
         /// <inheritdoc cref="IChunkLoadHandler"/>
         bool IChunkLoadHandler.OnChunkLoad(Chunk chunk, bool alreadyModified)
         {
@@ -32,11 +17,11 @@ namespace WraithavenGames.Bones3
             // Fill chunk with air, first.
             for (int i = 0; i < chunk.Blocks.Length; i++)
                 chunk.Blocks[i] = 1;
-            chunk.IsModified = true;
+            chunk.IsModified = false;
 
             // The generate terrain on top.
             GenerateChunk(chunk);
-            return true;
+            return chunk.IsModified;
         }
 
         /// <summary>

@@ -11,12 +11,14 @@ namespace WraithavenGames.Bones3
         private const int MAX_MESHER_POOL_SIZE = 16;
 
         private readonly List<GreedyMesher> m_GreedyMesherPool = new List<GreedyMesher>();
-        private readonly BlockWorld m_BlockWorld;
+        private readonly GridSize m_ChunkSize;
+        private readonly BlockListManager m_BlockList;
         private bool[] m_MaterialBuffer = new bool[1024];
 
-        internal StandardDistributor(BlockWorld blockWorld)
+        internal StandardDistributor(GridSize chunkSize, BlockListManager blockList)
         {
-            m_BlockWorld = blockWorld;
+            m_ChunkSize = chunkSize;
+            m_BlockList = blockList;
         }
 
         /// <inheritdoc cref="IRemeshTask"/>
@@ -45,7 +47,7 @@ namespace WraithavenGames.Bones3
         /// <param name="tasks">The task list to add to.</param>
         private void VisualBlockIterator(ChunkProperties properties, RemeshTaskStack taskStack)
         {
-            var volume = m_BlockWorld.ChunkSize.Volume;
+            var volume = m_ChunkSize.Volume;
             var blocks = properties.Blocks;
 
             for (int i = 0; i < volume; i++)
@@ -73,7 +75,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void PrepareMaterialBuffer()
         {
-            int materialCount = m_BlockWorld.BlockList.MaterialCount;
+            int materialCount = m_BlockList.MaterialCount;
             if (materialCount >= m_MaterialBuffer.Length)
             {
                 var newBuffer = new bool[materialCount];
@@ -98,7 +100,7 @@ namespace WraithavenGames.Bones3
         /// <param name="tasks">The task list to add to.</param>
         private void GenerateCollision(ChunkProperties properties, RemeshTaskStack taskStack)
         {
-            int volume = m_BlockWorld.ChunkSize.Volume;
+            int volume = m_ChunkSize.Volume;
             for (int i = 0; i < volume; i++)
             {
                 var type = properties.Blocks[i];
@@ -125,7 +127,7 @@ namespace WraithavenGames.Bones3
                 return mesher;
             }
 
-            return new GreedyMesher(m_BlockWorld.ChunkSize, this);
+            return new GreedyMesher(m_ChunkSize, this);
         }
 
         /// <summary>

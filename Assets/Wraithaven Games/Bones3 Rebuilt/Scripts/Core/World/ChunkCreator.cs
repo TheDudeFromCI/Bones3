@@ -7,15 +7,17 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class ChunkCreator
     {
-        private readonly BlockWorld m_BlockWorld;
+        private readonly Transform m_Transform;
+        private readonly GridSize m_ChunkSize;
 
         /// <summary>
         /// Creates a new chunk creator object.
         /// </summary>
-        /// <param name="blockWorld">The block world this creator is acting on.</param>
-        internal ChunkCreator(BlockWorld blockWorld)
+        /// <param name="transform">The transform to add objects to.</param>
+        internal ChunkCreator(Transform transform, GridSize chunkSize)
         {
-            m_BlockWorld = blockWorld;
+            m_Transform = transform;
+            m_ChunkSize = chunkSize;
         }
 
         /// <summary>
@@ -30,8 +32,8 @@ namespace WraithavenGames.Bones3
             chunk.Position = chunkPos;
 
             go.hideFlags = HideFlags.HideAndDontSave;
-            go.transform.SetParent(m_BlockWorld.transform);
-            go.transform.localPosition = new Vector3(chunkPos.X, chunkPos.Y, chunkPos.Z) * m_BlockWorld.ChunkSize.Value;
+            go.transform.SetParent(m_Transform);
+            go.transform.localPosition = new Vector3(chunkPos.X, chunkPos.Y, chunkPos.Z) * m_ChunkSize.Value;
 
             var meshFilter = go.AddComponent<MeshFilter>();
             var meshCollider = go.AddComponent<MeshCollider>();

@@ -320,9 +320,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1632449632}
-  - component: {fileID: 1632449631}
-  - component: {fileID: 1632449633}
+  - component: {fileID: 1632449635}
   - component: {fileID: 1632449634}
+  - component: {fileID: 1632449633}
+  - component: {fileID: 1632449631}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -339,11 +340,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1632449630}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2eb1a7d2b6c98b9ea28bd6ef3d11b16, type: 3}
+  m_Script: {fileID: 11500000, guid: 99e7c911f01b8da7db9e1acbef8c53a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BlockList: {fileID: 11400000, guid: 1312d598c99224683b9ff3e33af6d1f2, type: 2}
-  ID: 9e8a827e-b0c4-4fd3-80e7-0fab76bda938
+  m_SurfaceBlockID: 2
+  m_GroundBlockID: 3
 --- !u!4 &1632449632
 Transform:
   m_ObjectHideFlags: 0
@@ -373,7 +374,7 @@ MonoBehaviour:
   m_Camera: {fileID: 0}
   m_ViewDistance: {x: 10, y: 5, z: 10}
   m_ChunkLoadingPattern: 0
-  m_ChecksPerFrame: 5
+  m_ChecksPerFrame: 20
 --- !u!114 &1632449634
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +384,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1632449630}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d0631db4552a2f99944e805326473ab, type: 3}
+  m_Script: {fileID: 11500000, guid: d2eb1a7d2b6c98b9ea28bd6ef3d11b16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ID: 929480d9-ad87-425e-8dfb-762fe3298c80
+--- !u!114 &1632449635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632449630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed59f2ec0530dbe9eb21a223101f8325, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BlockList: {fileID: 11400000, guid: 1312d598c99224683b9ff3e33af6d1f2, type: 2}
