@@ -216,5 +216,11 @@ namespace WraithavenGames.Bones3
 
             m_DirtyChunks.Clear();
         }
+
+        /// <summary>
+        /// Checks if the given chunk exists or not.
+        /// </summary>
+        /// <returns>True if the chunk exists, false otherwise.</returns>
+        internal bool DoesChunkExist(ChunkPosition chunkPos) => World.DoesChunkExist(chunkPos);
     }
 }

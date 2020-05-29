@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace WraithavenGames.Bones3
@@ -154,18 +155,39 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="center">The center of the bounding region.</param>
         /// <param name="extents">The radius of each axis.</param>
-        internal void LoadChunkRegion(Vector3Int center, Vector3Int extents)
+        /// <returns>True if any additional chunks were loaded.</returns>
+        internal bool LoadChunkRegion(ChunkPosition center, Vector3Int extents)
         {
-            var min = center - extents;
-            var max = center + extents;
+            var min = new Vector3Int
+            {
+                x = center.X - extents.x,
+                y = center.Y - extents.y,
+                z = center.Z - extents.z,
+            };
 
+            var max = new Vector3Int
+            {
+                x = center.X + extents.x,
+                y = center.Y + extents.y,
+                z = center.Z + extents.z,
+            };
+
+            bool loaded = false;
             for (int x = min.x; x <= max.x; x++)
                 for (int y = min.y; y <= max.y; y++)
                     for (int z = min.z; z <= max.z; z++)
                     {
+                        var chunkPos = new ChunkPosition(x, y, z);
+                        if (WorldContainer.DoesChunkExist(chunkPos))
+                            continue;
+
+                        // Forces the given chunk to load by trying to poll it.
                         var blockPos = new BlockPosition(x, y, z) * ChunkSize.Value;
                         WorldContainer.GetBlock(blockPos, true);
+                        loaded = true;
                     }
+
+            return loaded;
         }
 
         /// <summary>

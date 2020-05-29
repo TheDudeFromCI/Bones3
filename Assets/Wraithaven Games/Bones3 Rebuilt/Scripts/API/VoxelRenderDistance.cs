@@ -18,6 +18,9 @@ namespace WraithavenGames.Bones3
         [Tooltip("The number of chunks to check loading per frame.")]
         [SerializeField, Range(5, 50)] protected int m_ChecksPerFrame = 20;
 
+        [Tooltip("Whether or not to force chunks directly touching the camera to be loaded immediately.")]
+        [SerializeField] protected bool m_EmergencyChunkLoading = true;
+
         private BlockWorld m_BlockWorld;
         private ChunkPosition m_LastCameraPosition;
 
@@ -92,7 +95,7 @@ namespace WraithavenGames.Bones3
                     m_Camera = Camera.main;
             }
             else
-                m_Camera = UnityEditor.SceneView.GetAllSceneCameras()?[0];
+                m_Camera = UnityEditor.SceneView.GetAllSceneCameras() ? [0];
 #else
             if (m_Camera == null)
                 m_Camera = Camera.main;
@@ -110,8 +113,28 @@ namespace WraithavenGames.Bones3
                 return;
 
             UpdateCameraPosition();
+
+            if (CheckEmergencyChunks())
+                return; // No need to cause extra processing this frame
+
             LoadNearbyChunks();
             UnloadDistantChunks();
+        }
+
+        /// <summary>
+        /// Forces the chunks directly around the camera to be loaded instantly.
+        /// </summary>
+        private bool CheckEmergencyChunks()
+        {
+            if (!m_EmergencyChunkLoading)
+                return false;
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                return false;
+#endif
+
+            return m_BlockWorld.LoadChunkRegion(m_LastCameraPosition, Vector3Int.one);
         }
 
         /// <summary>
@@ -140,8 +163,8 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void LoadNearbyChunks()
         {
-            if (m_BlockWorld.ActiveChunkLoadingTasks > 0
-                || m_BlockWorld.ActiveRemeshingTasks > 0)
+            if (m_BlockWorld.ActiveChunkLoadingTasks > 0 ||
+                m_BlockWorld.ActiveRemeshingTasks > 0)
                 return;
 
             for (int i = 0; i < m_ChecksPerFrame; i++)

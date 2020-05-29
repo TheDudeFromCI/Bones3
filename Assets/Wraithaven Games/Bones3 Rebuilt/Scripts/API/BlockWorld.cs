@@ -106,24 +106,20 @@ namespace WraithavenGames.Bones3
         /// Applies an edit batch to this world, remeshing chunks as needed.
         /// </summary>
         /// <param name="editBatch">The edit batch to apply.</param>
-        public void SetBlocks(IEditBatch editBatch)
-            => WorldBuilder.SetBlocks(editBatch.GetBlocks);
+        public void SetBlocks(IEditBatch editBatch) => WorldBuilder.SetBlocks(editBatch.GetBlocks);
 
         /// <summary>
         /// Applies an edit batch to this world, remeshing chunks as needed.
         /// </summary>
         /// <param name="editBatch">The edit batch to apply.</param>
-        public void SetBlocks(EditBatch editBatch)
-            => WorldBuilder.SetBlocks(editBatch);
-
+        public void SetBlocks(EditBatch editBatch) => WorldBuilder.SetBlocks(editBatch);
 
         /// <summary>
         /// Sets a world in the world to a given ID.
         /// </summary>
         /// <param name="blockPos">The block position.</param>
         /// <param name="blockID">The ID of the block to place.</param>
-        public void SetBlock(BlockPosition blockPos, ushort blockID)
-            => WorldBuilder.SetBlock(blockPos, blockID);
+        public void SetBlock(BlockPosition blockPos, ushort blockID) => WorldBuilder.SetBlock(blockPos, blockID);
 
         /// <summary>
         /// Gets the block type at the given world position.
@@ -133,21 +129,17 @@ namespace WraithavenGames.Bones3
         /// <param name="blockPos">The position of the block.</param>
         /// <param name="createChunk">Whether or not to create (or load) the chunk if it doesn't currently exist.</param>
         /// <returns>The block type.</returns>
-        public BlockType GetBlock(BlockPosition blockPos, bool createChunk = false)
-            => WorldBuilder.GetBlock(blockPos, createChunk);
+        public BlockType GetBlock(BlockPosition blockPos, bool createChunk = false) => WorldBuilder.GetBlock(blockPos, createChunk);
 
         /// <summary>
         /// Called each frame to pull remesh tasks from the remesh handler.
         /// </summary>
-        protected void Update()
-            => WorldBuilder.Update();
-
+        protected void Update() => WorldBuilder.Update();
 
         /// <summary>
         /// Saves the world to file.
         /// </summary>
-        public void SaveWorld()
-            => WorldBuilder.SaveWorld();
+        public void SaveWorld() => WorldBuilder.SaveWorld();
 
         /// <summary>
         /// Clears all loaded chunk data for this world.
@@ -163,15 +155,14 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="center">The center of the bounding region.</param>
         /// <param name="extents">The radius of each axis.</param>
-        public void LoadChunkRegion(Vector3Int center, Vector3Int extents)
-            => WorldBuilder.LoadChunkRegion(center, extents);
+        /// <returns>True if any additional chunks were loaded.</returns>
+        public bool LoadChunkRegion(ChunkPosition center, Vector3Int extents) => WorldBuilder.LoadChunkRegion(center, extents);
 
         /// <summary>
         /// Requests the chunk at the given position to start loading in the background.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
         /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
-        public bool LoadChunkAsync(ChunkPosition chunkPos)
-            => WorldBuilder.LoadChunkAsync(chunkPos);
+        public bool LoadChunkAsync(ChunkPosition chunkPos) => WorldBuilder.LoadChunkAsync(chunkPos);
     }
 }
