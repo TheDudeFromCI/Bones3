@@ -1,4 +1,4 @@
-namespace WraithavenGames.Bones3.Editor
+namespace WraithavenGames.Bones3
 {
     /// <summary>
     /// The block being targeting while world editing.
@@ -33,13 +33,11 @@ namespace WraithavenGames.Bones3.Editor
         }
 
         /// <summary>
-        /// Whether or not a block is being targeted, or if the mouse is over empty space.
+        /// Whether or not a block is being targeted, or if the target is infinity.
         /// </summary>
         public bool HasBlock { get; set; }
 
-        /// <summary>
-        /// Whether or not the shift button is being held.
-        /// </summary>
+        // TODO Remove, legacy code
         public bool HasShift { get; set; }
     }
 }

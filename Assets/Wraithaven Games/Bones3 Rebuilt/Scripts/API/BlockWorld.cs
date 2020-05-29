@@ -164,5 +164,58 @@ namespace WraithavenGames.Bones3
         /// <param name="chunkPos">The chunk position.</param>
         /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
         public bool LoadChunkAsync(ChunkPosition chunkPos) => WorldBuilder.LoadChunkAsync(chunkPos);
+
+        /// <summary>
+        /// Preforms a raycast in the scene. If the ray hits this block world, returns the block that was hit.
+        /// </summary>
+        /// <param name="ray">The ray.</param>
+        /// <param name="maxDistance">The max distance of the raycast.</param>
+        /// <returns>The target block data.</returns>
+        public TargetBlock RaycastWorld(Ray ray, float maxDistance) => RaycastWorld(ray, maxDistance, Physics.DefaultRaycastLayers);
+
+        /// <summary>
+        /// Preforms a raycast in the scene and returns the block that was hit, if any.
+        /// </summary>
+        /// <param name="ray">The ray.</param>
+        /// <param name="maxDistance">The max distance of the raycast.</param>
+        /// <param name="layerMask">The layer mask for the raycast.</param>
+        /// <returns>The target block data.</returns>
+        public TargetBlock RaycastWorld(Ray ray, float maxDistance, LayerMask layerMask)
+        {
+            if (!Physics.Raycast(ray, out RaycastHit hit, maxDistance, layerMask))
+                return new TargetBlock();
+
+            // Shift hit location to avoid floating point errors
+            Vector3 inside = hit.point - ray.direction * .0001f;
+            Vector3 over = hit.point + ray.direction * .0001f;
+
+            var target = new TargetBlock
+            {
+                Inside = VectorToBlockPos(inside),
+                Over = VectorToBlockPos(over),
+                HasBlock = true,
+                Side = 0,
+            };
+
+            return target;
+        }
+
+        /// <summary>
+        /// Converts a position in the Unity scene to the block position the point is in.
+        /// </summary>
+        /// <param name="pos">The point in world space.</param>
+        /// <returns>The block position containing this point.</returns>
+        public BlockPosition VectorToBlockPos(Vector3 pos)
+        {
+            pos = transform.InverseTransformPoint(pos);
+            var blockPos = new BlockPosition
+            {
+                X = Mathf.FloorToInt(pos.x),
+                Y = Mathf.FloorToInt(pos.y),
+                Z = Mathf.FloorToInt(pos.z),
+            };
+
+            return blockPos;
+        }
     }
 }
