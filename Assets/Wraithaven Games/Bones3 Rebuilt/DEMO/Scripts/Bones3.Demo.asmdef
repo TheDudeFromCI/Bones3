@@ -1,0 +1,16 @@
+{
+    "name": "Bones3.Demo",
+    "references": [
+        "GUID:13bef359365d01346be4e1ce26992fcd",
+        "GUID:7b8dd2c8a47302cbbbeda712e49807c7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
