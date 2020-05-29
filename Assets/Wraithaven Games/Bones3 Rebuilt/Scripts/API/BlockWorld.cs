@@ -87,8 +87,7 @@ namespace WraithavenGames.Bones3
             if (!Application.isPlaying)
             {
                 UnityEditor.EditorApplication.update -= Update;
-                WorldBuilder.ClearWorld();
-                WorldBuilder = null;
+                SaveWorld();
             }
         }
 #endif
@@ -146,7 +145,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         public void ClearWorld()
         {
-            WorldBuilder.SaveWorld();
+            WorldBuilder.ClearWorld();
             gameObject.SendMessage("OnWorldClear", SendMessageOptions.DontRequireReceiver);
         }
 
