@@ -6,12 +6,6 @@ namespace WraithavenGames.Bones3.Editor
     public interface IWand
     {
         /// <summary>
-        /// Called when the user switches the target world to edit.
-        /// </summary>
-        /// <param name="world">The world being edited, or null if no target is selected.</param>
-        void SetWorld(BlockWorld world);
-
-        /// <summary>
         /// Called when a mouse event is executed.
         /// </summary>
         /// <param name="target">The target block.</param>

@@ -8,99 +8,66 @@ namespace WraithavenGames.Bones3.Editor
     /// </summary>
     public abstract class RegionWand : IWand
     {
-        private BlockWorld world;
-        private IFillPattern fillPattern;
-        private TargetBlock point1;
-        private TargetBlock point2;
-        private bool dragging;
-
-        /// <summary>
-        /// The world currently being handled.
-        /// </summary>
-        /// <value>The world.</value>
-        public BlockWorld World { get => world; }
-
         /// <summary>
         /// The selection start point.
         /// </summary>
-        /// <value>One corner of the selection region.</value>
-        public TargetBlock Point1 { get => point1; }
+        public TargetBlock Point1 { get; private set; }
 
         /// <summary>
         /// The current selection end point.
         /// </summary>
-        /// <value>The opposite corner of the selection region.</value>
-        public TargetBlock Point2 { get => point2; }
+        public TargetBlock Point2 { get; private set; }
 
         /// <summary>
         /// Whether or not a selection is currently being made.
         /// </summary>
-        /// <value>True if a selection is currently being made, false otherwise.</value>
-        public bool IsDragging { get => dragging; }
+        public bool IsDragging { get; private set; }
 
         /// <summary>
         /// The active fill pattern for this wand.
         /// </summary>
-        /// <value>The fill pattern.</value>
-        public IFillPattern FillPattern { get => fillPattern; }
-
-        /// <inheritdoc/>
-        public void SetWorld(BlockWorld world)
-        {
-            this.world = world;
-            point1 = default;
-            point2 = default;
-            dragging = false;
-        }
+        public IFillPattern FillPattern { get; private set; }
 
         /// <inheritdoc/>
         public void SetFillPattern(IFillPattern fillPattern) =>
-            this.fillPattern = fillPattern;
+            FillPattern = fillPattern;
 
         /// <inheritdoc/>
         public void OnMouseEvent(TargetBlock target, WandEventType eventType)
         {
             if (eventType == WandEventType.ExitWindow)
             {
-                dragging = false;
-                point1 = default;
-                point2 = default;
-                return;
+                IsDragging = false;
+                Point1 = default;
+                Point2 = default;
             }
 
             if (eventType == WandEventType.MouseDown)
             {
-                if (World != null)
-                {
-                    dragging = true;
-                    point1 = target;
-                    point2 = target;
-                }
-
-                return;
+                IsDragging = true;
+                Point1 = target;
+                Point2 = target;
             }
 
             if (eventType == WandEventType.MouseMove)
             {
-                if (dragging)
-                    point2 = target;
+                if (IsDragging)
+                    Point2 = target;
                 else
-                    point1 = point2 = target;
-
-                return;
+                    Point1 = Point2 = target;
             }
 
             if (eventType == WandEventType.MouseUp)
             {
-                if (dragging)
+                if (IsDragging)
                 {
-                    point2 = target;
+                    Point2 = target;
 
                     HandleRegion();
 
-                    dragging = false;
-                    point1 = default;
-                    point2 = default;
+                    IsDragging = false;
+                    Point1 = default;
+                    Point2 = default;
                 }
             }
         }
@@ -119,16 +86,27 @@ namespace WraithavenGames.Bones3.Editor
     /// </summary>
     public class FillRegion : RegionWand
     {
-        private readonly CuboidFill cubeFill = new CuboidFill();
+        private readonly CuboidFill m_CubeFill = new CuboidFill();
+        private readonly FloodFill m_DeleteArea = new FloodFill(1);
 
         /// <inheritdoc/>
         public override void Render()
         {
-            if (World == null)
+            if (BlockWorldEditor.BlockWorld == null)
                 return;
 
-            Vector3 p1 = new Vector3(Point1.Inside.X, Point1.Inside.Y, Point1.Inside.Z);
-            Vector3 p2 = new Vector3(Point2.Inside.X, Point2.Inside.Y, Point2.Inside.Z);
+            Vector3 p1, p2;
+
+            if (Point2.HasShift)
+            {
+                p1 = new Vector3(Point1.Over.X, Point1.Over.Y, Point1.Over.Z);
+                p2 = new Vector3(Point2.Over.X, Point2.Over.Y, Point2.Over.Z);
+            }
+            else
+            {
+                p1 = new Vector3(Point1.Inside.X, Point1.Inside.Y, Point1.Inside.Z);
+                p2 = new Vector3(Point2.Inside.X, Point2.Inside.Y, Point2.Inside.Z);
+            }
 
             Vector3 min = Vector3.Min(p1, p2);
             Vector3 max = Vector3.Max(p1, p2) + Vector3.one;
@@ -136,16 +114,28 @@ namespace WraithavenGames.Bones3.Editor
             Vector3 center = (min + max) / 2f;
             Vector3 size = max - min;
 
-            Handles.color = Color.cyan;
-            Handles.matrix = World.transform.localToWorldMatrix;
+            if (Point2.HasShift)
+                Handles.color = Color.red;
+            else
+                Handles.color = Color.cyan;
+
+            Handles.matrix = BlockWorldEditor.BlockWorld.transform.localToWorldMatrix;
             Handles.DrawWireCube(center, size);
         }
 
         /// <inheritdoc/>
         public override void HandleRegion()
         {
-            cubeFill.Set(Point1.Inside, Point2.Inside, FillPattern);
-            World.SetBlocks(cubeFill);
+            if (Point2.HasShift)
+            {
+                m_CubeFill.Set(Point1.Over, Point2.Over, m_DeleteArea);
+                BlockWorldEditor.BlockWorld.SetBlocks(m_CubeFill);
+            }
+            else
+            {
+                m_CubeFill.Set(Point1.Inside, Point2.Inside, FillPattern);
+                BlockWorldEditor.BlockWorld.SetBlocks(m_CubeFill);
+            }
         }
     }
 }
