@@ -57,7 +57,6 @@ namespace WraithavenGames.Bones3
             }
 
             var properties = m_ChunkPropertiesPool.Pull();
-            var blockList = m_BlockList;
             var world = m_World;
             ChunkAnalyzer.LoadProperties(properties, m_BlockList, world, chunkPos);
 

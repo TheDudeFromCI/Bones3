@@ -85,6 +85,9 @@
       "remeshing",
       "ungenerated",
       "voxel"
-    ]
+    ],
+    "csharp2plantuml.inputPath": "Assets/Wraithaven Games/Bones3 Rebuilt",
+    "csharp2plantuml.outputPath": "UML",
+    "csharp2plantuml.createAssociation": true
   }
 }
