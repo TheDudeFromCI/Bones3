@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 namespace WraithavenGames.Bones3
 {
@@ -11,6 +12,7 @@ namespace WraithavenGames.Bones3
     {
         private readonly BlockingCollection<IWorldTask> m_TaskList = new BlockingCollection<IWorldTask>();
         private readonly BlockingCollection<IWorldTask> m_FinishedTasks = new BlockingCollection<IWorldTask>();
+        private readonly List<Task> m_ReadonlyTasks = new List<Task>();
         private readonly World m_World;
         private volatile bool m_Running = true;
 

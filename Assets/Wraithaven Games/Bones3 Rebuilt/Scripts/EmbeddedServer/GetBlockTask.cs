@@ -31,12 +31,6 @@ namespace WraithavenGames.Bones3
         }
 
         /// <inheritdoc cref="IWorldTask"/>
-        public bool IsReadOnly()
-        {
-            return !m_CreateChunk;
-        }
-
-        /// <inheritdoc cref="IWorldTask"/>
         public void RunWorldTask(World world)
         {
             var chunkPos = m_BlockPosition.ToChunkPosition(world.ChunkSize);
