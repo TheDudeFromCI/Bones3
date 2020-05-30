@@ -8,12 +8,21 @@ namespace WraithavenGames.Bones3
         private readonly ServerThread m_Server;
 
         /// <summary>
+        /// Gets the block list being used by the world.
+        /// </summary>
+        internal IBlockList BlockList { get; }
+
+        /// <summary>
         /// Creates and starts a new embedded server to the given world properties.
         /// </summary>
         /// <param name="worldProperties">The world properties.</param>
         internal EmbeddedServer(WorldProperties worldProperties)
         {
             var world = new World(worldProperties.ChunkSize, worldProperties.ID);
+
+            // TODO Create block list
+            BlockList = null;
+
             m_Server = new ServerThread(world);
         }
 
