@@ -96,22 +96,22 @@ MonoBehaviour:
     m_Faces:
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
     - m_Rotation: 0
       m_MaterialID: 0
-      m_TextureID: 1
+      m_TextureID: 2
   - m_Name: Glass
     m_ID: 4
     m_Solid: 1
