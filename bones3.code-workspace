@@ -86,8 +86,11 @@
       "ungenerated",
       "voxel"
     ],
-    "csharp2plantuml.inputPath": "Assets/Wraithaven Games/Bones3 Rebuilt",
-    "csharp2plantuml.outputPath": "UML",
-    "csharp2plantuml.createAssociation": true
+    "csharp2plantuml.inputPath": "Assets",
+    "csharp2plantuml.outputPath": "../UML", // TODO Workaround for bug in extension
+    "csharp2plantuml.createAssociation": true,
+    "csharp2plantuml.allInOne": true,
+    "csharp2plantuml.ignoreAccessibility": "",
+    "csharp2plantuml.excludePath": "Wraithaven Games/Bones3 Rebuilt/DEMO"
   }
 }
