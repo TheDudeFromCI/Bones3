@@ -11,7 +11,7 @@ namespace WraithavenGames.Bones3
         private readonly List<RemeshTaskStack> m_ActiveTasks = new List<RemeshTaskStack>();
         private readonly List<ChunkPosition> m_PendingRemesh = new List<ChunkPosition>();
         private readonly ChunkPropertiesPool m_ChunkPropertiesPool;
-        private readonly BlockListManager m_BlockList;
+        private readonly ServerBlockList m_BlockList;
         private readonly World m_World;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         internal int ActiveTasks => m_ActiveTasks.Count;
 
-        internal RemeshHandler(BlockListManager blockList, World world)
+        internal RemeshHandler(ServerBlockList blockList, World world)
         {
             m_BlockList = blockList;
             m_World = world;

@@ -19,5 +19,10 @@ namespace WraithavenGames.Bones3
         /// The size of chunks of the world.
         /// </summary>
         public GridSize ChunkSize { get; set; }
+
+        /// <summary>
+        /// Gets the world generator to assign to the world.
+        /// </summary>
+        public WorldGenerator WorldGenerator { get; set; }
     }
 }

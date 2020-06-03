@@ -14,7 +14,7 @@ namespace WraithavenGames.Bones3
         protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
-            if (!block.IsSolid)
+            if (!block.Solid)
                 return false;
 
             var nextPos = pos;
@@ -23,7 +23,7 @@ namespace WraithavenGames.Bones3
                 return true;
 
             var next = chunkProperties.GetBlock(nextPos);
-            return !next.IsSolid;
+            return !next.Solid;
         }
     }
 }

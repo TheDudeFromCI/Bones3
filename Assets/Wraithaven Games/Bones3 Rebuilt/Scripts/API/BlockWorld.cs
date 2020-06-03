@@ -35,12 +35,17 @@ namespace WraithavenGames.Bones3
             {
                 if (m_UnityWorldBuilder == null)
                 {
-                    var chunkSize = new GridSize(CHUNK_SIZE);
-                    var blockList = GetComponent<BlockListManager>();
-                    m_UnityWorldBuilder = new UnityWorldBuilder(transform, blockList, chunkSize, ID);
-
                     var worldGen = GetComponent<WorldGenerator>();
-                    m_UnityWorldBuilder.WorldContainer.ChunkLoader.AddChunkLoadHandler(worldGen);
+
+                    var worldProperties = new WorldProperties
+                    {
+                        ID = ID,
+                        ChunkSize = new GridSize(CHUNK_SIZE),
+                        WorldGenerator = worldGen,
+                    };
+
+                    var blockList = GetComponent<BlockListManager>();
+                    m_UnityWorldBuilder = new UnityWorldBuilder(transform, blockList, worldProperties);
 
                     var renderDistance = GetComponent<VoxelRenderDistance>();
                     renderDistance?.LoadPatternIterator.Reset();
@@ -60,13 +65,15 @@ namespace WraithavenGames.Bones3
         /// Gets the number of active chunk loading tasks being run.
         /// </summary>
         public int ActiveChunkLoadingTasks
-            => WorldBuilder.WorldContainer.ChunkLoader.ActiveTasks;
+            // => WorldBuilder.WorldContainer.ChunkLoader.ActiveTasks;
+            => 0; // TODO Reimplement this
 
         /// <summary>
         /// Gets the number of active chunk remeshing tasks being run.
         /// </summary>
         public int ActiveRemeshingTasks
-            => WorldBuilder.WorldContainer.RemeshHandler.ActiveTasks;
+            // => WorldBuilder.WorldContainer.RemeshHandler.ActiveTasks;
+            => 0; // TODO Reimplement this
 
 #if UNITY_EDITOR
         /// <summary>
@@ -128,7 +135,7 @@ namespace WraithavenGames.Bones3
         /// <param name="blockPos">The position of the block.</param>
         /// <param name="createChunk">Whether or not to create (or load) the chunk if it doesn't currently exist.</param>
         /// <returns>The block type.</returns>
-        public BlockType GetBlock(BlockPosition blockPos, bool createChunk = false) => WorldBuilder.GetBlock(blockPos, createChunk);
+        public ushort GetBlock(BlockPosition blockPos, bool createChunk = false) => WorldBuilder.GetBlock(blockPos, createChunk);
 
         /// <summary>
         /// Called each frame to pull remesh tasks from the remesh handler.
@@ -161,8 +168,7 @@ namespace WraithavenGames.Bones3
         /// Requests the chunk at the given position to start loading in the background.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
-        /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
-        public bool LoadChunkAsync(ChunkPosition chunkPos) => WorldBuilder.LoadChunkAsync(chunkPos);
+        public void LoadChunkAsync(ChunkPosition chunkPos) => WorldBuilder.LoadChunkAsync(chunkPos);
 
         /// <summary>
         /// Preforms a raycast in the scene. If the ray hits this block world, returns the block that was hit.

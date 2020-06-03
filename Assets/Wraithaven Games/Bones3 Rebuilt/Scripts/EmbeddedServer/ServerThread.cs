@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
 
 namespace WraithavenGames.Bones3
 {
@@ -12,16 +11,16 @@ namespace WraithavenGames.Bones3
     {
         private readonly BlockingCollection<IWorldTask> m_TaskList = new BlockingCollection<IWorldTask>();
         private readonly BlockingCollection<IWorldTask> m_FinishedTasks = new BlockingCollection<IWorldTask>();
-        private readonly World m_World;
+        private readonly WorldContainer m_WorldContainer;
         private volatile bool m_Running = true;
 
         /// <summary>
         /// Creates a new server thread for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
-        internal ServerThread(World world)
+        internal ServerThread(WorldContainer world)
         {
-            m_World = world;
+            m_WorldContainer = world;
             Task.Run(Run);
         }
 
@@ -101,7 +100,7 @@ namespace WraithavenGames.Bones3
                 if (!m_TaskList.TryTake(out IWorldTask task, -1))
                     break;
 
-                task.RunWorldTask(m_World);
+                task.RunWorldTask(m_WorldContainer);
                 m_FinishedTasks.Add(task);
             }
 

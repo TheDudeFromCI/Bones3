@@ -19,19 +19,19 @@ namespace WraithavenGames.Bones3
         protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
-            if (block.GetMaterialID(side) != MaterialID)
+            if (block.Face(side).MaterialID != MaterialID)
                 return false;
 
-            if (!block.IsVisible)
+            if (!block.Visible)
                 return false;
 
             var nextBlock = pos.ShiftAlongDirection(side);
             var next = chunkProperties.GetBlock(nextBlock);
 
-            if (!next.IsVisible)
+            if (!next.Visible)
                 return true;
 
-            if (!next.IsTransparent)
+            if (!next.Transparent)
                 return false;
 
             return block != next;

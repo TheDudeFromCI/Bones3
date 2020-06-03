@@ -7,25 +7,15 @@ namespace WraithavenGames.Bones3
     internal class UnityWorldBuilder
     {
         private readonly List<BlockChunk> m_Chunks = new List<BlockChunk>();
+        private readonly ServerThread m_ServerThread;
         private readonly ChunkCreator m_ChunkCreator;
         private readonly ChunkMeshBuilder m_ChunkMeshBuilder;
         private readonly WorldSaver m_WorldSaver;
-        private readonly BlockListManager m_BlockList;
 
         /// <summary>
         /// Gets the chunk size for this world.
         /// </summary>
         internal GridSize ChunkSize { get; }
-
-        /// <summary>
-        /// The unique ID value of this world.
-        /// </summary>
-        internal string ID { get; }
-
-        /// <summary>
-        /// Gets the world container for this behaviour.
-        /// </summary>
-        internal WorldContainer WorldContainer { get; private set; }
 
         /// <summary>
         /// Creates a new Unity world builder object.
@@ -34,18 +24,12 @@ namespace WraithavenGames.Bones3
         /// <param name="blockList">The block list to read from.</param>
         /// <param name="chunkSize">The chunk size of the world.</param>
         /// <param name="id">The ID value of the world.</param>
-        internal UnityWorldBuilder(Transform transform, BlockListManager blockList, GridSize chunkSize, string id)
+        internal UnityWorldBuilder(Transform transform, BlockListManager blockList, WorldProperties worldProperties)
         {
-            ChunkSize = chunkSize;
-            ID = id;
+            ChunkSize = worldProperties.ChunkSize;
+            m_ServerThread = EmbeddedServer.Initialize(worldProperties);
 
-            m_BlockList = blockList;
-
-            var world = new World(ChunkSize, ID);
-            WorldContainer = new WorldContainer(world, blockList);
-            m_WorldSaver = new WorldSaver(world);
-
-            m_ChunkCreator = new ChunkCreator(transform, chunkSize);
+            m_ChunkCreator = new ChunkCreator(transform, ChunkSize);
             m_ChunkMeshBuilder = new ChunkMeshBuilder(blockList);
         }
 
@@ -61,15 +45,7 @@ namespace WraithavenGames.Bones3
         /// <param name="editBatch">The edit batch to apply.</param>
         internal void SetBlocks(EditBatch editBatch)
         {
-            foreach (var block in editBatch())
-            {
-                if (block.BlockID >= m_BlockList.BlockCount)
-                    throw new System.ArgumentOutOfRangeException("editBatch", $"Invalid block type '{block.BlockID}'!");
-
-                WorldContainer.SetBlock(block.Position, block.BlockID);
-            }
-
-            WorldContainer.RemeshDirtyChunks();
+            m_ServerThread.RunTask(new SetBlocksTask(editBatch));
         }
 
         /// <summary>
@@ -79,11 +55,7 @@ namespace WraithavenGames.Bones3
         /// <param name="blockID">The ID of the block to place.</param>
         internal void SetBlock(BlockPosition blockPos, ushort blockID)
         {
-            if (blockID >= m_BlockList.BlockCount)
-                throw new System.ArgumentOutOfRangeException("blockID", $"Invalid block type '{blockID}'!");
-
-            WorldContainer.SetBlock(blockPos, blockID);
-            WorldContainer.RemeshDirtyChunks();
+            m_ServerThread.RunTask(new SetBlockTask(blockPos, blockID));
         }
 
         /// <summary>
@@ -94,10 +66,12 @@ namespace WraithavenGames.Bones3
         /// <param name="blockPos">The position of the block.</param>
         /// <param name="createChunk">Whether or not to create (or load) the chunk if it doesn't currently exist.</param>
         /// <returns>The block type.</returns>
-        internal BlockType GetBlock(BlockPosition blockPos, bool createChunk = false)
+        internal ushort GetBlock(BlockPosition blockPos, bool createChunk = false)
         {
-            ushort blockID = WorldContainer.GetBlock(blockPos, createChunk);
-            return m_BlockList.GetBlockType(blockID);
+            var task = new GetBlockTask(blockPos, createChunk);
+            m_ServerThread.RunTaskSync(task);
+
+            return task.BlockID;
         }
 
         /// <summary>
@@ -105,7 +79,11 @@ namespace WraithavenGames.Bones3
         /// </summary>
         internal void Update()
         {
-            WorldContainer.FinishRemeshTasks(BuildChunkMesh);
+            m_ServerThread.Update();
+
+            // TODO REIMPLEMENT REMESHING!
+            // This relies on the remesh handles being moved entirely to the server
+            // and listening for remesh events.
         }
 
         /// <summary>
@@ -158,6 +136,8 @@ namespace WraithavenGames.Bones3
         /// <returns>True if any additional chunks were loaded.</returns>
         internal bool LoadChunkRegion(ChunkPosition center, Vector3Int extents)
         {
+            // TODO Remove "was loaded" check, to stop tasks from being run synchronously.
+
             var min = new Vector3Int
             {
                 x = center.X - extents.x,
@@ -178,13 +158,10 @@ namespace WraithavenGames.Bones3
                     for (int z = min.z; z <= max.z; z++)
                     {
                         var chunkPos = new ChunkPosition(x, y, z);
-                        if (WorldContainer.DoesChunkExist(chunkPos))
-                            continue;
+                        var task = new LoadChunkTask(chunkPos);
+                        m_ServerThread.RunTaskSync(task);
 
-                        // Forces the given chunk to load by trying to poll it.
-                        var blockPos = new BlockPosition(x, y, z) * ChunkSize.Value;
-                        WorldContainer.GetBlock(blockPos, true);
-                        loaded = true;
+                        loaded |= task.WasJustLoaded;
                     }
 
             return loaded;
@@ -194,7 +171,9 @@ namespace WraithavenGames.Bones3
         /// Requests the chunk at the given position to start loading in the background.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
-        /// <returns>True if the operation was started. False if the chunk is already loaded.</returns>
-        internal bool LoadChunkAsync(ChunkPosition chunkPos) => WorldContainer.LoadChunkAsync(chunkPos);
+        internal void LoadChunkAsync(ChunkPosition chunkPos)
+        {
+            m_ServerThread.RunTask(new LoadChunkTask(chunkPos));
+        }
     }
 }

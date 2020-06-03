@@ -20,7 +20,7 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Gets the block type array backing this chunk properties object.
         /// </summary>
-        internal BlockType[] Blocks { get; } = new BlockType[0];
+        internal ServerBlockType[] Blocks { get; } = new ServerBlockType[0];
 
         /// <summary>
         /// Creates a new chunk properties container for the given chunk size.
@@ -32,7 +32,7 @@ namespace WraithavenGames.Bones3
 
             int blockCount = chunkSize.Value + 2;
             blockCount *= blockCount * blockCount;
-            Blocks = new BlockType[blockCount];
+            Blocks = new ServerBlockType[blockCount];
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="pos">The position of the block.</param>
         /// <returns>The block type.</returns>
-        public BlockType GetBlock(BlockPosition pos)
+        public ServerBlockType GetBlock(BlockPosition pos)
         {
             int size = ChunkSize.Value + 2;
             return Blocks[(pos.X + 1) * size * size + (pos.Y + 1) * size + (pos.Z + 1)];

@@ -12,10 +12,10 @@ namespace WraithavenGames.Bones3
 
         private readonly List<GreedyMesher> m_GreedyMesherPool = new List<GreedyMesher>();
         private readonly GridSize m_ChunkSize;
-        private readonly BlockListManager m_BlockList;
+        private readonly ServerBlockList m_BlockList;
         private bool[] m_MaterialBuffer = new bool[1024];
 
-        internal StandardDistributor(GridSize chunkSize, BlockListManager blockList)
+        internal StandardDistributor(GridSize chunkSize, ServerBlockList blockList)
         {
             m_ChunkSize = chunkSize;
             m_BlockList = blockList;
@@ -54,13 +54,14 @@ namespace WraithavenGames.Bones3
             {
                 var type = blocks[i];
 
-                if (!type.IsVisible)
+                if (!type.Visible)
                     continue;
 
-                var faces = type.Faces;
-                for (int j = 0; j < 6; j++)
+                // TODO Make sure block type is a cube
+
+                for (int j = 0; j < type.FaceCount; j++)
                 {
-                    var material = faces[j].MaterialID;
+                    var material = type.Face(j).MaterialID;
                     if (m_MaterialBuffer[material])
                         continue;
 
@@ -75,7 +76,20 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void PrepareMaterialBuffer()
         {
-            int materialCount = m_BlockList.MaterialCount;
+            // This feels like a bad approach. Might look back into refactoring this, later.
+
+            int materialCount = 0;
+            for (ushort i = 0; i < m_BlockList.Capacity; i++)
+            {
+                var block = m_BlockList.GetBlockType(i);
+                if (!block.Visible)
+                    continue;
+
+                var faces = UnityEngine.Mathf.Min(block.FaceCount, 6);
+                for (int j = 0; j < faces; j++)
+                    materialCount = UnityEngine.Mathf.Min(materialCount, block.Face(j).MaterialID);
+            }
+
             if (materialCount >= m_MaterialBuffer.Length)
             {
                 var newBuffer = new bool[materialCount];
@@ -105,7 +119,7 @@ namespace WraithavenGames.Bones3
             {
                 var type = properties.Blocks[i];
 
-                if (type.IsSolid)
+                if (type.Solid)
                 {
                     taskStack.AddTask(new CollisionRemeshTask(properties, PullMesher()));
                     return;

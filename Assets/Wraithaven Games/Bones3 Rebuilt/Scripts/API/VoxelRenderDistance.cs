@@ -95,7 +95,7 @@ namespace WraithavenGames.Bones3
                     m_Camera = Camera.main;
             }
             else
-                m_Camera = UnityEditor.SceneView.GetAllSceneCameras() ? [0];
+                m_Camera = UnityEditor.SceneView.GetAllSceneCameras()?[0];
 #else
             if (m_Camera == null)
                 m_Camera = Camera.main;
@@ -167,16 +167,16 @@ namespace WraithavenGames.Bones3
                 m_BlockWorld.ActiveRemeshingTasks > 0)
                 return;
 
-            for (int i = 0; i < m_ChecksPerFrame; i++)
+            for (int i = 0; i < m_ChecksPerFrame; /*i++*/)
             {
                 if (!LoadPatternIterator.HasNext)
                     return;
 
                 var pos = LoadPatternIterator.Next;
-                var startedLoading = m_BlockWorld.LoadChunkAsync(pos + m_LastCameraPosition);
+                m_BlockWorld.LoadChunkAsync(pos + m_LastCameraPosition);
 
-                if (startedLoading)
-                    return;
+                // TODO Write server task for loading chunks async
+                return;
             }
         }
 

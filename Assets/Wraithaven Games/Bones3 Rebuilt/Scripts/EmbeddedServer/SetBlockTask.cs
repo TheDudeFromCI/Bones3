@@ -26,12 +26,9 @@ namespace WraithavenGames.Bones3
         }
 
         /// <inheritdoc cref="IWorldTask"/>
-        public void RunWorldTask(World world)
+        public void RunWorldTask(WorldContainer world)
         {
-            var chunkPos = m_BlockPosition.ToChunkPosition(world.ChunkSize);
-            var blockPos = m_BlockPosition & world.ChunkSize.Mask;
-
-            world.CreateChunk(chunkPos).SetBlockID(blockPos, m_BlockID);
+            world.SetBlock(m_BlockPosition, m_BlockID);
         }
     }
 }

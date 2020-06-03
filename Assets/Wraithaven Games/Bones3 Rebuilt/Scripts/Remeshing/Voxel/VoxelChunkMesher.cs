@@ -52,8 +52,10 @@ namespace WraithavenGames.Bones3
                                 continue;
 
                             var type = m_ChunkProperties.GetBlock(pos);
-                            var texture = type.GetTextureID(j);
-                            var rotation = SolveRotation(pos, type.GetRotation(j));
+                            var face = type.Face(j);
+
+                            var texture = face.TextureID;
+                            var rotation = SolveRotation(pos, face.Rotation);
                             var quad = new GreedyMesher.Quad(rotation, texture);
 
                             m_GreedyMesher.SetQuad(a, b, quad);

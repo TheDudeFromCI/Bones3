@@ -4,8 +4,11 @@ using System.Collections.Generic;
 namespace WraithavenGames.Bones3
 {
     /// <summary>
-    /// A container which wraps the World API and RemeshHandler API.
+    /// A container which wraps the World API.
     /// </summary>
+    /// <remarks>
+    /// All API calls to this container must be preformed within the world server thread.
+    /// </remarks>
     internal class WorldContainer
     {
         private readonly List<RemeshTaskStack> m_TaskStacks = new List<RemeshTaskStack>();
@@ -30,12 +33,18 @@ namespace WraithavenGames.Bones3
         internal World World { get; }
 
         /// <summary>
+        /// Gets the block list being managed by this world container.
+        /// </summary>
+        internal ServerBlockList BlockList { get; }
+
+        /// <summary>
         /// Creates a new world container for the given world.
         /// </summary>
         /// <param name="world">The world.</param>
-        internal WorldContainer(World world, BlockListManager blockList)
+        internal WorldContainer(World world, ServerBlockList blockList)
         {
             World = world;
+            BlockList = blockList;
 
             ChunkLoader = new AsyncChunkLoader();
             ChunkLoader.AddChunkLoadHandler(new WorldLoader(world.ID));
@@ -221,6 +230,11 @@ namespace WraithavenGames.Bones3
         /// Checks if the given chunk exists or not.
         /// </summary>
         /// <returns>True if the chunk exists, false otherwise.</returns>
-        internal bool DoesChunkExist(ChunkPosition chunkPos) => World.DoesChunkExist(chunkPos);
+        public bool DoesChunkExist(ChunkPosition chunkPos) => World.DoesChunkExist(chunkPos);
+
+        /// <summary>
+        /// Causes the target chunk to be loaded, if not already loaded.
+        /// </summary>
+        public void LoadChunk(ChunkPosition chunkPos) => World.CreateChunk(chunkPos);
     }
 }
