@@ -1,10 +1,33 @@
-# <div align="center">Bones³</div>
+<h1 align="center">Bones³</h1>
+<p align="center"><i>Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</i></p>
 
-_<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>_
+<p align="center">
+  <img src="https://img.shields.io/github/license/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/repo-size/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/issues/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/v/tag/Wraithaven-UnityTools/Bones3" />
+</p>
 
 ---
 
+<h2 align="center">A Super Special Thanks To</h2>
+<p align="center">
+  :star: Mika :star:
+</p>
+
 <br />
+
+<h3 align="center">And a Warm Thank You To</h3>
+<p align="center">
+  :rocket:  :rocket:
+</p>
+
+<br />
+<br />
+
+Thank you all for helping this project, and many others, to continue being developed.
+
+---
 
 ### Now Fully Open-Source!
 
