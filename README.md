@@ -12,7 +12,7 @@
 
 <h2 align="center">A Super Special Thanks To</h2>
 <p align="center">
-  :star: Mika :star:
+  :star: Mika, Alora Brown :star:
 </p>
 
 <br />
