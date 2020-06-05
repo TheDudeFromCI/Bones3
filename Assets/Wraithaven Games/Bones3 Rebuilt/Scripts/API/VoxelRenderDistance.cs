@@ -163,8 +163,9 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void LoadNearbyChunks()
         {
-            if (m_BlockWorld.ActiveChunkLoadingTasks > 0 ||
-                m_BlockWorld.ActiveRemeshingTasks > 0)
+            Debug.Log($"Active Tasks: {m_BlockWorld.ActiveTasks}");
+
+            if (m_BlockWorld.ActiveTasks > 0)
                 return;
 
             for (int i = 0; i < m_ChecksPerFrame; /*i++*/)

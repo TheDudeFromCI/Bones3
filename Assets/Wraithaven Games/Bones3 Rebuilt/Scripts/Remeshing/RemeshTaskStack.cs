@@ -8,7 +8,6 @@ namespace WraithavenGames.Bones3
     public class RemeshTaskStack
     {
         private readonly List<IRemeshTask> m_Tasks = new List<IRemeshTask>();
-        private ChunkProperties m_ChunkProperties;
 
         /// <summary>
         /// Gets the position of the chunk this task stack is targeting.
@@ -22,34 +21,12 @@ namespace WraithavenGames.Bones3
         public int TaskCount => m_Tasks.Count;
 
         /// <summary>
-        /// Gets whether or not this task was marked as a pending stack. A pending
-        /// stack is allowed to take as long as needed to finish.
-        /// </summary>
-        internal bool IsPendingTask { get; set; } = false;
-
-        /// <summary>
-        /// Gets whether or not this task stack has finished.
-        /// </summary>
-        internal bool IsFinished
-        {
-            get
-            {
-                foreach (var task in m_Tasks)
-                    if (!task.IsFinished)
-                        return false;
-
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Creates a new remesh task stack.
         /// </summary>
-        /// <param name="chunkProperties">The chunk properties remeshed.</param>
-        internal RemeshTaskStack(ChunkProperties chunkProperties)
+        /// <param name="chunkPos">The chunk position.</param>
+        internal RemeshTaskStack(ChunkPosition chunkPos)
         {
-            m_ChunkProperties = chunkProperties;
-            ChunkPosition = chunkProperties.ChunkPosition;
+            ChunkPosition = chunkPos;
         }
 
         /// <summary>
@@ -68,14 +45,10 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Waits for all tasks to finish before returning.
         /// </summary>
-        internal ChunkProperties Finish()
+        internal void Finish()
         {
             foreach (var task in m_Tasks)
                 task.Finish();
-
-            var props = m_ChunkProperties;
-            m_ChunkProperties = null; // Clear memory reference
-            return props;
         }
     }
 }

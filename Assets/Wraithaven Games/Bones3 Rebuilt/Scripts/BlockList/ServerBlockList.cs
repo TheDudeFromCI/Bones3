@@ -35,6 +35,15 @@ namespace WraithavenGames.Bones3
         }
 
         /// <summary>
+        /// Adds a block type to this list at the given position.
+        /// </summary>
+        /// <param name="type">The block type.</param>
+        internal void UpdateBlockType(ServerBlockType type)
+        {
+            m_BlockTypes[type.ID] = type;
+        }
+
+        /// <summary>
         /// Gets the block with the given block ID.
         /// </summary>
         /// <param name="id">The ID of the block.</param>

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WraithavenGames.Bones3
@@ -13,6 +15,12 @@ namespace WraithavenGames.Bones3
         private readonly BlockingCollection<IWorldTask> m_FinishedTasks = new BlockingCollection<IWorldTask>();
         private readonly WorldContainer m_WorldContainer;
         private volatile bool m_Running = true;
+        private volatile int m_ActiveTasks = 0;
+
+        /// <summary>
+        /// Gets number of active tasks being run.
+        /// </summary>
+        internal int ActiveTasks => m_ActiveTasks;
 
         /// <summary>
         /// Creates a new server thread for the given world.
@@ -36,9 +44,7 @@ namespace WraithavenGames.Bones3
 
             m_Running = false;
             m_TaskList.CompleteAdding();
-
-            while (m_FinishedTasks.TryTake(out IWorldTask task, -1))
-                task.FinishWorldTask();
+            while (!m_FinishedTasks.IsAddingCompleted && m_FinishedTasks.TryTake(out _, -1)) ;
         }
 
         /// <summary>
@@ -53,6 +59,7 @@ namespace WraithavenGames.Bones3
             if (!m_Running)
                 throw new ObjectDisposedException("World thread already disposed!");
 
+            Interlocked.Increment(ref m_ActiveTasks);
             m_TaskList.Add(task);
         }
 
@@ -70,7 +77,8 @@ namespace WraithavenGames.Bones3
                 if (!m_FinishedTasks.TryTake(out IWorldTask t, -1))
                     throw new ApplicationException("Failed to retreive task!");
 
-                t.FinishWorldTask();
+                m_WorldContainer.EventQueue.RunEvents();
+                Interlocked.Decrement(ref m_ActiveTasks);
 
                 if (task == t)
                     break;
@@ -86,8 +94,10 @@ namespace WraithavenGames.Bones3
             if (!m_Running)
                 return;
 
-            if (m_FinishedTasks.TryTake(out IWorldTask task))
-                task.FinishWorldTask();
+            while (m_FinishedTasks.TryTake(out _))
+                Interlocked.Decrement(ref m_ActiveTasks);
+
+            m_WorldContainer.EventQueue.RunEvents();
         }
 
         /// <summary>
@@ -95,7 +105,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void Run()
         {
-            while (m_Running && !m_TaskList.IsCompleted)
+            while (!m_TaskList.IsAddingCompleted)
             {
                 if (!m_TaskList.TryTake(out IWorldTask task, -1))
                     break;

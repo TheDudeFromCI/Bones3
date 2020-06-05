@@ -47,19 +47,6 @@ namespace WraithavenGames.Bones3.Editor
             BlockWorld = null;
         }
 
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-
-            GUILayout.Space(20f);
-
-            if (GUILayout.Button("Save World"))
-                BlockWorld.SaveWorld();
-
-            if (GUILayout.Button("Clear World"))
-                BlockWorld.ClearWorld();
-        }
-
         protected void OnSceneGUI()
         {
             if (BlockWorld == null)

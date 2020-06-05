@@ -10,12 +10,16 @@ namespace WraithavenGames.Bones3
         private readonly ServerThread m_ServerThread;
         private readonly ChunkCreator m_ChunkCreator;
         private readonly ChunkMeshBuilder m_ChunkMeshBuilder;
-        private readonly WorldSaver m_WorldSaver;
 
         /// <summary>
         /// Gets the chunk size for this world.
         /// </summary>
         internal GridSize ChunkSize { get; }
+
+        /// <summary>
+        /// Gets the number of active tasks being run on the server thread.
+        /// </summary>
+        internal int ActiveTasks => m_ServerThread.ActiveTasks;
 
         /// <summary>
         /// Creates a new Unity world builder object.
@@ -27,10 +31,54 @@ namespace WraithavenGames.Bones3
         internal UnityWorldBuilder(Transform transform, BlockListManager blockList, WorldProperties worldProperties)
         {
             ChunkSize = worldProperties.ChunkSize;
-            m_ServerThread = EmbeddedServer.Initialize(worldProperties);
+
+            var container = new WorldContainer(worldProperties);
+            container.EventQueue.OnWorldEvent += OnBlockWorldEvent;
+
+            {
+                // TODO TEMP CODE REMOVE THIS
+                container.BlockList.UpdateBlockType(CreateBlock(2, "Grass", 0));
+                container.BlockList.UpdateBlockType(CreateBlock(3, "SideDirt", 1));
+                container.BlockList.UpdateBlockType(CreateBlock(4, "Dirt", 2));
+            }
+
+            m_ServerThread = new ServerThread(container);
 
             m_ChunkCreator = new ChunkCreator(transform, ChunkSize);
             m_ChunkMeshBuilder = new ChunkMeshBuilder(blockList);
+        }
+
+        private ServerBlockType CreateBlock(ushort id, string name, int textureID)
+        {
+            var type = new ServerBlockType(id)
+            {
+                Name = name,
+                Solid = true,
+                Visible = true,
+                Transparent = false,
+            };
+
+            type.Face(0).TextureID = textureID;
+            type.Face(1).TextureID = textureID;
+            type.Face(2).TextureID = textureID;
+            type.Face(3).TextureID = textureID;
+            type.Face(4).TextureID = textureID;
+            type.Face(5).TextureID = textureID;
+
+            return type;
+        }
+
+        /// <summary>
+        /// Shutsdown the server thread and clears all data.
+        /// </summary>
+        internal void Shutdown()
+        {
+            m_ServerThread.Stop();
+
+            foreach (var chunk in m_Chunks)
+                m_ChunkCreator.DestroyChunk(chunk);
+
+            m_Chunks.Clear();
         }
 
         /// <summary>
@@ -43,20 +91,14 @@ namespace WraithavenGames.Bones3
         /// Applies an edit batch to this world, remeshing chunks as needed.
         /// </summary>
         /// <param name="editBatch">The edit batch to apply.</param>
-        internal void SetBlocks(EditBatch editBatch)
-        {
-            m_ServerThread.RunTask(new SetBlocksTask(editBatch));
-        }
+        internal void SetBlocks(EditBatch editBatch) => m_ServerThread.RunTask(new SetBlocksTask(editBatch));
 
         /// <summary>
         /// Sets a world in the world to a given ID.
         /// </summary>
         /// <param name="blockPos">The block position.</param>
         /// <param name="blockID">The ID of the block to place.</param>
-        internal void SetBlock(BlockPosition blockPos, ushort blockID)
-        {
-            m_ServerThread.RunTask(new SetBlockTask(blockPos, blockID));
-        }
+        internal void SetBlock(BlockPosition blockPos, ushort blockID) => m_ServerThread.RunTask(new SetBlockTask(blockPos, blockID));
 
         /// <summary>
         /// Gets the block type at the given world position.
@@ -77,14 +119,7 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Called each frame to pull remesh tasks from the remesh handler.
         /// </summary>
-        internal void Update()
-        {
-            m_ServerThread.Update();
-
-            // TODO REIMPLEMENT REMESHING!
-            // This relies on the remesh handles being moved entirely to the server
-            // and listening for remesh events.
-        }
+        internal void Update() => m_ServerThread.Update();
 
         /// <summary>
         /// Updates a chunk mesh based on the results of a finished task stack.
@@ -116,17 +151,10 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Saves the world to file.
         /// </summary>
-        internal void SaveWorld() => m_WorldSaver.SaveWorld();
-
-        /// <summary>
-        /// Clears all loaded chunk data for this world.
-        /// </summary>
-        internal void ClearWorld()
-        {
-            foreach (var chunk in m_Chunks)
-                m_ChunkCreator.DestroyChunk(chunk);
-            m_Chunks.Clear();
-        }
+        internal void SaveWorld()
+        // => m_WorldSaver.SaveWorld();
+        // TODO Reimplement world saver.
+        { }
 
         /// <summary>
         /// Force loads all chunks within a given region, if not already loaded.
@@ -171,9 +199,16 @@ namespace WraithavenGames.Bones3
         /// Requests the chunk at the given position to start loading in the background.
         /// </summary>
         /// <param name="chunkPos">The chunk position.</param>
-        internal void LoadChunkAsync(ChunkPosition chunkPos)
+        internal void LoadChunkAsync(ChunkPosition chunkPos) => m_ServerThread.RunTask(new LoadChunkTask(chunkPos));
+
+        /// <summary>
+        /// Called when events are triggered from the world container.
+        /// </summary>
+        /// <param name="ev">The event.</param>
+        private void OnBlockWorldEvent(object sender, IBlockWorldEvent ev)
         {
-            m_ServerThread.RunTask(new LoadChunkTask(chunkPos));
+            if (ev is ChunkRemeshEvent chunkRemeshEvent)
+                BuildChunkMesh(chunkRemeshEvent.Task);
         }
     }
 }

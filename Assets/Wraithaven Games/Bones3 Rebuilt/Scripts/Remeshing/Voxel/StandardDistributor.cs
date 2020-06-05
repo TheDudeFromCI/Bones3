@@ -22,7 +22,7 @@ namespace WraithavenGames.Bones3
         }
 
         /// <inheritdoc cref="IRemeshTask"/>
-        public void CreateTasks(ChunkProperties properties, RemeshTaskStack taskStack)
+        public void CreateTasks(ChunkGroup properties, RemeshTaskStack taskStack)
         {
             GenerateVisuals(properties, taskStack);
             GenerateCollision(properties, taskStack);
@@ -33,7 +33,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="properties">The chunk properties.</param>
         /// <param name="tasks">The task list to add to.</param>
-        private void GenerateVisuals(ChunkProperties properties, RemeshTaskStack taskStack)
+        private void GenerateVisuals(ChunkGroup properties, RemeshTaskStack taskStack)
         {
             PrepareMaterialBuffer();
             VisualBlockIterator(properties, taskStack);
@@ -45,14 +45,14 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="properties">The chunk properties.</param>
         /// <param name="tasks">The task list to add to.</param>
-        private void VisualBlockIterator(ChunkProperties properties, RemeshTaskStack taskStack)
+        private void VisualBlockIterator(ChunkGroup properties, RemeshTaskStack taskStack)
         {
             var volume = m_ChunkSize.Volume;
             var blocks = properties.Blocks;
 
             for (int i = 0; i < volume; i++)
             {
-                var type = blocks[i];
+                var type = m_BlockList.GetBlockType(blocks[i]);
 
                 if (!type.Visible)
                     continue;
@@ -112,12 +112,14 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="properties">The chunk properties.</param>
         /// <param name="tasks">The task list to add to.</param>
-        private void GenerateCollision(ChunkProperties properties, RemeshTaskStack taskStack)
+        private void GenerateCollision(ChunkGroup properties, RemeshTaskStack taskStack)
         {
             int volume = m_ChunkSize.Volume;
+            var blocks = properties.Blocks;
+
             for (int i = 0; i < volume; i++)
             {
-                var type = properties.Blocks[i];
+                var type = m_BlockList.GetBlockType(blocks[i]);
 
                 if (type.Solid)
                 {

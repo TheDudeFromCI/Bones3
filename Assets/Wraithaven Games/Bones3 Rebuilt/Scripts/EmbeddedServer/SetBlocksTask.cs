@@ -17,12 +17,6 @@ namespace WraithavenGames.Bones3
         }
 
         /// <inheritdoc cref="IWorldTask"/>
-        public void FinishWorldTask()
-        {
-            // Nothing to do.
-        }
-
-        /// <inheritdoc cref="IWorldTask"/>
         public void RunWorldTask(WorldContainer world)
         {
             foreach (var block in m_EditBatch())

@@ -8,7 +8,7 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal abstract class VoxelChunkMesher : IRemeshTask
     {
-        private readonly ChunkProperties m_ChunkProperties;
+        private readonly ChunkGroup m_ChunkProperties;
         private readonly Task m_Task;
         private readonly ProcMesh m_Mesh;
         private GreedyMesher m_GreedyMesher;
@@ -21,7 +21,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="chunkProperties">The chunk properties to handle.</param>
         /// <param name="greedyMesher">The greedy mesher to use.</param>
-        internal VoxelChunkMesher(ChunkProperties chunkProperties, GreedyMesher greedyMesher)
+        internal VoxelChunkMesher(ChunkGroup chunkProperties, GreedyMesher greedyMesher)
         {
             m_ChunkProperties = chunkProperties;
             m_GreedyMesher = greedyMesher;
@@ -143,6 +143,6 @@ namespace WraithavenGames.Bones3
         /// <param name="pos">The block position.</param>
         /// <param name="side">The side of the block being checked.</param>
         /// <returns>True if the quad should be placed. False otherwise.</returns>
-        protected abstract bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side);
+        protected abstract bool CanPlaceQuad(ChunkGroup chunkProperties, BlockPosition pos, int side);
     }
 }

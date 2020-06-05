@@ -8,8 +8,8 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Looks over a chunk and generates new remesh tasks as needed.
         /// </summary>
-        /// <param name="properties">The chunk properties object.</param>
+        /// <param name="chunkGroup">The chunk group being remeshed.</param>
         /// <param name="taskStack">The list of tasks to add tasks to.</param>
-        void CreateTasks(ChunkProperties properties, RemeshTaskStack taskStack);
+        void CreateTasks(ChunkGroup chunkGroup, RemeshTaskStack taskStack);
     }
 }

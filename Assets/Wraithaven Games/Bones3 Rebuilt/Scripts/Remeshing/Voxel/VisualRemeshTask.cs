@@ -12,11 +12,11 @@ namespace WraithavenGames.Bones3
         public int MaterialID { get; }
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        internal VisualRemeshTask(ChunkProperties chunkProperties, int materialID, GreedyMesher mesher) :
+        internal VisualRemeshTask(ChunkGroup chunkProperties, int materialID, GreedyMesher mesher) :
             base(chunkProperties, mesher) => MaterialID = materialID;
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
+        protected override bool CanPlaceQuad(ChunkGroup chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
             if (block.Face(side).MaterialID != MaterialID)

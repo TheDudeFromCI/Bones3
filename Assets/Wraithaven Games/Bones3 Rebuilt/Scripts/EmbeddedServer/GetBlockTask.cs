@@ -25,12 +25,6 @@ namespace WraithavenGames.Bones3
         }
 
         /// <inheritdoc cref="IWorldTask"/>
-        public void FinishWorldTask()
-        {
-            // Nothing to do.
-        }
-
-        /// <inheritdoc cref="IWorldTask"/>
         public void RunWorldTask(WorldContainer world)
         {
             BlockID = world.GetBlock(m_BlockPosition, m_CreateChunk);

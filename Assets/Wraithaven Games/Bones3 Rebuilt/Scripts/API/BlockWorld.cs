@@ -62,18 +62,9 @@ namespace WraithavenGames.Bones3
         public GridSize ChunkSize => WorldBuilder.ChunkSize;
 
         /// <summary>
-        /// Gets the number of active chunk loading tasks being run.
+        /// Gets the number of active tasks being run on the block world server thread.
         /// </summary>
-        public int ActiveChunkLoadingTasks
-            // => WorldBuilder.WorldContainer.ChunkLoader.ActiveTasks;
-            => 0; // TODO Reimplement this
-
-        /// <summary>
-        /// Gets the number of active chunk remeshing tasks being run.
-        /// </summary>
-        public int ActiveRemeshingTasks
-            // => WorldBuilder.WorldContainer.RemeshHandler.ActiveTasks;
-            => 0; // TODO Reimplement this
+        public int ActiveTasks => WorldBuilder.ActiveTasks;
 
 #if UNITY_EDITOR
         /// <summary>
@@ -104,7 +95,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         protected void OnDestroy()
         {
-            ClearWorld();
+            WorldBuilder.Shutdown();
             WorldBuilder = null;
         }
 
@@ -146,15 +137,6 @@ namespace WraithavenGames.Bones3
         /// Saves the world to file.
         /// </summary>
         public void SaveWorld() => WorldBuilder.SaveWorld();
-
-        /// <summary>
-        /// Clears all loaded chunk data for this world.
-        /// </summary>
-        public void ClearWorld()
-        {
-            WorldBuilder.ClearWorld();
-            gameObject.SendMessage("OnWorldClear", SendMessageOptions.DontRequireReceiver);
-        }
 
         /// <summary>
         /// Force loads all chunks within a given region, if not already loaded.

@@ -6,12 +6,12 @@ namespace WraithavenGames.Bones3
     internal class CollisionRemeshTask : VoxelChunkMesher
     {
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        internal CollisionRemeshTask(ChunkProperties chunkProperties, GreedyMesher mesher) :
+        internal CollisionRemeshTask(ChunkGroup chunkProperties, GreedyMesher mesher) :
             base(chunkProperties, mesher)
         { }
 
         /// <inheritdoc cref="VoxelChunkMesher"/>
-        protected override bool CanPlaceQuad(ChunkProperties chunkProperties, BlockPosition pos, int side)
+        protected override bool CanPlaceQuad(ChunkGroup chunkProperties, BlockPosition pos, int side)
         {
             var block = chunkProperties.GetBlock(pos);
             if (!block.Solid)

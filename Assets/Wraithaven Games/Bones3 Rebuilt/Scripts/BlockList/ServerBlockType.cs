@@ -46,6 +46,9 @@ namespace WraithavenGames.Bones3
         {
             ID = id;
             m_Faces = new ServerBlockFace[faceCount];
+
+            for (int i = 0; i < faceCount; i++)
+                m_Faces[i] = new ServerBlockFace();
         }
 
         /// <summary>
