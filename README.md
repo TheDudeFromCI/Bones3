@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/github/license/Wraithaven-UnityTools/Bones3" />
   <img src="https://img.shields.io/github/repo-size/Wraithaven-UnityTools/Bones3" />
   <img src="https://img.shields.io/github/issues/Wraithaven-UnityTools/Bones3" />
-  <img src="https://img.shields.io/github/v/tag/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/v/release/Wraithaven-UnityTools/Bones3?include_prereleases" />
 </p>
 
 ---
@@ -25,7 +25,12 @@
 <br />
 <br />
 
-Thank you all for helping this project, and many others, to continue being developed.
+Thank you all for supporting me and helping this project to continue being developed.
+
+<br />
+
+<p>Want to support this project? Join my Patreon!</p>
+<a href="https://www.patreon.com/thedudefromci"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="150px" /></a>
 
 ---
 
