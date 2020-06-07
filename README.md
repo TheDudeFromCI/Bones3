@@ -1,10 +1,38 @@
-# <div align="center">Bones³</div>
+<h1 align="center">Bones³</h1>
+<p align="center"><i>Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</i></p>
 
-_<p align="justify">Bones³ (pronounced "Bones Cubed") is an advanced voxel block editor designed for the Unity engine. The framework is designed to allow users to create voxel structures and worlds both in-editor and in-game, as well as exposing a flexible API for writing custom world manipulation scripts.</p>_
+<p align="center">
+  <img src="https://img.shields.io/github/license/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/repo-size/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/issues/Wraithaven-UnityTools/Bones3" />
+  <img src="https://img.shields.io/github/v/release/Wraithaven-UnityTools/Bones3?include_prereleases" />
+</p>
 
 ---
 
+<h2 align="center">A Super Special Thanks To</h2>
+<p align="center">
+  :star: Mika, Alora Brown :star:
+</p>
+
 <br />
+
+<h3 align="center">And a Warm Thank You To</h3>
+<p align="center">
+  :rocket:  :rocket:
+</p>
+
+<br />
+<br />
+
+Thank you all for supporting me and helping this project to continue being developed.
+
+<br />
+
+<p>Want to support this project? Join my Patreon!</p>
+<a href="https://www.patreon.com/thedudefromci"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="150px" /></a>
+
+---
 
 ### Now Fully Open-Source!
 
