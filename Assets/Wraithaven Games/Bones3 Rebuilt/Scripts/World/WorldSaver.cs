@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
-
-using UnityEngine;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace WraithavenGames.Bones3
 {
@@ -9,52 +10,74 @@ namespace WraithavenGames.Bones3
     /// </summary>
     internal class WorldSaver
     {
-        private readonly World m_World;
+        /// <summary>
+        /// An identifier for handling file versioning, to aid in future-proofing.
+        /// </summary>
+        private const int CHUNK_FILE_VERSION = 1;
+
         private readonly string m_ChunkFolder;
 
         /// <summary>
         /// Creates a new world saver object.
         /// </summary>
         /// <param name="world">The world to manage.</param>
-        internal WorldSaver(World world)
+        internal WorldSaver(string worldID)
         {
-            m_World = world;
-
 #if UNITY_EDITOR
-            m_ChunkFolder = $"{Application.dataPath}/../Bones3/Worlds/{m_World.ID}/Chunks";
+            m_ChunkFolder = $"{UnityEngine.Application.dataPath}/../Bones3/Worlds/{worldID}/Chunks";
 #else
-            m_ChunkFolder = $"{Application.persistentDataPath}/Worlds/{m_World.ID}/Chunks";
+            m_ChunkFolder = $"{UnityEngine.Application.persistentDataPath}/Worlds/{worldID}/Chunks";
 #endif
         }
 
         /// <summary>
         /// Saves all chunks in the world.
         /// </summary>
-        internal void SaveWorld()
+        internal void SaveWorld(WorldContainer container)
         {
-            List<ChunkSaveOperation> operations = new List<ChunkSaveOperation>();
+            Directory.CreateDirectory(m_ChunkFolder);
 
-            foreach (var chunk in m_World.ChunkIterator())
+            List<Task> tasks = new List<Task>();
+            foreach (var chunk in container.World.ChunkIterator())
             {
                 if (chunk.IsModified)
-                    operations.Add(new ChunkSaveOperation(m_ChunkFolder, chunk));
+                {
+                    var task = Task.Run(() => SaveChunk(chunk));
+                    tasks.Add(task);
+                }
             }
 
-            List<System.Exception> exceptions = new List<System.Exception>();
-            foreach (var op in operations)
+            for (int i = 0; i < tasks.Count; i++)
             {
                 try
                 {
-                    op.FinishTask();
+                    tasks[i].Wait();
                 }
-                catch (System.Exception e)
+                catch (Exception e)
                 {
-                    exceptions.Add(e);
+                    UnityEngine.Debug.LogException(e);
                 }
             }
-
-            if (exceptions.Count > 0) // We still want to throw all exceptions, but ensure tasks finish first.
-                throw new System.AggregateException(exceptions);
         }
+
+        /// <summary>
+        /// Saves a chunk to it's correct file.
+        /// </summary>
+        /// <param name="chunk">The chunk to save.</param>
+        private void SaveChunk(Chunk chunk)
+        {
+            var file = $"{m_ChunkFolder}/{chunk.Position.X}-{chunk.Position.Y}-{chunk.Position.Z}.dat";
+            var fileStream = File.Open(file, FileMode.OpenOrCreate);
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                writer.Write(CHUNK_FILE_VERSION);
+                writer.Write(chunk.Size.IntBits);
+
+                var blocks = chunk.Blocks;
+                for (int i = 0; i < blocks.Length; i++)
+                    writer.Write(blocks[i]);
+            }
+        }
+
     }
 }

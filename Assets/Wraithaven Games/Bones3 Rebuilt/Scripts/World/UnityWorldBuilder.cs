@@ -151,10 +151,7 @@ namespace WraithavenGames.Bones3
         /// <summary>
         /// Saves the world to file.
         /// </summary>
-        internal void SaveWorld()
-        // => m_WorldSaver.SaveWorld();
-        // TODO Reimplement world saver.
-        { }
+        internal void SaveWorld() => m_ServerThread.RunTask(new SaveWorldTask());
 
         /// <summary>
         /// Force loads all chunks within a given region, if not already loaded.

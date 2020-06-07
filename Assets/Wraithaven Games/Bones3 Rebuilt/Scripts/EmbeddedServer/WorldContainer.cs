@@ -23,6 +23,12 @@ namespace WraithavenGames.Bones3
         internal ChunkLoader ChunkLoader { get; }
 
         /// <summary>
+        /// Gets the chunk saver being used by this container.
+        /// </summary>
+        /// <value></value>
+        internal WorldSaver WorldSaver { get; }
+
+        /// <summary>
         /// Gets the remesh handler being used by this container.
         /// </summary>
         internal RemeshHandler RemeshHandler { get; }
@@ -52,6 +58,8 @@ namespace WraithavenGames.Bones3
             ChunkLoader = new ChunkLoader();
             ChunkLoader.AddChunkLoadHandler(new WorldLoader(World.ID));
             ChunkLoader.AddChunkLoadHandler(worldProperties.WorldGenerator);
+
+            WorldSaver = new WorldSaver(World.ID);
 
             RemeshHandler = new RemeshHandler();
             RemeshHandler.AddDistributor(new StandardDistributor(World.ChunkSize, BlockList));
@@ -207,5 +215,10 @@ namespace WraithavenGames.Bones3
         /// Adds an event to the event queue.
         /// </summary>
         public void AddEvent(IBlockWorldEvent ev) => EventQueue.AddEvent(ev);
+
+        /// <summary>
+        /// Saves all modified chunks in this world.
+        /// </summary>
+        public void SaveWorld() => WorldSaver.SaveWorld(this);
     }
 }
