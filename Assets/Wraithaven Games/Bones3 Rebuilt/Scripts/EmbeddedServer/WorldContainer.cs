@@ -172,8 +172,22 @@ namespace WraithavenGames.Bones3
         /// </summary>
         public void RemeshDirtyChunks()
         {
+            if (m_DirtyChunks.Count == 0)
+                return;
+
+            List<RemeshTaskStack> tasks = new List<RemeshTaskStack>();
+
             for (int i = 0; i < m_DirtyChunks.Count; i++)
-                RemeshHandler.RemeshChunk(this, m_DirtyChunks[i]);
+            {
+                var task = RemeshHandler.RemeshChunk(this, m_DirtyChunks[i]);
+                tasks.Add(task);
+            }
+
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                tasks[i].Finish();
+                AddEvent(new ChunkRemeshEvent(tasks[i]));
+            }
 
             m_DirtyChunks.Clear();
         }

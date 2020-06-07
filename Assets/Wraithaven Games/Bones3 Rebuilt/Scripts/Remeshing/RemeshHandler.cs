@@ -15,7 +15,7 @@ namespace WraithavenGames.Bones3
         /// </summary>
         /// <param name="worldContainer">The world to operate on.</param>
         /// <param name="chunkPos">The chunk target position.</param>
-        internal void RemeshChunk(WorldContainer worldContainer, ChunkPosition chunkPos)
+        internal RemeshTaskStack RemeshChunk(WorldContainer worldContainer, ChunkPosition chunkPos)
         {
             var taskStack = new RemeshTaskStack(chunkPos);
             var chunkGroup = new ChunkGroup(worldContainer, chunkPos);
@@ -23,8 +23,7 @@ namespace WraithavenGames.Bones3
             foreach (var dis in m_Distributors)
                 dis.CreateTasks(chunkGroup, taskStack);
 
-            taskStack.Finish();
-            worldContainer.AddEvent(new ChunkRemeshEvent(taskStack));
+            return taskStack;
         }
 
         /// <summary>

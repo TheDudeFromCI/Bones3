@@ -47,12 +47,15 @@ namespace WraithavenGames.Bones3
                         for (int b = 0; b < chunkSize; b++)
                         {
                             var pos = GetAsBlockCoords(j, t, a, b);
+                            var type = m_ChunkProperties.GetBlock(pos);
+
+                            if (type.FaceCount != 6)
+                                continue; // TODO Make sure that the block is a cube
+
+                            var face = type.Face(j);
 
                             if (!CanPlaceQuad(m_ChunkProperties, pos, j))
                                 continue;
-
-                            var type = m_ChunkProperties.GetBlock(pos);
-                            var face = type.Face(j);
 
                             var texture = face.TextureID;
                             var rotation = SolveRotation(pos, face.Rotation);

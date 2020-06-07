@@ -14,8 +14,8 @@ namespace WraithavenGames.Bones3
         private readonly BlockingCollection<IWorldTask> m_TaskList = new BlockingCollection<IWorldTask>();
         private readonly BlockingCollection<IWorldTask> m_FinishedTasks = new BlockingCollection<IWorldTask>();
         private readonly WorldContainer m_WorldContainer;
-        private volatile bool m_Running = true;
         private volatile int m_ActiveTasks = 0;
+        private bool m_Running = true;
 
         /// <summary>
         /// Gets number of active tasks being run.
@@ -29,7 +29,10 @@ namespace WraithavenGames.Bones3
         internal ServerThread(WorldContainer world)
         {
             m_WorldContainer = world;
-            Task.Run(Run);
+
+            var thread = new Thread(Run);
+            thread.Name = "Block World";
+            thread.Start();
         }
 
         /// <summary>
@@ -44,7 +47,9 @@ namespace WraithavenGames.Bones3
 
             m_Running = false;
             m_TaskList.CompleteAdding();
-            while (!m_FinishedTasks.IsAddingCompleted && m_FinishedTasks.TryTake(out _, -1)) ;
+
+            while (!m_FinishedTasks.IsCompleted)
+                m_FinishedTasks.TryTake(out _, -1);
         }
 
         /// <summary>
@@ -105,12 +110,20 @@ namespace WraithavenGames.Bones3
         /// </summary>
         private void Run()
         {
-            while (!m_TaskList.IsAddingCompleted)
+            while (!m_TaskList.IsCompleted)
             {
                 if (!m_TaskList.TryTake(out IWorldTask task, -1))
                     break;
 
-                task.RunWorldTask(m_WorldContainer);
+                try
+                {
+                    task.RunWorldTask(m_WorldContainer);
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError(e);
+                }
+
                 m_FinishedTasks.Add(task);
             }
 
